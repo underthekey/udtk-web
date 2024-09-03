@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   title: "underthekey",
   description: "Explore all about custom keyboards",
   icons: {
-    icon: '/images/logo-color-main.png', // 기본 favicon
+    icon: '/images/logo-color-3d.png', // 기본 favicon
   },
 };
 
