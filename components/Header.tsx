@@ -27,10 +27,11 @@ export default function Header() {
           <div className={styles.logoContainer}>
             <div className={styles.logoImageWrapper}>
               <Image
-                src="/images/logo-line-ivory.png"
+                src="/images/image-logo/line/ivory/logo-line-ivory-256.png"
                 alt="underthekey logo"
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                width={256}
+                height={256}
+                sizes="(max-width: 768px) 100px, (max-width: 1200px) 150px, 200px"
                 style={{ objectFit: 'contain' }}
                 className={styles.logoImage}
               />
@@ -39,7 +40,7 @@ export default function Header() {
           </div>
         </Link>
       </div>
-      <button className={styles.menuButton} onClick={toggleMenu}>
+      <button className={styles.menuButton} onClick={toggleMenu} aria-label="메뉴 열기">
         ☰
       </button>
       <nav className={styles.nav}>
