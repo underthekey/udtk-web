@@ -1,0 +1,48 @@
+.typingArea {
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.input {
+  /* padding: 0.5rem; */
+  padding-left: 0.2rem;
+  font-size: 1.5rem;
+  line-height: 1.5;
+  border: 2px solid #ccc;
+  border-radius: 7px;
+  color: #333;
+  background-color: #f7f7f7;
+  box-sizing: border-box;
+  transition: border-color 0.5s ease;
+}
+
+.input:focus {
+  border-color: #000000;
+  outline: none;
+}
+
+.incorrect {
+  border-color: #f44336 !important;
+  animation: shake 0.2s;
+}
+
+.correct {
+  border-color: #225cd8 !important;
+  transition: border-color 0s ease-in-out; /* 즉시 바뀌도록 설정 */
+}
+
+.input.correct-remove {
+  transition: border-color 0.5s ease-in-out; /* 서서히 사라지게 */
+  border-color: #ccc; /* 원래 색상으로 돌아옴 */
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}

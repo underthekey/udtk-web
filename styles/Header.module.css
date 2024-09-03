@@ -1,0 +1,195 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: var(--background-color);
+    color: white;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.logoContainer {
+    display: flex;
+    align-items: center;
+}
+
+.logoImageWrapper {
+    position: relative;
+    width: 1.5em;
+    height: 1.5em;
+    margin-right: 0.2em;
+}
+
+.logoImage {
+    object-fit: contain;
+}
+
+.logoText {
+    /* 여기에 로고 텍스트의 스타일이 정의되어 있을 것입니다 */
+    color: var(--main-text-color);
+    transition: color 0.3s ease; /* 부드러운 색상 전환을 위해 추가 */
+}
+
+.logoText:hover {
+    color: #D62828; /* 붉은색으로 변경. 원하는 색상 코드로 조정 가능 */
+}
+
+/* 만약 로고 텍스트가 링크로 감싸져 있다면 다음 스타일도 추가하세요 */
+.logoText a {
+    color: inherit; /* 부모 요소의 색상을 상속 */
+    text-decoration: none;
+}
+
+.logoText a:hover {
+    color: #D62828; /* 붉은색으로 변경 */
+    text-decoration: none; /* 밑줄 제거 유지 */
+}
+
+.logo a {
+    color: FDF0D5;
+    text-decoration: none;
+}
+
+
+.nav {
+    display: flex;
+}
+
+.navList {
+    display: flex;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.navList li {
+    margin-left: 2rem;
+}
+
+.navList a {
+    color: var(--secondary-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.navList a:hover {
+    color: var(--hover-color);
+    text-decoration: none;  /* 이 줄을 추가합니다 */
+}
+
+.menuButton {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--main-text-color);
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.sideMenu {
+    background-color: var(--background-color);
+    display: none;
+}
+
+.overlay {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .nav {
+        display: none;
+    }
+
+    .menuButton {
+        display: block;
+    }
+
+    .sideMenu {
+        display: block;
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 300px;
+        height: 100vh;
+        background-color: var(--background-color);
+        transition: right 0.3s ease-in-out;
+        z-index: 1000;
+        padding: 2rem;
+        box-sizing: border-box;
+    }
+
+    .sideMenu.open {
+        right: 0;
+    }
+
+    .closeButton {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: none;
+        border: none;
+        color: var(--main-text-color);
+        font-size: 1.5rem;
+        cursor: pointer;
+    }
+
+    .overlay {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+    }
+
+    .sideMenu .navList {
+        flex-direction: column;
+    }
+
+    .sideMenu .navList li {
+        margin: 1rem 0;
+    }
+
+    .logoContainer {
+        flex-direction: row;
+        align-items: center;
+        font-size: 0.9em;
+    }
+
+    .logoImage {
+        width: 30px;
+        height: 30px;
+    }
+
+    .logoText {
+        font-size: 1.2rem;
+        /* margin-left: 10px; */
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        background-color: var(--background-color);
+        padding: 0.6rem 0.8rem; /* 좌우 패딩 더 줄임 */
+    }
+
+    .logoImage {
+        width: 25px;
+        height: 25px;
+    }
+
+    .logoText {
+        font-size: 1rem;
+        /* margin-left: 5px; */
+    }
+
+    .logoContainer {
+        font-size: 0.8em;
+    }
+}

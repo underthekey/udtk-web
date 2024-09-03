@@ -1,0 +1,469 @@
+/* Import external fonts */
+@import url('https://cdn.jsdelivr.net/npm/segoe-fonts@1.0.1/segoe-fonts.min.css');
+
+/* Tester Container Styling */
+.testerContainer {
+  --def-fs: 62.5%;
+  --ff: 'Segoe UI', sans-serif;
+  --color-primary: #343a40;
+  --color-primary-darker: #333;
+  --color-primary-lighter: #555;
+  --key-border-radius: 0.6rem;
+  --box-shadow-keycaps-value: inset 0 -0.2rem 0 0.3rem;
+  --box-shadow-keycaps-hover-value: inset 0 -0.1rem 0 0.2rem;
+  --box-shadow-keycaps: var(--box-shadow-keycaps-value) var(--color-keycaps-shadow);
+  --box-shadow-keycaps-hover: var(--box-shadow-keycaps-hover-value) var(--color-keycaps-shadow);
+  --box-shadow-keycaps-accent: var(--box-shadow-keycaps-value) var(--color-keycaps-shadow-accent);
+  --box-shadow-keycaps-accent-hover: var(--box-shadow-keycaps-hover-value) var(--color-keycaps-shadow-accent);
+  --box-shadow-keycaps-pressed: var(--box-shadow-keycaps-value) var(--color-keycaps-shadow-pressed);
+  --box-shadow-keycaps-pressed-hover: var(--box-shadow-keycaps-hover-value) var(--color-keycaps-shadow-pressed);
+  --color-keyboard: #3c3e4a;
+  --color-keyboard-border: #303642;
+  --color-keycaps-legends: #555;
+  --color-keycaps-bg: #f8f9fa;
+  --color-keycaps-shadow: #adb5bd;
+  --color-keycaps-legends-accent: #555;
+  --color-keycaps-bg-accent: #e2e3e6;
+  --color-keycaps-shadow-accent: #97a0a8;
+  --color-keycaps-legends-pressed: #2f3674;
+  --color-keycaps-bg-pressed: #a4a9b0;
+  --color-keycaps-shadow-pressed: #7f8489;
+  --color-bg: linear-gradient(
+    45deg,
+    #e9ecef,
+    #ced4da,
+    #adb5bd,
+    #eaebf1,
+    #c1c3d5
+  );
+  --color-bg-title: linear-gradient(
+    45deg,
+    #14181c,
+    #506070,
+    #2e3235,
+    #506070,
+    #2e3235,
+    #506070,
+    #14181c
+  );
+  --color-bg-toggle: linear-gradient(45deg, #4dabf7, #228be6, #1c70c0, #3c56da);
+  --standard-key-size: 5rem;
+
+  font-size: var(--def-fs);
+  font-family: var(--ff);
+  line-height: 1;
+  font-weight: 400;
+  color: var(--color-primary);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-image: var(--color-bg);
+}
+
+.intro {
+  max-width: 130rem;
+  margin: 0 auto;
+  padding: 4.8rem 3.2rem 0rem;
+}
+
+.title {
+  font-weight: 700;
+  color: var(--color-primary-darker);
+  letter-spacing: -0.5px;
+  font-size: 5.2rem;
+  line-height: 1.05;
+  margin-bottom: 3.2rem;
+}
+
+.title span {
+  background-image: var(--color-bg-title);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -moz-text-fill-color: transparent;
+}
+
+.description {
+  font-size: 2rem;
+  color: var(--color-primary);
+  line-height: 1.6;
+  margin-bottom: 4.8rem;
+}
+
+.themeAndLayout {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 120rem;
+  margin: 0 auto 2.4rem;
+  transition: all 0.25s;
+}
+
+.themeSection {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.theme {
+  display: flex;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.themeColor {
+  width: 25%;
+}
+
+.retro div:nth-child(1) {
+  background-color: #3c3e4a;
+}
+
+.retro div:nth-child(2) {
+  background-color: #f8f9fa;
+}
+
+.retro div:nth-child(3) {
+  background-color: #a4a9b0;
+}
+
+.retro div:nth-child(4) {
+  background-color: #2f3674;
+}
+
+.navyBlue div:nth-child(1) {
+  background-color: #2a309c;
+}
+
+.navyBlue div:nth-child(2) {
+  background-color: #3d489b;
+}
+
+.navyBlue div:nth-child(3) {
+  background-color: #a4a9b0;
+}
+
+.navyBlue div:nth-child(4) {
+  background-color: #2f3674;
+}
+
+.sliderContainer {
+  width: 80%;
+  margin: 1.6rem auto;
+  text-align: center;
+}
+
+.sliderValue {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  color: #fff;
+  line-height: 20px;
+  text-align: center;
+  border-radius: 3px;
+  background: var(--color-bg-toggle);
+  padding: 5px 10px;
+  margin-left: 8px;
+}
+
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 15px;
+  border-radius: 5px;
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #4dabf7;
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #4dabf7;
+  cursor: pointer;
+}
+
+.keyboard {
+  display: grid;
+  margin: 0 auto;
+  padding: 0.8rem;
+  border-radius: 0.4rem;
+  background-color: var(--color-keyboard);
+  box-shadow: 0 0.4rem 0 0.6rem var(--color-keyboard-border),
+    0 1.2rem 3.2rem rgba(0, 0, 0, 0.1);
+  transform: translateZ(0);
+  transition: all 0.2s;
+}
+
+.fullSize {
+  grid-template-columns: 215fr 2fr 45fr 1fr 60fr;
+  max-width: 122rem;
+}
+
+.tkl {
+  grid-template-columns: 215fr 7fr 45fr;
+  max-width: 100rem;
+}
+
+.seventyFivePercent {
+  grid-template-columns: 79rem 0 16.5rem;
+  max-width: 86rem;
+}
+
+.key {
+  width: 100%;
+  height: var(--standard-key-size);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: var(--key-border-radius);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-keycaps-legends);
+  background-color: var(--color-keycaps-bg);
+  box-shadow: var(--box-shadow-keycaps);
+  cursor: pointer;
+  transition: all 0.075s;
+}
+
+.keyAccentColor {
+  color: var(--color-keycaps-legends-accent);
+  background-color: var(--color-keycaps-bg-accent);
+  box-shadow: var(--box-shadow-keycaps-accent);
+}
+
+.keyPressed {
+  color: var(--color-keycaps-legends-pressed);
+  background-color: var(--color-keycaps-bg-pressed);
+  box-shadow: var(--box-shadow-keycaps-pressed);
+}
+
+.key:hover,
+.keyAccentColor:hover,
+.keyPressed:hover,
+.keyPressingSimulation {
+  transform: scale(0.98);
+  box-shadow: var(--box-shadow-keycaps-hover);
+}
+
+.keyAccentColor:hover {
+  box-shadow: var(--box-shadow-keycaps-accent-hover);
+}
+
+.keyPressed:hover,
+.keyPressingSimulation {
+  box-shadow: var(--box-shadow-keycaps-pressed-hover);
+}
+
+.region {
+  padding: 0.5rem;
+  gap: 0.25rem;
+}
+
+.function {
+  display: grid;
+  grid-template-columns: 2fr 2fr repeat(4, 2fr) 1fr repeat(4, 2fr) 1fr repeat(4, 2fr);
+}
+
+.systemControl {
+  grid-column: 3;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.typewriter {
+  grid-row: 2;
+  display: grid;
+}
+
+.row1,
+.row2,
+.row3,
+.row4,
+.row5 {
+  display: grid;
+  justify-items: center;
+  gap: 0.25rem;
+}
+
+.row1 {
+  grid-template-columns: repeat(13, 1fr) 2fr;
+}
+
+.row2 {
+  grid-template-columns: 1.5fr repeat(12, 1fr) 1.5fr;
+}
+
+.row3 {
+  grid-template-columns: 1.79fr repeat(11, 1fr) 2.29fr;
+}
+
+.row4 {
+  grid-template-columns: 2.29fr repeat(10, 1fr) 2.79fr;
+}
+
+.row5 {
+  grid-template-columns: repeat(3, 1.29fr) 6.36fr repeat(4, 1.29fr);
+}
+
+.navigation {
+  grid-column: 3;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+}
+
+.numpad {
+  grid-column: 5;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+}
+
+.keySublegend {
+  display: grid;
+  grid-template-rows: 1fr auto auto 1fr;
+  padding-top: 0.8rem;
+  gap: 0.1rem;
+}
+
+.hiddenStep1 {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: all 0.15s;
+}
+
+.hiddenStep2 {
+  width: 0;
+  padding: 0;
+}
+
+.footer {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding: 3.2rem 0 2.4rem;
+}
+
+.footerText {
+  font-size: 1.6rem;
+}
+
+.footerText svg {
+  width: 2.4rem;
+  height: 2.4rem;
+  transform: translateY(0.5rem);
+  fill: var(--color-primary);
+}
+
+/* Media Queries for responsive design */
+@media (max-width: 87em) {
+  .testerContainer {
+    font-size: 56.25%;
+  }
+}
+
+@media (max-width: 79em) {
+  .testerContainer {
+    font-size: 50%;
+  }
+}
+
+@media (max-width: 66em) {
+  .testerContainer {
+    font-size: 43.75%;
+  }
+}
+
+@media (max-width: 58em) {
+  .testerContainer {
+    font-size: 37.5%;
+  }
+}
+
+@media (max-width: 49em) {
+  .testerContainer {
+    font-size: 31.25%;
+  }
+}
+
+@media (max-width: 40em) {
+  .testerContainer {
+    font-size: 25%;
+  }
+}
+
+@media (max-width: 32em) {
+  .testerContainer {
+    font-size: 18.75%;
+  }
+}
+
+@media (max-width: 24em) {
+  .testerContainer {
+    font-size: 16%;
+  }
+}
+
+/* Theme-specific styles */
+.themeRetro {
+  --key-border-radius: 0.6rem;
+  --box-shadow-keycaps: var(--box-shadow-keycaps-value) var(--color-keycaps-shadow);
+  --box-shadow-keycaps-hover: var(--box-shadow-keycaps-hover-value) var(--color-keycaps-shadow);
+  --box-shadow-keycaps-accent: var(--box-shadow-keycaps-value) var(--color-keycaps-shadow-accent);
+  --box-shadow-keycaps-accent-hover: var(--box-shadow-keycaps-hover-value) var(--color-keycaps-shadow-accent);
+  --box-shadow-keycaps-pressed: var(--box-shadow-keycaps-value) var(--color-keycaps-shadow-pressed);
+  --box-shadow-keycaps-pressed-hover: var(--box-shadow-keycaps-hover-value) var(--color-keycaps-shadow-pressed);
+  --color-keyboard: #3c3e4a;
+  --color-keyboard-border: #303642;
+  --color-keycaps-legends: #555;
+  --color-keycaps-bg: #f8f9fa;
+  --color-keycaps-shadow: #adb5bd;
+  --color-keycaps-legends-accent: #555;
+  --color-keycaps-bg-accent: #e2e3e6;
+  --color-keycaps-shadow-accent: #97a0a8;
+  --color-keycaps-legends-pressed: #2f3674;
+  --color-keycaps-bg-pressed: #a4a9b0;
+  --color-keycaps-shadow-pressed: #7f8489;
+}
+
+.themeNavyBlue {
+  --key-border-radius: 1.2rem;
+  --box-shadow-keycaps-value: inset 0 -0.2rem 0 0.3rem;
+  --box-shadow-keycaps-hover-value: inset 0 -0.1rem 0 0.2rem;
+  --box-shadow-keycaps: var(--box-shadow-keycaps-value) var(--color-keycaps-shadow);
+  --box-shadow-keycaps-hover: var(--box-shadow-keycaps-hover-value) var(--color-keycaps-shadow);
+  --box-shadow-keycaps-accent: var(--box-shadow-keycaps-value) var(--color-keycaps-shadow-accent);
+  --box-shadow-keycaps-accent-hover: var(--box-shadow-keycaps-hover-value) var(--color-keycaps-shadow-accent);
+  --box-shadow-keycaps-pressed: var(--box-shadow-keycaps-value) var(--color-keycaps-shadow-pressed);
+  --box-shadow-keycaps-pressed-hover: var(--box-shadow-keycaps-hover-value) var(--color-keycaps-shadow-pressed);
+  --color-keyboard: #2a309c;
+  --color-keyboard-border: #21267e;
+  --color-keycaps-legends: #fff;
+  --color-keycaps-bg: #3d489b;
+  --color-keycaps-shadow: #1c2880;
+  --color-keycaps-legends-accent: #fff;
+  --color-keycaps-bg-accent: #4f71e4;
+  --color-keycaps-shadow-accent: #2e43ad;
+  --color-keycaps-legends-pressed: #555;
+  --color-keycaps-bg-pressed: #f8f9fa;
+  --color-keycaps-shadow-pressed: #adb5bd;
+}

@@ -1,0 +1,26 @@
+/* styles/Home.module.css */
+.container {
+    min-height: 100vh;
+    padding: 0 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(243, 243, 243);
+  }
+  
+  .main {
+    min-height: 100vh;
+    padding: 4rem 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(243, 243, 243);;
+  }
+  
+  .main h1,
+  .main p {
+    color: black; /* 글자 색상을 검정색으로 변경 */
+  }
