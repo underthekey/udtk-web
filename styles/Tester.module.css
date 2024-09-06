@@ -1,7 +1,3 @@
-/* Import external fonts */
-@import url('https://cdn.jsdelivr.net/npm/segoe-fonts@1.0.1/segoe-fonts.min.css');
-
-/* Tester Container Styling */
 .testerContainer {
   --def-fs: 62.5%;
   --ff: 'Segoe UI', sans-serif;
@@ -53,7 +49,9 @@
   font-family: var(--ff);
   line-height: 1;
   font-weight: 400;
-  color: var(--color-primary);
+  max-width: 130rem; /* KeyboardTester-main의 .intro와 동일한 최대 너비 설정 */
+  margin: 0 auto; /* 중앙 정렬 */
+  padding: 4.8rem 3.2rem 0rem; /* KeyboardTester-main의 .intro와 동일한 패딩 설정 */
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -101,11 +99,12 @@
 
 .themeSection {
   display: flex;
-  justify-content: center;
+  justify-content: end;
   align-items: center;
+  gap: 2rem;
 }
 
-.theme {
+.themeSection > div {
   display: flex;
   width: 4rem;
   height: 4rem;
@@ -118,6 +117,7 @@
   width: 25%;
 }
 
+/* retro theme */
 .retro div:nth-child(1) {
   background-color: #3c3e4a;
 }
@@ -134,6 +134,7 @@
   background-color: #2f3674;
 }
 
+/* navy-blue */
 .navyBlue div:nth-child(1) {
   background-color: #2a309c;
 }
@@ -150,55 +151,52 @@
   background-color: #2f3674;
 }
 
+/* slider styling */
+
 .sliderContainer {
   width: 80%;
   margin: 1.6rem auto;
   text-align: center;
 }
 
-.sliderValue {
-  display: inline-block;
-  position: relative;
-  width: 80px;
-  color: #fff;
-  line-height: 20px;
-  text-align: center;
-  border-radius: 3px;
-  background: var(--color-bg-toggle);
-  padding: 5px 10px;
-  margin-left: 8px;
-}
-
 .slider {
-  -webkit-appearance: none;
   width: 100%;
-  height: 15px;
-  border-radius: 5px;
-  background: #d3d3d3;
-  outline: none;
-  opacity: 0.7;
-  -webkit-transition: .2s;
-  transition: opacity .2s;
+  transform: translateY(1.8rem);
 }
 
-.slider::-webkit-slider-thumb {
+/* Styling the track */
+.sliderContainer input[type='range']::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(to right, #555555, #f1f3f5);
+}
+
+/* Styling the thumb */
+.sliderContainer input[type='range']::-webkit-slider-thumb {
+  height: 24px;
+  width: 24px;
+  border-radius: 50%;
+  background: #555; /* Thumb color */
+  cursor: pointer;
   -webkit-appearance: none;
-  appearance: none;
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  background: #4dabf7;
-  cursor: pointer;
+  transition: all 0.3s ease; /* Smooth transition */
+  transform: translateY(-0.4rem);
 }
 
-.slider::-moz-range-thumb {
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  background: #4dabf7;
-  cursor: pointer;
+/* Highlighting the thumb on hover */
+.sliderContainer input[type='range']::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 10px rgba(84, 84, 84, 0.4); /* Add a subtle box-shadow on hover */
+  transform: translateY(-0.4rem) scale(1.2);
 }
 
+.sliderValue {
+  font-size: 2.4em;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: #555; /* Match the thumb color */
+  background: #fff; /* Background color for the value */
+  box-shadow: 0 0 10px rgba(84, 84, 84, 0.1); /* Add a subtle box-shadow to the value */
+}
 .keyboard {
   display: grid;
   margin: 0 auto;
@@ -207,7 +205,11 @@
   background-color: var(--color-keyboard);
   box-shadow: 0 0.4rem 0 0.6rem var(--color-keyboard-border),
     0 1.2rem 3.2rem rgba(0, 0, 0, 0.1);
+
+  /* force GPU acceleration to reduce
+   potential subrendering issues */
   transform: translateZ(0);
+
   transition: all 0.2s;
 }
 
@@ -232,13 +234,16 @@
   display: flex;
   justify-content: center;
   align-items: center;
+
   border-radius: var(--key-border-radius);
   font-size: 1.2rem;
   font-weight: 700;
+
   color: var(--color-keycaps-legends);
   background-color: var(--color-keycaps-bg);
   box-shadow: var(--box-shadow-keycaps);
   cursor: pointer;
+
   transition: all 0.075s;
 }
 
@@ -248,12 +253,14 @@
   box-shadow: var(--box-shadow-keycaps-accent);
 }
 
-.keyPressed {
+/* making specificity higher by adding .key */
+.key.keyPressed {
   color: var(--color-keycaps-legends-pressed);
   background-color: var(--color-keycaps-bg-pressed);
   box-shadow: var(--box-shadow-keycaps-pressed);
 }
 
+/* key pressing simulation class is for using in js */
 .key:hover,
 .keyAccentColor:hover,
 .keyPressed:hover,
@@ -271,22 +278,34 @@
   box-shadow: var(--box-shadow-keycaps-pressed-hover);
 }
 
+/* __________________________________
+   ||||||||||||||||||||||||||||||||||
+   |||| GENERAL KB LAYOUT STYLES ||||
+   ||||||||||||||||||||||||||||||||||
+*/
+
 .region {
   padding: 0.5rem;
   gap: 0.25rem;
 }
 
+/* contains "ESC" & Function (F1-F12) */
 .function {
   display: grid;
-  grid-template-columns: 2fr 2fr repeat(4, 2fr) 1fr repeat(4, 2fr) 1fr repeat(4, 2fr);
+  grid-template-columns: 2fr 2fr repeat(4, 2fr) 1fr repeat(4, 2fr) 1fr repeat(
+      4,
+      2fr
+    );
 }
 
+/* contains Top-Located Control (Prt Sc|Scr lck|Pause) keys  */
 .systemControl {
   grid-column: 3;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
 }
 
+/* contains Modifiers/Control (Ctrl|Alt|etc.) & Alpha (A-Z) keys */
 .typewriter {
   grid-row: 2;
   display: grid;
@@ -322,6 +341,7 @@
   grid-template-columns: repeat(3, 1.29fr) 6.36fr repeat(4, 1.29fr);
 }
 
+/* contains Navigation (PgUp|PgDn|etc.) & Arrow keys */
 .navigation {
   grid-column: 3;
   display: grid;
@@ -329,13 +349,26 @@
   grid-template-rows: repeat(5, 1fr);
 }
 
+/* contains Numpad Keys */
 .numpad {
   grid-column: 5;
+
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(5, 1fr);
 }
 
+/* _______________________________
+   |||||||||||||||||||||||||||||||
+   |||| KEY SPECIFIC STYLES ||||||
+   |||||||||||||||||||||||||||||||
+*/
+
+/**************************/
+/* TYPEWRITER REGION KEYS */
+/**************************/
+
+/* styling keys with sublegends */
 .keySublegend {
   display: grid;
   grid-template-rows: 1fr auto auto 1fr;
@@ -343,89 +376,172 @@
   gap: 0.1rem;
 }
 
-.hiddenStep1 {
-  opacity: 0;
-  pointer-events: none;
-  visibility: hidden;
+.keySublegend span:nth-child(1) {
+  font-size: 0.8rem;
+  align-self: start;
+}
+
+.keySublegend span:nth-child(2) {
+  font-size: 1.2rem;
+}
+
+.backspace {
+  grid-column: -2 / -1;
+}
+
+.tab {
+  grid-column: 1 / 2;
+}
+
+.backslash {
+  grid-column: -2 / -1;
+}
+
+.capslock {
+  grid-column: 1 / 3;
+}
+
+.enter {
+  grid-column: -2 / -1;
+}
+
+.leftshift {
+  grid-column: 1 / 3;
+}
+
+.rightshift {
+  grid-column: -3 / -1;
+}
+
+.leftctrl {
+  grid-column: 1 / 2;
+}
+
+.leftwin {
+  grid-column: 2 / 3;
+}
+
+.leftalt {
+  grid-column: 3 / 4;
+}
+
+.space {
+  grid-column: 4 / 8;
+}
+
+.rightalt {
+  grid-column: 8 / 9;
+}
+
+.rightwin {
+  grid-column: 9 / 10;
+}
+
+.menu {
+  grid-column: 10 / 11;
+}
+
+.rightctrl {
+  grid-column: 11 / 12;
+}
+
+/*************************/
+/* NAVIGATION REGION KEYS */
+/*************************/
+
+.insert,
+.home,
+.pageup {
+  grid-row: 1;
+}
+
+.delete,
+.end,
+.pagedown {
+  grid-row: 2;
+}
+
+.arrowup {
+  grid-column: 2;
+  grid-row: 4;
+}
+
+.arrowleft,
+.arrowdown,
+.arrowright {
+  grid-row: 5;
+}
+
+.arrowup svg,
+.arrowleft svg,
+.arrowdown svg,
+.arrowright svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  fill: var(--color-keycaps-legends);
+}
+
+.arrowup.keyPressed svg,
+.arrowleft.keyPressed svg,
+.arrowdown.keyPressed svg,
+.arrowright.keyPressed svg {
+  fill: var(--color-keycaps-legends-pressed);
+}
+
+/**********************/
+/* NUMPAD REGION KEYS */
+/**********************/
+
+.numpadadd {
+  grid-column: 4;
+  grid-row: 2 / span 2;
+  height: 100%;
+}
+
+.numpadenter {
+  grid-column: 4;
+  grid-row: 4 / span 2;
+  height: 100%;
+}
+.numpad0 {
+  grid-column: 1 / span 2;
+}
+
+/* _____________________________________
+   |||||||||||||||||||||||||||||||||||||
+   |||| Changing Layout Animation ||||||
+   |||||||||||||||||||||||||||||||||||||
+*/
+
+.numpad {
   transition: all 0.15s;
 }
 
-.hiddenStep2 {
+/* simply using display:none; doesn't work because 
+then we can't use transitions anymore
+
+STEPS FOR REMOVING NUMPAD FROM FULL-SIZE KEYBOARD: */
+.hidden--step1 {
+  /* 1) Hide it visually */
+  opacity: 0;
+  /* 2) Make it inaccessible to mouse and keyboard */
+  pointer-events: none;
+  /* 3) Hide it from screen readers */
+  visibility: hidden;
+
+  transition: all 0.15;
+}
+
+.hidden--step2 {
   width: 0;
   padding: 0;
 }
 
-.footer {
-  flex-grow: 1;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  padding: 3.2rem 0 2.4rem;
-}
-
-.footerText {
-  font-size: 1.6rem;
-}
-
-.footerText svg {
-  width: 2.4rem;
-  height: 2.4rem;
-  transform: translateY(0.5rem);
-  fill: var(--color-primary);
-}
-
-/* Media Queries for responsive design */
-@media (max-width: 87em) {
-  .testerContainer {
-    font-size: 56.25%;
-  }
-}
-
-@media (max-width: 79em) {
-  .testerContainer {
-    font-size: 50%;
-  }
-}
-
-@media (max-width: 66em) {
-  .testerContainer {
-    font-size: 43.75%;
-  }
-}
-
-@media (max-width: 58em) {
-  .testerContainer {
-    font-size: 37.5%;
-  }
-}
-
-@media (max-width: 49em) {
-  .testerContainer {
-    font-size: 31.25%;
-  }
-}
-
-@media (max-width: 40em) {
-  .testerContainer {
-    font-size: 25%;
-  }
-}
-
-@media (max-width: 32em) {
-  .testerContainer {
-    font-size: 18.75%;
-  }
-}
-
-@media (max-width: 24em) {
-  .testerContainer {
-    font-size: 16%;
-  }
-}
-
-/* Theme-specific styles */
+/* THEMES */
 .themeRetro {
   --key-border-radius: 0.6rem;
+  --box-shadow-keycaps-value: inset 0 -0.2rem 0 0.3rem;
+  --box-shadow-keycaps-hover-value: inset 0 -0.1rem 0 0.2rem;
   --box-shadow-keycaps: var(--box-shadow-keycaps-value) var(--color-keycaps-shadow);
   --box-shadow-keycaps-hover: var(--box-shadow-keycaps-hover-value) var(--color-keycaps-shadow);
   --box-shadow-keycaps-accent: var(--box-shadow-keycaps-value) var(--color-keycaps-shadow-accent);
@@ -466,4 +582,86 @@
   --color-keycaps-legends-pressed: #555;
   --color-keycaps-bg-pressed: #f8f9fa;
   --color-keycaps-shadow-pressed: #adb5bd;
+}
+
+.emptySpaceBetweenKeys {
+  visibility: hidden !important;
+  width: 0 !important;
+  padding: 0 !important;
+}
+
+/* Media Queries */
+/* rem and em do NOT depend on html font-size 
+in media queries! Instead, 1rem = 1em = 16px */
+
+/***********************************/
+/* BELOW 1392px (Smaller desktops) */
+/***********************************/
+@media (max-width: 87em) {
+  .testerContainer {
+    font-size: 56.25%;
+  }
+}
+
+/******************************************************/
+/* BELOW 1264px (Larger laptops and smaller desktops) */
+/******************************************************/
+@media (max-width: 79em) {
+  .testerContainer {
+    font-size: 50%;
+  }
+}
+
+/************************************************************/
+/* BELOW 1056px (Medium-sized laptops and smaller desktops) */
+/************************************************************/
+@media (max-width: 66em) {
+  .testerContainer {
+    font-size: 43.75%;
+  }
+}
+
+/******************************************************/
+/* BELOW 928px (Smaller laptops and smaller desktops) */
+/******************************************************/
+@media (max-width: 58em) {
+  .testerContainer {
+    font-size: 37.5%;
+  }
+}
+
+/*************************/
+/* BELOW 784px (Tablets) */
+/*************************/
+@media (max-width: 49em) {
+  .testerContainer {
+    font-size: 31.25%;
+  }
+}
+
+/*******************************/
+/* BELOW 640px (Small tablets) */
+/*******************************/
+@media (max-width: 40em) {
+  .testerContainer {
+    font-size: 25%;
+  }
+}
+
+/********************************/
+/* BELOW 512px (Mobile devices) */
+/********************************/
+@media (max-width: 32em) {
+  .testerContainer {
+    font-size: 18.75%;
+  }
+}
+
+/**************************************/
+/* BELOW 384px (Small mobile devices) */
+/**************************************/
+@media (max-width: 24em) {
+  .testerContainer {
+    font-size: 16%;
+  }
 }

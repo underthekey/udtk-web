@@ -12,6 +12,11 @@
   --background-color: #003049;
   --main-text-color: #FDF0D5;
   --hover-color: #D62828;
+  --def-fs: 62.5%;
+  --ff: 'Segoe UI', sans-serif;
+  --color-primary: #343a40;
+  --color-primary-darker: #333;
+  --color-primary-lighter: #555;
 }
 
 @media (prefers-color-scheme: dark) {
