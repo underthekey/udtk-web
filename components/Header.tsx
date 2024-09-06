@@ -27,7 +27,7 @@ export default function Header() {
           <div className={styles.logoContainer}>
             <div className={styles.logoImageWrapper}>
               <Image
-                src="/images/image-logo/line/ivory/logo-line-ivory-256.png"
+                src="/images/image-logo/line/vector/logo-line-ivory.svg"
                 alt="underthekey logo"
                 width={256}
                 height={256}
