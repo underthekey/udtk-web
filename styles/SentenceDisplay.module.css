@@ -10,6 +10,12 @@
   font-size: 1.5rem;
   line-height: 1.5rem;
   color: #444444;
+  opacity: 0;
+  transition: opacity 0.5s ease-in;
+}
+
+.content.visible {
+  opacity: 1;
 }
 
 .author {

@@ -1,15 +1,17 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { Sentence } from '@/app/types';
 import SentenceDisplay from './SentenceDisplay';
 import TypingArea from './TypingArea';
+import AnimatedSentences from './AnimatedSentences';
 import styles from '@app/styles/Typer.module.css';
 
 export default function Typer({ initialSentences }: { initialSentences: Sentence[] }) {
   const [sentences, setSentences] = useState<Sentence[]>(initialSentences);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFetching, setIsFetching] = useState(false);
+  const [showAnimation, setShowAnimation] = useState(true);
 
   const fetchMoreSentences = useCallback(async () => {
     if (isFetching) return; // 이미 fetch 중이면 중복 요청 방지
@@ -42,8 +44,17 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
 
   const currentSentence = useMemo(() => sentences[currentIndex], [sentences, currentIndex]);
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowAnimation(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className={styles.typer}>
+      {showAnimation && <AnimatedSentences sentences={sentences.slice(0, 20)} />}
       {currentSentence && (
         <>
           <SentenceDisplay sentence={currentSentence} />
@@ -53,7 +64,6 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
           />
         </>
       )}
-      {/* <div>Current: {currentIndex + 1} / Total: {sentences.length}</div> */}
     </div>
   );
 }

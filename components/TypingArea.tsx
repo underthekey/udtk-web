@@ -24,7 +24,7 @@ export default function TypingArea({ sentence, onComplete }: TypingAreaProps) {
         const paddingRight = parseFloat(computedStyle.paddingRight);
         const borderLeft = parseFloat(computedStyle.borderLeftWidth);
         const borderRight = parseFloat(computedStyle.borderRightWidth);
-        
+
         const totalWidth = textWidth + paddingLeft + paddingRight + borderLeft + borderRight + 5; // 5px 추가 여백
         inputRef.current.style.width = `${totalWidth}px`;
       }
@@ -54,7 +54,7 @@ export default function TypingArea({ sentence, onComplete }: TypingAreaProps) {
         }
         onComplete(); // 다음 문장으로 즉시 넘어감
         setInput(''); // 입력 필드 초기화
-        
+
         // 짧은 지연 후 처리 상태 해제
         setTimeout(() => {
           setIsProcessing(false);
