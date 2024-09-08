@@ -26,3 +26,19 @@
 .incorrect {
   color: var(--hover-color);
 }
+
+.incorrectSpace {
+  position: relative;
+}
+
+.incorrectSpace::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 4px;
+  height: 4px;
+  background-color: var(--hover-color);
+  border-radius: 50%;
+}

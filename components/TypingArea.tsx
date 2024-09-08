@@ -1,17 +1,20 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import styles from '@/styles/TypingArea.module.css';
 
 interface TypingAreaProps {
   sentence: string;
   onComplete: () => void;
   onInputChange: (input: string, correctChars: number, lastCompletedCharIndex: number) => void;
+  onSkip: () => void;
+  onPrevious: () => void;
 }
 
-export default function TypingArea({ sentence, onComplete, onInputChange }: TypingAreaProps) {
+export default function TypingArea({ sentence, onComplete, onInputChange, onSkip, onPrevious }: TypingAreaProps) {
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [lastCompletedCharIndex, setLastCompletedCharIndex] = useState(-1);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const adjustInputWidth = useCallback(() => {
     if (inputRef.current) {
@@ -37,7 +40,6 @@ export default function TypingArea({ sentence, onComplete, onInputChange }: Typi
     adjustInputWidth();
     setInput('');
     setLastCompletedCharIndex(-1);
-    focusInput();
   }, [sentence, adjustInputWidth]);
 
   const focusInput = useCallback(() => {
@@ -45,6 +47,10 @@ export default function TypingArea({ sentence, onComplete, onInputChange }: Typi
       inputRef.current?.focus();
     });
   }, []);
+
+  useEffect(() => {
+    focusInput();
+  }, [focusInput]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newInput = e.target.value;
@@ -68,6 +74,16 @@ export default function TypingArea({ sentence, onComplete, onInputChange }: Typi
 
     onInputChange(newInput, correctChars, newLastCompletedCharIndex);
   };
+
+  const debouncedSkip = useCallback(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = setTimeout(() => {
+      onSkip();
+    }, 200); // 200ms 디바운스 타임
+  }, [onSkip]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !isProcessing) {
@@ -94,13 +110,27 @@ export default function TypingArea({ sentence, onComplete, onInputChange }: Typi
           }, 200);
         }
       }
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      debouncedSkip();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      onPrevious();
     }
   };
 
   // 컴포넌트가 마운트되거나 업데이트될 때마다 포커스를 유지
-  useEffect(() => {
+  useLayoutEffect(() => {
     focusInput();
   });
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className={styles.typingArea}>

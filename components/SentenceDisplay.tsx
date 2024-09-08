@@ -25,12 +25,14 @@ export default function SentenceDisplay({ sentence, currentInput, correctChars, 
           let className = '';
           if (index < currentInput.length) {
             if (index < lastCompletedCharIndex) {
-              className = currentInput[index] !== char ? styles.incorrect : '';
+              if (currentInput[index] !== char) {
+                className = char === ' ' ? styles.incorrectSpace : styles.incorrect;
+              }
             }
           }
           return (
             <span key={index} className={className}>
-              {char}
+              {char === ' ' ? '\u00A0' : char}
             </span>
           );
         })}
