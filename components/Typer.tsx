@@ -16,7 +16,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     setIsFetching(true);
     console.log('Fetching more sentences...');
     try {
-      const res = await fetch('https://sentence.udtk.site/random/20', { cache: 'no-store' });
+      const res = await fetch('https://sentence.udtk.site/random?count=20', { cache: 'no-store' });
       if (!res.ok) {
         throw new Error('Failed to fetch sentences');
       }
