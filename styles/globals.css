@@ -4,13 +4,12 @@
 
 :root {
   --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --background-color: #f0f0f0;
   --primary-color: #003049;
   --secondary-color: #fdf0d5;
   --text-color: #ffffff;
-  --background-color: #003049;
-  --main-text-color: #fdf0d5;
+  --header-color: #f0f0f0;
+  --main-text-color: #003049;
   --hover-color: #d62828;
 }
 
@@ -28,7 +27,7 @@ body {
 }
 
 a {
-  color: var(--secondary-color);
+  color: var(--main-text-color);
   text-decoration: none;
   transition: color 0.3s ease;
 }
