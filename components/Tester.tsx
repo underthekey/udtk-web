@@ -316,44 +316,46 @@ const KeyboardTester: React.FC = () => {
   };
 
   return (
-    <div className={`${styles.testerContainer} ${styles[currentTheme]}`}>
-      <header>
-        <section className={styles.intro}>
-          <h1 className={`${styles.headingPrimary} ${styles.title} ${styles.centerText}`}>
-            <span>Test Your Keyboard</span>
-          </h1>
-          <p className={`${styles.paragraph} ${styles.description} ${styles.centerText}`}>
-            This interactive tool is designed to help users identify and
-            troubleshoot any issues with their physical keyboard or simply explore
-            its layout
-          </p>
-        </section>
-      </header>
+    <div className={`${styles.testerWrapper}`}>
+      <div className={`${styles.testerContainer} ${styles[currentTheme]}`}>
+        <header>
+          <section className={styles.intro}>
+            <h1 className={`${styles.headingPrimary} ${styles.title} ${styles.centerText}`}>
+              <span>Test Your Keyboard</span>
+            </h1>
+            <p className={`${styles.paragraph} ${styles.description} ${styles.centerText}`}>
+              This interactive tool is designed to help users identify and
+              troubleshoot any issues with their physical keyboard or simply explore
+              its layout
+            </p>
+          </section>
+        </header>
 
-      <main>
-        <div className={styles.themeAndLayout}>
-          <div></div>
-          <div className={styles.sliderContainer}>
-            <output className={styles.sliderValue}>{sliderValue}</output>
-            <input
-              type="range"
-              min="1"
-              max="3"
-              value={layout === 'fullSize' ? '1' : layout === 'tkl' ? '2' : '3'}
-              className={styles.slider}
-              onChange={(e) => updateLayout(e.target.value)}
-            />
+        <main>
+          <div className={styles.themeAndLayout}>
+            <div></div>
+            <div className={styles.sliderContainer}>
+              <output className={styles.sliderValue}>{sliderValue}</output>
+              <input
+                type="range"
+                min="1"
+                max="3"
+                value={layout === 'fullSize' ? '1' : layout === 'tkl' ? '2' : '3'}
+                className={styles.slider}
+                onChange={(e) => updateLayout(e.target.value)}
+              />
+            </div>
+            {renderThemeSelector()}
           </div>
-          {renderThemeSelector()}
-        </div>
-        {renderKeyboard()}
-      </main>
+          {renderKeyboard()}
+        </main>
 
-      <footer className={styles.footer}>
-        <p className={styles.footerText}>
-          Made with ❤️ by <a href="https://github.com/Mostafa-Abbasi" target="_blank" rel="noopener noreferrer">Mostafa Abbasi</a>
-        </p>
-      </footer>
+        <footer className={styles.footer}>
+          <p className={styles.footerText}>
+            Made with ❤️ by <a href="https://github.com/Mostafa-Abbasi" target="_blank" rel="noopener noreferrer">Mostafa Abbasi</a>
+          </p>
+        </footer>
+      </div>
     </div>
   );
 };
