@@ -22,3 +22,7 @@
   font-size: 1rem;
   color: #979797;
 }
+
+.incorrect {
+  color: var(--hover-color);
+}

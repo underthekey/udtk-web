@@ -12,6 +12,12 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFetching, setIsFetching] = useState(false);
   const [showAnimation, setShowAnimation] = useState(true);
+  const [currentInput, setCurrentInput] = useState('');
+  const [lastCompletedIndex, setLastCompletedIndex] = useState(-1);
+  const [isCorrect, setIsCorrect] = useState(true);
+  const [completedChars, setCompletedChars] = useState(0);
+  const [correctChars, setCorrectChars] = useState(0);
+  const [lastCompletedCharIndex, setLastCompletedCharIndex] = useState(-1);
 
   const fetchMoreSentences = useCallback(async () => {
     if (isFetching) return; // 이미 fetch 중이면 중복 요청 방지
@@ -40,6 +46,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
       }
       return nextIndex;
     });
+    setCurrentInput(''); // 새 문장으로 넘어갈 때 currentInput 초기화
   }, [sentences.length, fetchMoreSentences, isFetching]);
 
   const currentSentence = useMemo(() => sentences[currentIndex], [sentences, currentIndex]);
@@ -52,15 +59,33 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     return () => clearTimeout(timer);
   }, []);
 
+  const handleInputChange = (input: string, newCorrectChars: number, newLastCompletedCharIndex: number) => {
+    setCurrentInput(input);
+    setCorrectChars(newCorrectChars);
+    setLastCompletedCharIndex(newLastCompletedCharIndex);
+  };
+
+  // currentSentence가 변경될 때마다 currentInput과 correctChars 초기화
+  useEffect(() => {
+    setCurrentInput('');
+    setCorrectChars(0);
+  }, [currentSentence]);
+
   return (
     <div className={styles.typer}>
       {showAnimation && <AnimatedSentences sentences={sentences.slice(0, 20)} />}
       {currentSentence && (
         <>
-          <SentenceDisplay sentence={currentSentence} />
+          <SentenceDisplay
+            sentence={currentSentence}
+            currentInput={currentInput}
+            correctChars={correctChars}
+            lastCompletedCharIndex={lastCompletedCharIndex}
+          />
           <TypingArea
             sentence={currentSentence.content}
             onComplete={handleSentenceComplete}
+            onInputChange={handleInputChange}
           />
         </>
       )}
