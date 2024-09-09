@@ -18,17 +18,23 @@ pipeline {
             steps {
                 withCredentials([file(credentialsId: 'udtk-web-credentials', variable: 'ENV_CREDENTIALS')]) {
                     script {
-                        def props = readProperties file: ENV_CREDENTIALS
-                        env.PROD_SERVER_PORT = props.PROD_SERVER_PORT
-                        env.DEV_SERVER_PORT = props.DEV_SERVER_PORT
+                        def lines = readFile(file: ENV_CREDENTIALS).split('\n')
+                        def envMap = [:]
+
+                        lines.each { line ->
+                            if (line && !line.startsWith('#')) {
+                                def (key, value) = line.split('=')
+                                envMap[key.trim()] = value.trim()
+                            }
+                        }
 
                         env.BRANCH_NAME = params.ENV_TYPE == 'prod' ? 'main' : 'dev'
                         env.DEPLOY_URL = params.ENV_TYPE == 'prod'
                                 ? 'https://udtk.site'
                                 : 'https://dev.udtk.site'
                         env.SERVER_PORT = params.ENV_TYPE == 'prod'
-                                ? "${env.PROD_SERVER_PORT}"
-                                : "${env.DEV_SERVER_PORT}"
+                                ? envMap['PROD_SERVER_PORT']
+                                : envMap['DEV_SERVER_PORT']
                     }
                 }
             }
