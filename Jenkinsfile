@@ -9,7 +9,6 @@ pipeline {
 
     parameters {
         string(name: 'DOCKER_NETWORK', defaultValue: 'proxy-network', description: 'docker network name')
-        string(name: 'IMAGE_NAME', defaultValue: 'udtk-web', description: 'docker image name')
         choice(name: 'ENV_TYPE', choices: ['dev', 'prod'], description: 'Choose the environment type')
     }
 
@@ -76,8 +75,8 @@ pipeline {
                         ssh -o ProxyCommand="ssh -W %h:%p -p ${PROXMOX_SSH_PORT} ${PROXMOX_SERVER_ACCOUNT}@${PROXMOX_SERVER_URI}" \
                         -o StrictHostKeyChecking=no ${UDTK_SERVER_ACCOUNT}@${UDTK_SERVER_IP} \
                         '
-                        docker stop \$(docker ps -aq --filter "ancestor=${DOCKER_REPOSITORY}:latest") || true &&
-                        docker rm -f \$(docker ps -aq --filter "ancestor=${DOCKER_REPOSITORY}:latest") || true &&
+                        docker stop \$(docker ps -aq --filter "ancestor=${DOCKER_REPOSITORY}:${env.IMAGE_NAME}-latest") || true &&
+                        docker rm -f \$(docker ps -aq --filter "ancestor=${DOCKER_REPOSITORY}:${env.IMAGE_NAME}-latest") || true &&
                         docker rmi ${DOCKER_REPOSITORY}:latest || true
                         '
                     """
@@ -90,7 +89,7 @@ pipeline {
                 sshagent(credentials: ['deepeet-ubuntu', 'udtk-ubuntu']) {
                     sh """
                         ssh -o ProxyCommand="ssh -W %h:%p -p ${PROXMOX_SSH_PORT} ${PROXMOX_SERVER_ACCOUNT}@${PROXMOX_SERVER_URI}" \
-                        -o StrictHostKeyChecking=no ${UDTK_SERVER_ACCOUNT}@${UDTK_SERVER_IP} 'docker pull ${DOCKER_REPOSITORY}:latest'
+                        -o StrictHostKeyChecking=no ${UDTK_SERVER_ACCOUNT}@${UDTK_SERVER_IP} 'docker pull ${DOCKER_REPOSITORY}:${env.IMAGE_NAME}-latest:latest'
                     """
                 }
             }
