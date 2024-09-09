@@ -4,8 +4,11 @@ FROM node:18-alpine AS builder
 # 작업 디렉토리 설정
 WORKDIR /app
 
+# package.json만 먼저 복사
+COPY package.json ./
+
 # 패키지 파일 복사 및 종속성 설치
-COPY package.json package-lock.json ./
+COPY package-lock.json ./
 RUN npm ci
 
 # 소스 코드 복사

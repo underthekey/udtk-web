@@ -54,6 +54,7 @@ pipeline {
                     docker.withRegistry('', REGISTRY_CREDENTIAL) {
                         sh 'docker buildx create --use --name mybuilder'
                         sh """
+                        cd ${WORKSPACE}
                         docker buildx build --platform linux/amd64 \
                         --build-arg SERVER_PORT=${env.SERVER_PORT} \
                         --cache-from type=registry,ref=${DOCKER_REPOSITORY}:buildcache \
