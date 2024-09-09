@@ -49,4 +49,4 @@ ENV TZ Asia/Seoul
 ENV SERVER_PORT $SERVER_PORT
 
 # 애플리케이션 실행 명령어
-CMD ["node", "server.js"]
+CMD ["sh", "-c", "next start -p $SERVER_PORT"]

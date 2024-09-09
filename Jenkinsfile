@@ -35,6 +35,7 @@ pipeline {
                         env.SERVER_PORT = params.ENV_TYPE == 'prod'
                                 ? envMap['PROD_SERVER_PORT']
                                 : envMap['DEV_SERVER_PORT']
+                        env.IMAGE_NAME = params.ENV_TYPE == 'prod' ? 'udtk-web' : 'udtk-web-dev'
                     }
                 }
             }
@@ -59,8 +60,8 @@ pipeline {
                         --build-arg SERVER_PORT=${env.SERVER_PORT} \
                         --cache-from type=registry,ref=${DOCKER_REPOSITORY}:buildcache \
                         --cache-to type=registry,ref=${DOCKER_REPOSITORY}:buildcache,mode=max \
-                        -t ${DOCKER_REPOSITORY}:${BUILD_NUMBER} \
-                        -t ${DOCKER_REPOSITORY}:latest \
+                        -t ${DOCKER_REPOSITORY}:${env.IMAGE_NAME}-${BUILD_NUMBER} \
+                        -t ${DOCKER_REPOSITORY}:${env.IMAGE_NAME}-latest \
                         --push .
                         """
                     }
@@ -111,10 +112,10 @@ pipeline {
                             -o StrictHostKeyChecking=no ${UDTK_SERVER_ACCOUNT}@${UDTK_SERVER_IP} \
                         '
                         docker run -i -e TZ=Asia/Seoul --env-file ~/udtk-web-credentials \\
-                        --name ${params.IMAGE_NAME} --network ${params.DOCKER_NETWORK} \\
+                        --name ${env.IMAGE_NAME} --network ${params.DOCKER_NETWORK} \\
                         -p ${env.SERVER_PORT}:${env.SERVER_PORT} \\
                         --restart unless-stopped \\
-                        -d ${DOCKER_REPOSITORY}:latest
+                        -d ${DOCKER_REPOSITORY}:${env.IMAGE_NAME}-latest
 
                         rm -f ~/udtk-web-credentials
                         '
