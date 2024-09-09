@@ -11,6 +11,7 @@
   --header-color: #f0f0f0;
   --main-text-color: #003049;
   --hover-color: #d62828;
+  --correct-color: #09703c;
 }
 
 @media (prefers-color-scheme: dark) {

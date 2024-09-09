@@ -20,17 +20,17 @@
 }
 
 .input:focus {
-  border-color: #000000;
+  border-color: var(--main-text-color);
   outline: none;
 }
 
 .incorrect {
-  border-color: #f44336 !important;
+  border-color: var(--hover-color) !important;
   animation: shake 0.2s;
 }
 
 .correct {
-  border-color: #225cd8 !important;
+  border-color: var(--correct-color) !important;
   transition: border-color 0s ease-in-out; /* 즉시 바뀌도록 설정 */
 }
 
@@ -40,9 +40,19 @@
 }
 
 @keyframes shake {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  50% { transform: translateX(5px); }
-  75% { transform: translateX(-5px); }
-  100% { transform: translateX(0); }
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+  75% {
+    transform: translateX(-5px);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }

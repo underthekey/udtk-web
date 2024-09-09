@@ -4,9 +4,12 @@ import styles from '@/styles/SentenceDisplay.module.css';
 
 interface SentenceDisplayProps {
   sentence: Sentence;
+  currentInput: string;
+  correctChars: number;
+  lastCompletedCharIndex: number;
 }
 
-export default function SentenceDisplay({ sentence }: SentenceDisplayProps) {
+export default function SentenceDisplay({ sentence, currentInput, correctChars, lastCompletedCharIndex }: SentenceDisplayProps) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -17,7 +20,23 @@ export default function SentenceDisplay({ sentence }: SentenceDisplayProps) {
 
   return (
     <div className={styles.sentenceDisplay}>
-      <p className={`${styles.content} ${visible ? styles.visible : ''}`}>{sentence.content}</p>
+      <p className={`${styles.content} ${visible ? styles.visible : ''}`}>
+        {sentence.content.split('').map((char, index) => {
+          let className = '';
+          if (index < currentInput.length) {
+            if (index < lastCompletedCharIndex) {
+              if (currentInput[index] !== char) {
+                className = char === ' ' ? styles.incorrectSpace : styles.incorrect;
+              }
+            }
+          }
+          return (
+            <span key={index} className={className}>
+              {char === ' ' ? '\u00A0' : char}
+            </span>
+          );
+        })}
+      </p>
     </div>
   );
 }

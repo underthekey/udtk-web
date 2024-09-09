@@ -1,15 +1,20 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import styles from '@/styles/TypingArea.module.css';
 
 interface TypingAreaProps {
   sentence: string;
   onComplete: () => void;
+  onInputChange: (input: string, correctChars: number, lastCompletedCharIndex: number) => void;
+  onSkip: () => void;
+  onPrevious: () => void;
 }
 
-export default function TypingArea({ sentence, onComplete }: TypingAreaProps) {
+export default function TypingArea({ sentence, onComplete, onInputChange, onSkip, onPrevious }: TypingAreaProps) {
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [lastCompletedCharIndex, setLastCompletedCharIndex] = useState(-1);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const adjustInputWidth = useCallback(() => {
     if (inputRef.current) {
@@ -34,40 +39,70 @@ export default function TypingArea({ sentence, onComplete }: TypingAreaProps) {
   useEffect(() => {
     adjustInputWidth();
     setInput('');
-    // requestAnimationFrame을 사용하여 다음 렌더링 주기에 포커스 설정
+    setLastCompletedCharIndex(-1);
+  }, [sentence, adjustInputWidth]);
+
+  const focusInput = useCallback(() => {
     requestAnimationFrame(() => {
       inputRef.current?.focus();
     });
-  }, [sentence, adjustInputWidth]);
+  }, []);
+
+  useEffect(() => {
+    focusInput();
+  }, [focusInput]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInput(e.target.value);
+    const newInput = e.target.value;
+    setInput(newInput);
+
+    let correctChars = 0;
+    let newLastCompletedCharIndex = lastCompletedCharIndex;
+
+    for (let i = 0; i <= newLastCompletedCharIndex; i++) {
+      if (newInput[i] === sentence[i]) {
+        correctChars++;
+      } else {
+        break;
+      }
+    }
+
+    if (newInput.length > lastCompletedCharIndex + 1) {
+      newLastCompletedCharIndex = newInput.length - 1;
+      setLastCompletedCharIndex(newLastCompletedCharIndex);
+    }
+
+    onInputChange(newInput, correctChars, newLastCompletedCharIndex);
   };
+
+  const debouncedSkip = useCallback(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = setTimeout(() => {
+      onSkip();
+    }, 200); // 200ms 디바운스 타임
+  }, [onSkip]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !isProcessing) {
       if (input === sentence) {
-        // 정답일 경우
         setIsProcessing(true);
         if (inputRef.current) {
           inputRef.current.classList.add(styles.correct);
         }
-        onComplete(); // 다음 문장으로 즉시 넘어감
-        setInput(''); // 입력 필드 초기화
+        onComplete();
+        setInput('');
 
-        // 짧은 지연 후 처리 상태 해제
         setTimeout(() => {
           setIsProcessing(false);
           if (inputRef.current) {
             inputRef.current.classList.remove(styles.correct);
-            // requestAnimationFrame을 사용하여 다음 렌더링 주기에 포커스 설정
-            requestAnimationFrame(() => {
-              inputRef.current?.focus();
-            });
+            focusInput();
           }
-        }, 300); // 300ms 동안 추가 입력 무시
+        }, 300);
       } else {
-        // 오답일 경우
         if (inputRef.current) {
           inputRef.current.classList.add(styles.incorrect);
           setTimeout(() => {
@@ -75,8 +110,27 @@ export default function TypingArea({ sentence, onComplete }: TypingAreaProps) {
           }, 200);
         }
       }
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      debouncedSkip();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      onPrevious();
     }
   };
+
+  // 컴포넌트가 마운트되거나 업데이트될 때마다 포커스를 유지
+  useLayoutEffect(() => {
+    focusInput();
+  });
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className={styles.typingArea}>
@@ -88,7 +142,8 @@ export default function TypingArea({ sentence, onComplete }: TypingAreaProps) {
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
         className={styles.input}
-        disabled={isProcessing} // 처리 중일 때 입력 필드 비활성화
+        disabled={isProcessing}
+        onBlur={focusInput} // 포커스를 잃었을 때 다시 포커스
       />
     </div>
   );
