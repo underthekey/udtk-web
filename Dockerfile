@@ -28,6 +28,7 @@ RUN adduser --system --uid 1001 nextjs
 
 USER nextjs
 
+ARG SERVER_PORT
 EXPOSE ${SERVER_PORT}
 
 ENV TZ Asia/Seoul
