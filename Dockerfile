@@ -46,5 +46,7 @@ EXPOSE ${SERVER_PORT}
 # 한국 시간으로 설정
 ENV TZ Asia/Seoul
 
+ENV SERVER_PORT $SERVER_PORT
+
 # 애플리케이션 실행 명령어
 CMD ["node", "server.js"]
