@@ -29,10 +29,10 @@ RUN adduser --system --uid 1001 nextjs
 USER nextjs
 
 ARG SERVER_PORT
-ENV SERVER_PORT=${SERVER_PORT}
+ENV PORT=${SERVER_PORT}
 
-EXPOSE ${SERVER_PORT}
+EXPOSE ${PORT}
 
 ENV TZ Asia/Seoul
 
-CMD ["sh", "-c", "node server.js -p $SERVER_PORT"]
+CMD ["sh", "-c", "node server.js"]
