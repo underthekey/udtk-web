@@ -77,7 +77,7 @@ pipeline {
                         '
                         docker stop \$(docker ps -aq --filter "ancestor=${DOCKER_REPOSITORY}:${env.IMAGE_NAME}-latest") || true &&
                         docker rm -f \$(docker ps -aq --filter "ancestor=${DOCKER_REPOSITORY}:${env.IMAGE_NAME}-latest") || true &&
-                        docker rmi ${DOCKER_REPOSITORY}:latest || true
+                        docker rmi ${DOCKER_REPOSITORY}:${env.IMAGE_NAME}-latest || true
                         '
                     """
                 }
