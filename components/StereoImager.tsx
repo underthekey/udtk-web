@@ -7,7 +7,7 @@ interface StereoImagerProps {
     panValue: number;  // 패닝 값
 }
 
-const DECAY_SPEED = 0.001;
+const DECAY_SPEED = 0.05;
 
 const StereoImager: React.FC<StereoImagerProps> = ({ analyserNodeLeft, analyserNodeRight, panValue }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -52,14 +52,16 @@ const StereoImager: React.FC<StereoImagerProps> = ({ analyserNodeLeft, analyserN
                 const leftValue = Math.max((dataArrayLeft[i] + 140) / 140, 0);
                 const rightValue = Math.max((dataArrayRight[i] + 140) / 140, 0);
 
-                const prevLeftValue = previousDataRef.current[i * 2];
-                const prevRightValue = previousDataRef.current[i * 2 + 1];
+                const prevLeftValue = previousDataRef.current?.[i * 2] ?? 0;
+                const prevRightValue = previousDataRef.current?.[i * 2 + 1] ?? 0;
 
                 const currentLeftValue = Math.max(leftValue, prevLeftValue * (1 - DECAY_SPEED));
                 const currentRightValue = Math.max(rightValue, prevRightValue * (1 - DECAY_SPEED));
 
-                previousDataRef.current[i * 2] = currentLeftValue;
-                previousDataRef.current[i * 2 + 1] = currentRightValue;
+                if (previousDataRef.current) {
+                    previousDataRef.current[i * 2] = currentLeftValue;
+                    previousDataRef.current[i * 2 + 1] = currentRightValue;
+                }
 
                 const angle = (i / bufferLength) * Math.PI;
 
