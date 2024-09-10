@@ -7,9 +7,11 @@ interface TypingAreaProps {
   onInputChange: (input: string, correctChars: number, lastCompletedCharIndex: number) => void;
   onSkip: () => void;
   onPrevious: () => void;
+  onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void; // 추가
+  onKeyUp?: (event: React.KeyboardEvent<HTMLInputElement>) => void; // 추가
 }
 
-export default function TypingArea({ sentence, onComplete, onInputChange, onSkip, onPrevious }: TypingAreaProps) {
+export default function TypingArea({ sentence, onComplete, onInputChange, onSkip, onPrevious, onKeyDown, onKeyUp }: TypingAreaProps) {
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -141,9 +143,10 @@ export default function TypingArea({ sentence, onComplete, onInputChange, onSkip
         placeholder={sentence}
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
+        onKeyUp={onKeyUp}
         className={styles.input}
         disabled={isProcessing}
-        onBlur={focusInput} // 포커스를 잃었을 때 다시 포커스
+      // onBlur={focusInput} // 포커스를 잃었을 때 다시 포커스
       />
     </div>
   );
