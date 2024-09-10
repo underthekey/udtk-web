@@ -5,6 +5,8 @@ import { Sentence } from '@/app/types';
 import SentenceDisplay from './SentenceDisplay';
 import TypingArea from './TypingArea';
 import AnimatedSentences from './AnimatedSentences';
+import SimpleEqualizer from './SimpleEqualizer';
+import StereoImager from './StereoImager';
 import styles from '@/styles/Typer.module.css';
 
 const switchOptions = [
@@ -32,6 +34,13 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
   const [isCapsLockOn, setIsCapsLockOn] = useState(false);
   const [pressedKeys, setPressedKeys] = useState<Set<string>>(new Set());
 
+  const [equalizerFrequency, setEqualizerFrequency] = useState(0);
+  const [equalizerVolume, setEqualizerVolume] = useState(0);
+
+  const [analyserNodeLeft, setAnalyserNodeLeft] = useState<AnalyserNode | null>(null);
+  const [analyserNodeRight, setAnalyserNodeRight] = useState<AnalyserNode | null>(null);
+  const [panValue, setPanValue] = useState(0);  // 패닝 값 상태 추가
+
   const initAudioContext = useCallback(() => {
     if (!audioContext) {
       const newContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -45,6 +54,27 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
       loadAudio(selectedSwitch, audioContext);
     }
   }, [selectedSwitch, audioContext]);
+
+  useEffect(() => {
+    if (audioContext) {
+      const analyserLeft = audioContext.createAnalyser();
+      const analyserRight = audioContext.createAnalyser();
+      analyserLeft.fftSize = 256;
+      analyserRight.fftSize = 256;
+      setAnalyserNodeLeft(analyserLeft);
+      setAnalyserNodeRight(analyserRight);
+
+      // 스테레오 분리 및 연결
+      const splitter = audioContext.createChannelSplitter(2);
+      const merger = audioContext.createChannelMerger(2);
+
+      splitter.connect(analyserLeft, 0);
+      splitter.connect(analyserRight, 1);
+      analyserLeft.connect(merger, 0, 0);
+      analyserRight.connect(merger, 0, 1);
+      merger.connect(audioContext.destination);
+    }
+  }, [audioContext]);
 
   const loadAudio = async (switchName: string, context: AudioContext) => {
     if (switchName === 'Default') {
@@ -88,14 +118,21 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
       source.connect(filter);
       filter.connect(panNode);
       panNode.connect(gainNode);
-      gainNode.connect(audioContext.destination);
+      gainNode.connect(analyserNodeLeft!);  // 분석기에 연결
+      gainNode.connect(analyserNodeRight!);  // 분석기에 연결
+      analyserNodeLeft!.connect(audioContext.destination);  // 분석기를 대상에 연결
+      analyserNodeRight!.connect(audioContext.destination);  // 분석기를 대상에 연결
 
       source.start(0);
       source.stop(audioContext.currentTime + 1);
+
+      setEqualizerFrequency(frequency);
+      setEqualizerVolume(gain * volume);
+      setPanValue(pan);  // 패닝 값을 상태로 저장
     } catch (error) {
       console.error('오디오 재생 중 오류 발생:', error);
     }
-  }, [audioContext, volume]);
+  }, [audioContext, volume, analyserNodeLeft, analyserNodeRight]);
 
   const getKeyProperties = (key: string): { frequency: number; pan: number; gain: number } => {
     const lowerKey = key.toLowerCase();
@@ -239,8 +276,6 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     setCurrentInput(input);
     setCorrectChars(newCorrectChars);
     setLastCompletedCharIndex(newLastCompletedCharIndex);
-
-    // 입력된 문자의 소리 재생 로직은 여기서 제거
   }, []);
 
   const currentSentence = useMemo(() => sentences[currentIndex], [sentences, currentIndex]);
@@ -313,45 +348,57 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
   return (
     <div className={styles.typer} onClick={initAudioContext}>
       {showAnimation && <AnimatedSentences sentences={sentences.slice(0, 20)} />}
-      <SentenceDisplay
-        sentence={currentSentence}
-        currentInput={currentInput}
-        correctChars={correctChars}
-        lastCompletedCharIndex={lastCompletedCharIndex}
-      />
-      <TypingArea
-        sentence={currentSentence.content}
-        onComplete={handleSentenceComplete}
-        onInputChange={handleInputChange}
-        onSkip={handleSkip}
-        onPrevious={handlePrevious}
-        onKeyDown={handleKeyDown}
-        onKeyUp={handleKeyUp}
-      />
-      <div className={styles.switchSelector}>
-        <label htmlFor="switchSelect">키보드 스위치 선택: </label>
-        <select
-          id="switchSelect"
-          value={selectedSwitch}
-          onChange={handleSwitchChange}
-          className={styles.switchSelect}
-        >
-          {switchOptions.map(option => (
-            <option key={option} value={option}>{option.replace(/_/g, ' ')}</option>
-          ))}
-        </select>
+      <div className={styles.mainContent}>
+        <SentenceDisplay
+          sentence={currentSentence}
+          currentInput={currentInput}
+          correctChars={correctChars}
+          lastCompletedCharIndex={lastCompletedCharIndex}
+        />
+        <TypingArea
+          sentence={currentSentence.content}
+          onComplete={handleSentenceComplete}
+          onInputChange={handleInputChange}
+          onSkip={handleSkip}
+          onPrevious={handlePrevious}
+          onKeyDown={handleKeyDown}
+          onKeyUp={handleKeyUp}
+        />
+        <div className={styles.controls}>
+          <div className={styles.switchSelector}>
+            <label htmlFor="switchSelect">키보드 스위치 선택: </label>
+            <select
+              id="switchSelect"
+              value={selectedSwitch}
+              onChange={handleSwitchChange}
+              className={styles.switchSelect}
+            >
+              {switchOptions.map(option => (
+                <option key={option} value={option}>{option.replace(/_/g, ' ')}</option>
+              ))}
+            </select>
+          </div>
+          <div className={styles.volumeControl}>
+            <label htmlFor="volumeSlider">볼륨: </label>
+            <input
+              id="volumeSlider"
+              type="range"
+              min="0"
+              max="1"
+              step="0.1"
+              value={volume}
+              onChange={handleVolumeChange}
+              className={styles.volumeSlider}
+            />
+          </div>
+        </div>
       </div>
-      <div className={styles.volumeControl}>
-        <label htmlFor="volumeSlider">볼륨: </label>
-        <input
-          id="volumeSlider"
-          type="range"
-          min="0"
-          max="1"
-          step="0.1"
-          value={volume}
-          onChange={handleVolumeChange}
-          className={styles.volumeSlider}
+      <div className={styles.equalizerContainer}>
+        <SimpleEqualizer analyserNode={analyserNodeLeft} />
+        <StereoImager
+          analyserNodeLeft={analyserNodeLeft}
+          analyserNodeRight={analyserNodeRight}
+          panValue={panValue}  // 패닝 값을 전달
         />
       </div>
     </div>
