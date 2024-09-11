@@ -4,12 +4,18 @@ import styles from '@/styles/AnimatedSentences.module.css';
 
 interface AnimatedSentencesProps {
     sentences: Sentence[];
+    shouldAnimate: boolean;
 }
 
-export default function AnimatedSentences({ sentences }: AnimatedSentencesProps) {
+export default function AnimatedSentences({ sentences, shouldAnimate }: AnimatedSentencesProps) {
     const [visibleSentences, setVisibleSentences] = useState<Sentence[]>([]);
 
     useEffect(() => {
+        if (!shouldAnimate) {
+            setVisibleSentences([]);
+            return;
+        }
+
         let index = 0;
         const interval = setInterval(() => {
             if (index < sentences.length) {
@@ -21,7 +27,9 @@ export default function AnimatedSentences({ sentences }: AnimatedSentencesProps)
         }, 10);
 
         return () => clearInterval(interval);
-    }, [sentences]);
+    }, [sentences, shouldAnimate]);
+
+    if (!shouldAnimate) return null;
 
     return (
         <div className={styles.animatedSentences}>
@@ -31,7 +39,7 @@ export default function AnimatedSentences({ sentences }: AnimatedSentencesProps)
                     className={styles.animatedSentence}
                     style={{
                         animationDelay: `${index * 0.05}s`,
-                        fontFamily: 'var(--font-family)', // SentenceDisplay와 동일한 글꼴 사용
+                        fontFamily: 'var(--font-family)',
                     }}
                 >
                     {sentence?.content || ''}

@@ -3,11 +3,96 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: calc(100vh - 60px); /* 헤더 높이를 고려하여 조정 */
+  min-height: calc(100vh - 60px);
   padding: 1rem;
   background-color: #f0f0f0;
   width: 100%;
   max-width: 100%;
   margin: 0 auto;
   overflow-x: hidden;
+  position: relative;
+}
+
+.mainContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 600px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.sentenceDisplayWrapper {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 2rem;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.typingAreaWrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.controlsWrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 1rem;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.switchSelector,
+.volumeControl {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 300px;
+}
+
+.visualizerContainer {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+@media (min-width: 768px) {
+  .controls {
+    flex-direction: row;
+  }
+
+  .switchSelector,
+  .volumeControl {
+    width: auto;
+  }
+}
+
+@media (max-width: 767px) {
+  .visualizerContainer {
+    flex-direction: column;
+    align-items: center;
+  }
 }

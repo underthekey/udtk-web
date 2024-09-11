@@ -1,0 +1,20 @@
+.equalizer {
+  width: 100%;
+  max-width: 300px;
+  height: 150px;
+  opacity: 60%;
+}
+
+@media (max-width: 800px) {
+  .equalizer {
+    max-width: 250px;
+    height: 125px;
+  }
+}
+
+@media (max-width: 600px) {
+  .equalizer {
+    max-width: 200px;
+    height: 100px;
+  }
+}
