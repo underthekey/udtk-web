@@ -165,9 +165,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     };
 
     // key에서 실제 문자 추출
-    let actualKey = key.length === 1 ? key.toLowerCase() : key.replace('Key', '').toLowerCase();
-    // 특수 문자 키에 대한 매핑 적용
-    actualKey = keyMap[key] || actualKey;
+    let actualKey = keyMap[key] || (key.length === 1 ? key : key.replace('Key', '')).toLowerCase();
 
     let frequency = 1000;
     let pan = 0;
@@ -182,12 +180,64 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
       'zxcvbnm,./'
     ];
 
+    let found = false;
     for (let i = 0; i < keyboardLayout.length; i++) {
       const rowIndex = keyboardLayout[i].indexOf(actualKey);
       if (rowIndex !== -1) {
         const rowLength = keyboardLayout[i].length;
-        pan = ((rowIndex / (rowLength - 1)) * 40) - 20; // -20에서 20 사이의 값으로 변경
+        // 일반 키의 패닝을 -20에서 20 사이의 값으로 정규화
+        pan = Math.round(((rowIndex / (rowLength - 1)) * 40) - 20);
+        found = true;
         break;
+      }
+    }
+
+    // 특수 키 설정
+    if (!found) {
+      switch (key) {
+        case 'Space':
+          frequency = 300;
+          gain = 0.8;
+          pan = 0;
+          isSpecialKey = true;
+          break;
+        case 'ShiftLeft':
+        case 'ShiftRight':
+          frequency = 800;
+          gain = 0.7;
+          pan = key === 'ShiftLeft' ? -30 : 30;
+          isSpecialKey = true;
+          break;
+        case 'CapsLock':
+          frequency = 1000;
+          gain = 0.7;
+          pan = -30;
+          isSpecialKey = true;
+          break;
+        case 'Backspace':
+          frequency = 900;
+          gain = 0.6;
+          pan = 35;
+          isSpecialKey = true;
+          break;
+        case 'Enter':
+          frequency = 700;
+          gain = 0.7;
+          pan = 35;
+          isSpecialKey = true;
+          break;
+        case 'ControlLeft':
+        case 'ControlRight':
+          frequency = 800;
+          gain = 1;
+          pan = key === 'ControlLeft' ? -30 : 30;
+          break;
+        case 'AltLeft':
+        case 'AltRight':
+          frequency = 800;
+          gain = 1;
+          pan = key === 'AltLeft' ? -18 : 18;
+          break;
       }
     }
 
@@ -202,54 +252,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
       frequency = 800;
     }
 
-    // 특수 키 설정 (이전과 동일)
-    switch (key) {
-      case 'Space':
-        frequency = 300;
-        gain = 0.8;
-        pan = 0;
-        isSpecialKey = true;
-        break;
-      case 'ShiftLeft':
-      case 'ShiftRight':
-        frequency = 800;
-        gain = 0.7;
-        pan = key === 'ShiftLeft' ? -0.4 : 0.4;
-        isSpecialKey = true;
-        break;
-      case 'CapsLock':
-        frequency = 1000;
-        gain = 0.7;
-        pan = -0.4;
-        isSpecialKey = true;
-        break;
-      case 'Backspace':
-        frequency = 900;
-        gain = 0.6;
-        pan = 0.4;
-        isSpecialKey = true;
-        break;
-      case 'Enter':
-        frequency = 700;
-        gain = 0.7;
-        pan = 0.4;
-        isSpecialKey = true;
-        break;
-      case 'ControlLeft':
-      case 'ControlRight':
-        frequency = 800;
-        gain = 1;
-        pan = key === 'ControlLeft' ? -0.4 : 0.4;
-        break;
-      case 'AltLeft':
-      case 'AltRight':
-        frequency = 800;
-        gain = 1;
-        pan = key === 'AltLeft' ? -0.3 : 0.3;
-        break;
-    }
-
-    console.log(`Key: ${key}, ActualKey: ${actualKey}, Frequency: ${frequency}, Pan: ${pan}, IsSpecial: ${isSpecialKey}`);  // 디버깅용
+    // console.log(`Key: ${key}, ActualKey: ${actualKey}, Frequency: ${frequency}, Pan: ${pan}, IsSpecial: ${isSpecialKey}`);  // 디버깅용
 
     return { frequency, pan, gain, isSpecialKey };
   };
@@ -300,7 +303,8 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
         filteredGain.gain.setValueAtTime(1, audioContext.currentTime);
       }
 
-      panNode.pan.setValueAtTime(pan / 20, audioContext.currentTime); // -1에서 1 사이의 값으로 변환
+      // pan 값을 -1에서 1 사이로 정규화
+      panNode.pan.setValueAtTime(pan / 100, audioContext.currentTime);
       gainNode.gain.setValueAtTime(gain * volume * 10, audioContext.currentTime);
 
       // 연결 구조 변경
