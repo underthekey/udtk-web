@@ -7,32 +7,35 @@ interface TypingAreaProps {
   onInputChange: (input: string, correctChars: number, lastCompletedCharIndex: number) => void;
   onSkip: () => void;
   onPrevious: () => void;
-  onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void; // 추가
-  onKeyUp?: (event: React.KeyboardEvent<HTMLInputElement>) => void; // 추가
+  onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+  onKeyUp?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
 }
 
-export default function TypingArea({ sentence, onComplete, onInputChange, onSkip, onPrevious, onKeyDown, onKeyUp }: TypingAreaProps) {
+export default function TypingArea({
+  sentence,
+  onComplete,
+  onInputChange,
+  onSkip,
+  onPrevious,
+  onKeyDown,
+  onKeyUp
+}: TypingAreaProps) {
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [lastCompletedCharIndex, setLastCompletedCharIndex] = useState(-1);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // 타이핑 영역 너비 조정
   const adjustInputWidth = useCallback(() => {
     if (inputRef.current) {
       const canvas = document.createElement('canvas');
       const context = canvas.getContext('2d');
       if (context) {
         const computedStyle = window.getComputedStyle(inputRef.current);
-        const font = computedStyle.font;
-        context.font = font;
+        context.font = computedStyle.font;
         const textWidth = context.measureText(sentence).width;
-        const paddingLeft = parseFloat(computedStyle.paddingLeft);
-        const paddingRight = parseFloat(computedStyle.paddingRight);
-        const borderLeft = parseFloat(computedStyle.borderLeftWidth);
-        const borderRight = parseFloat(computedStyle.borderRightWidth);
-
-        const totalWidth = textWidth + paddingLeft + paddingRight + borderLeft + borderRight + 5; // 5px 추가 여백
+        const totalWidth = textWidth + 10; // 10px 여유 공간 추가
         inputRef.current.style.width = `${totalWidth}px`;
       }
     }
@@ -50,41 +53,40 @@ export default function TypingArea({ sentence, onComplete, onInputChange, onSkip
     });
   }, []);
 
-  useEffect(() => {
-    focusInput();
-  }, [focusInput]);
+  // 타이핑 입력 값 변경 처리 (디바운스 적용)
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newInput = e.target.value;
+      setInput(newInput);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newInput = e.target.value;
-    setInput(newInput);
+      let correctChars = 0;
+      let newLastCompletedCharIndex = lastCompletedCharIndex;
 
-    let correctChars = 0;
-    let newLastCompletedCharIndex = lastCompletedCharIndex;
-
-    for (let i = 0; i <= newLastCompletedCharIndex; i++) {
-      if (newInput[i] === sentence[i]) {
-        correctChars++;
-      } else {
-        break;
+      for (let i = 0; i < newInput.length; i++) {
+        if (newInput[i] === sentence[i]) {
+          correctChars++;
+        } else {
+          break;
+        }
       }
-    }
 
-    if (newInput.length > lastCompletedCharIndex + 1) {
-      newLastCompletedCharIndex = newInput.length - 1;
-      setLastCompletedCharIndex(newLastCompletedCharIndex);
-    }
+      if (newInput.length > lastCompletedCharIndex + 1) {
+        newLastCompletedCharIndex = newInput.length - 1;
+        setLastCompletedCharIndex(newLastCompletedCharIndex);
+      }
 
-    onInputChange(newInput, correctChars, newLastCompletedCharIndex);
-  };
+      onInputChange(newInput, correctChars, newLastCompletedCharIndex);
+    },
+    [sentence, lastCompletedCharIndex, onInputChange]
+  );
 
   const debouncedSkip = useCallback(() => {
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
-
     debounceTimerRef.current = setTimeout(() => {
       onSkip();
-    }, 200); // 200ms 디바운스 타임
+    }, 200); // 디바운스 타임 적용
   }, [onSkip]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -121,10 +123,9 @@ export default function TypingArea({ sentence, onComplete, onInputChange, onSkip
     }
   };
 
-  // 컴포넌트가 마운트되거나 업데이트될 때마다 포커스를 유지
   useLayoutEffect(() => {
     focusInput();
-  });
+  }, [focusInput]);
 
   useEffect(() => {
     return () => {
@@ -146,7 +147,6 @@ export default function TypingArea({ sentence, onComplete, onInputChange, onSkip
         onKeyUp={onKeyUp}
         className={styles.input}
         disabled={isProcessing}
-      // onBlur={focusInput} // 포커스를 잃었을 때 다시 포커스
       />
     </div>
   );
