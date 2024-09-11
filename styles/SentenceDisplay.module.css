@@ -7,6 +7,11 @@
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.sentenceDisplay * {
+  pointer-events: none;
 }
 
 .content {
@@ -47,4 +52,12 @@
   height: 4px;
   background-color: var(--hover-color);
   border-radius: 50%;
+}
+
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-touch-callout: none;
 }

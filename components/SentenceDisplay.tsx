@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Sentence } from '@/app/types';
 import styles from '@/styles/SentenceDisplay.module.css';
 
@@ -18,9 +18,22 @@ export default function SentenceDisplay({ sentence, currentInput, correctChars, 
     return () => clearTimeout(timer);
   }, [sentence]);
 
+  const preventSelection = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+  }, []);
+
   return (
-    <div className={styles.sentenceDisplay}>
-      <p className={`${styles.content} ${visible ? styles.visible : ''}`}>
+    <div
+      className={styles.sentenceDisplay}
+      onMouseDown={preventSelection}
+      onTouchStart={preventSelection}
+    >
+      <p
+        className={`${styles.content} ${visible ? styles.visible : ''} ${styles.noSelect}`}
+        onCopy={(e) => e.preventDefault()}
+        onCut={(e) => e.preventDefault()}
+        onPaste={(e) => e.preventDefault()}
+      >
         {sentence.content.split('').map((char, index) => {
           let className = '';
           if (index < currentInput.length) {
