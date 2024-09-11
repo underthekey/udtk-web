@@ -62,11 +62,30 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     return () => clearTimeout(timer);
   }, []);
 
-  // AudioContext 초기화를 즉시 수행
+  // AudioContext 초기화를 사용자 상호작용 후로 이동
+  const initializeAudioContext = useCallback(() => {
+    if (!audioContext) {
+      const newContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      setAudioContext(newContext);
+    }
+  }, [audioContext]);
+
+  // 사용자 상호작용 이벤트 핸들러에 AudioContext 초기화 추가
+  const handleUserInteraction = useCallback(() => {
+    initializeAudioContext();
+    // 기존의 다른 로직들...
+  }, [initializeAudioContext]);
+
   useEffect(() => {
-    const newContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    setAudioContext(newContext);
-  }, []);
+    // 페이지에 사용자 상호작용 이벤트 리스너 추가
+    document.addEventListener('click', handleUserInteraction);
+    document.addEventListener('keydown', handleUserInteraction);
+
+    return () => {
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('keydown', handleUserInteraction);
+    };
+  }, [handleUserInteraction]);
 
   useEffect(() => {
     if (audioContext) {
@@ -119,9 +138,130 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     setIsLoading(false);
   }, [loadedSwitches]);
 
+  const getKeyProperties = (key: string): { frequency: number; pan: number; gain: number; isSpecialKey: boolean } => {
+    // 키 매핑 객체 추가
+    const keyMap: { [key: string]: string } = {
+      'Semicolon': ';',
+      'Comma': ',',
+      'Period': '.',
+      'BracketLeft': '[',
+      'BracketRight': ']',
+      'Backslash': '\\',
+      'Quote': '\'',
+      'Minus': '-',
+      'Equal': '=',
+      'Backquote': '`',
+      'Slash': '/',
+      'Digit1': '1',
+      'Digit2': '2',
+      'Digit3': '3',
+      'Digit4': '4',
+      'Digit5': '5',
+      'Digit6': '6',
+      'Digit7': '7',
+      'Digit8': '8',
+      'Digit9': '9',
+      'Digit0': '0'
+    };
+
+    // key에서 실제 문자 추출
+    let actualKey = key.length === 1 ? key.toLowerCase() : key.replace('Key', '').toLowerCase();
+    // 특수 문자 키에 대한 매핑 적용
+    actualKey = keyMap[key] || actualKey;
+
+    let frequency = 1000;
+    let pan = 0;
+    let gain = 1;
+    let isSpecialKey = false;
+
+    // 패닝 설정 수정
+    const keyboardLayout = [
+      '`1234567890-=',
+      'qwertyuiop[]\\',
+      'asdfghjkl;\'',
+      'zxcvbnm,./'
+    ];
+
+    for (let i = 0; i < keyboardLayout.length; i++) {
+      const rowIndex = keyboardLayout[i].indexOf(actualKey);
+      if (rowIndex !== -1) {
+        const rowLength = keyboardLayout[i].length;
+        pan = ((rowIndex / (rowLength - 1)) * 40) - 20; // -20에서 20 사이의 값으로 변경
+        break;
+      }
+    }
+
+    // 주파수 설정
+    if ('`1234567890-='.includes(actualKey)) {
+      frequency = 1100;
+    } else if ('qwertyuiop[]\\'.includes(actualKey)) {
+      frequency = 1000;
+    } else if ('asdfghjkl;\''.includes(actualKey)) {
+      frequency = 900;
+    } else if ('zxcvbnm,./'.includes(actualKey)) {
+      frequency = 800;
+    }
+
+    // 특수 키 설정 (이전과 동일)
+    switch (key) {
+      case 'Space':
+        frequency = 300;
+        gain = 0.8;
+        pan = 0;
+        isSpecialKey = true;
+        break;
+      case 'ShiftLeft':
+      case 'ShiftRight':
+        frequency = 800;
+        gain = 0.7;
+        pan = key === 'ShiftLeft' ? -0.4 : 0.4;
+        isSpecialKey = true;
+        break;
+      case 'CapsLock':
+        frequency = 1000;
+        gain = 0.7;
+        pan = -0.4;
+        isSpecialKey = true;
+        break;
+      case 'Backspace':
+        frequency = 900;
+        gain = 0.6;
+        pan = 0.4;
+        isSpecialKey = true;
+        break;
+      case 'Enter':
+        frequency = 700;
+        gain = 0.7;
+        pan = 0.4;
+        isSpecialKey = true;
+        break;
+      case 'ControlLeft':
+      case 'ControlRight':
+        frequency = 800;
+        gain = 1;
+        pan = key === 'ControlLeft' ? -0.4 : 0.4;
+        break;
+      case 'AltLeft':
+      case 'AltRight':
+        frequency = 800;
+        gain = 1;
+        pan = key === 'AltLeft' ? -0.3 : 0.3;
+        break;
+    }
+
+    console.log(`Key: ${key}, ActualKey: ${actualKey}, Frequency: ${frequency}, Pan: ${pan}, IsSpecial: ${isSpecialKey}`);  // 디버깅용
+
+    return { frequency, pan, gain, isSpecialKey };
+  };
+
   const playKeySound = useCallback((keyType: string) => {
     if (!audioContext || !audioBufferRef.current || !loadedSwitches.has(selectedSwitch)) {
       return;
+    }
+
+    // AudioContext가 suspended 상태인 경우 resume
+    if (audioContext.state === 'suspended') {
+      audioContext.resume();
     }
 
     try {
@@ -134,120 +274,58 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
       const filter = audioContext.createBiquadFilter();
       const panNode = audioContext.createStereoPanner();
 
-      const { frequency, pan, gain } = getKeyProperties(keyType);
+      const { frequency, pan, gain, isSpecialKey } = getKeyProperties(keyType);
 
-      filter.type = 'bandpass';
-      filter.frequency.setValueAtTime(frequency, audioContext.currentTime);
-      filter.Q.setValueAtTime(0.5, audioContext.currentTime);
+      // 필터 믹스 노드 추가
+      const originalGain = audioContext.createGain();
+      const filteredGain = audioContext.createGain();
+      const mixerGain = audioContext.createGain();
 
-      panNode.pan.setValueAtTime(pan, audioContext.currentTime);
+      if (isSpecialKey) {
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(frequency, audioContext.currentTime);
+        filter.Q.setValueAtTime(0.1, audioContext.currentTime);
+
+        // 특수 키에 대한 필터 믹스 양 설정 (0에서 1 사이의 값)
+        const filterMix = 0.9;
+        originalGain.gain.setValueAtTime(1 - filterMix, audioContext.currentTime);
+        filteredGain.gain.setValueAtTime(filterMix, audioContext.currentTime);
+      } else {
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(frequency, audioContext.currentTime);
+        filter.Q.setValueAtTime(0.5, audioContext.currentTime);
+
+        // 일반 키는 100% 필터링된 신호 사용
+        originalGain.gain.setValueAtTime(0, audioContext.currentTime);
+        filteredGain.gain.setValueAtTime(1, audioContext.currentTime);
+      }
+
+      panNode.pan.setValueAtTime(pan / 20, audioContext.currentTime); // -1에서 1 사이의 값으로 변환
       gainNode.gain.setValueAtTime(gain * volume * 10, audioContext.currentTime);
 
+      // 연결 구조 변경
+      source.connect(originalGain);
       source.connect(filter);
-      filter.connect(panNode);
+      filter.connect(filteredGain);
+      originalGain.connect(mixerGain);
+      filteredGain.connect(mixerGain);
+      mixerGain.connect(panNode);
       panNode.connect(gainNode);
-      gainNode.connect(analyserNodeLeft!);  // 분석기에 연결
-      gainNode.connect(analyserNodeRight!);  // 분석기에 연결
-      analyserNodeLeft!.connect(audioContext.destination);  // 분석기를 대상에 연결
-      analyserNodeRight!.connect(audioContext.destination);  // 분석기를 대상에 연결
+      gainNode.connect(analyserNodeLeft!);
+      gainNode.connect(analyserNodeRight!);
+      analyserNodeLeft!.connect(audioContext.destination);
+      analyserNodeRight!.connect(audioContext.destination);
 
       source.start(0);
       source.stop(audioContext.currentTime + 1);
 
       setEqualizerFrequency(frequency);
       setEqualizerVolume(gain * volume);
-      setPanValue(pan);  // 패닝 값을 상태로 저장
+      setPanValue(pan);
     } catch (error) {
       console.error('오디오 재생 중 오류 발생:', error);
     }
   }, [audioContext, volume, analyserNodeLeft, analyserNodeRight, selectedSwitch, loadedSwitches]);
-
-  const getKeyProperties = (key: string): { frequency: number; pan: number; gain: number } => {
-    const lowerKey = key.toLowerCase();
-    let frequency = 1000;
-    let pan = 0;
-    let gain = 1;
-
-    if ('`1234567890-='.includes(lowerKey)) {
-      frequency = 1100;
-    } else if ('qwertyuiop[]\\'.includes(lowerKey)) {
-      frequency = 1000;
-    } else if ('asdfghjkl;\''.includes(lowerKey)) {
-      frequency = 900;
-    } else if ('zxcvbnm,./'.includes(lowerKey)) {
-      frequency = 800;
-    }
-
-    const keyboardLayout = [
-      '`1234567890-=',
-      'qwertyuiop[]\\',
-      'asdfghjkl;\'',
-      'zxcvbnm,./'
-    ];
-    for (let i = 0; i < keyboardLayout.length; i++) {
-      const rowIndex = keyboardLayout[i].indexOf(lowerKey);
-      if (rowIndex !== -1) {
-        pan = ((rowIndex - (keyboardLayout[i].length - 1) / 2) / ((keyboardLayout[i].length - 1) / 2)) * 0.9;
-        pan = Math.sign(pan) * Math.pow(Math.abs(pan), 0.5) * 0.9;
-        break;
-      }
-    }
-
-    switch (key) {
-      case ' ':
-        frequency = 700;
-        gain = 1.1;
-        pan = 0;
-        break;
-      case 'ShiftLeft':
-        frequency = 800;
-        gain = 1.05;
-        pan = -0.6;
-        break;
-      case 'ShiftRight':
-        frequency = 800;
-        gain = 1.05;
-        pan = 0.6;
-        break;
-      case 'CapsLock':
-        frequency = 850;
-        gain = 1.05;
-        pan = -0.6;
-        break;
-      case 'Backspace':
-        frequency = 950;
-        gain = 1.1;
-        pan = 0.6;
-        break;
-      case 'Enter':
-        frequency = 900;
-        gain = 1.15;
-        pan = 0.5;
-        break;
-      case 'ControlLeft':
-        frequency = 750;
-        gain = 1.05;
-        pan = -0.6;
-        break;
-      case 'ControlRight':
-        frequency = 750;
-        gain = 1.05;
-        pan = 0.5;
-        break;
-      case 'AltLeft':
-        frequency = 780;
-        gain = 1.05;
-        pan = -0.4;
-        break;
-      case 'AltRight':
-        frequency = 780;
-        gain = 1.05;
-        pan = 0.4;
-        break;
-    }
-
-    return { frequency, pan, gain };
-  };
 
   const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setVolume(parseFloat(event.target.value));
