@@ -13,38 +13,86 @@
   position: relative;
 }
 
-.contentWrapper {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
 .mainContent {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   width: 100%;
   max-width: 600px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.sentenceDisplayWrapper {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 2rem;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.typingAreaWrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.controlsWrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 1rem;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .controls {
   display: flex;
   justify-content: center;
   gap: 1rem;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.switchSelector,
+.volumeControl {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 300px;
+}
+
+.visualizerContainer {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
   margin-top: 1rem;
 }
 
-.equalizerContainer {
-  position: absolute;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
+@media (min-width: 768px) {
+  .controls {
+    flex-direction: row;
+  }
+
+  .switchSelector,
+  .volumeControl {
+    width: auto;
+  }
 }
 
-.equalizer {
-  width: 100px;
-  height: 60px;
+@media (max-width: 767px) {
+  .visualizerContainer {
+    flex-direction: column;
+    align-items: center;
+  }
 }

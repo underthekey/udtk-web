@@ -10,9 +10,19 @@ import StereoImager from './StereoImager';
 import styles from '@/styles/Typer.module.css';
 
 const switchOptions = [
-  "Default", "Cherry_MX_Black", "Cherry_MX_Blue", "Cherry_MX_Brown", "Cherry_MX_Clear",
-  "Cherry_MX_Green", "Cherry_MX_Red", "Cherry_MX_Silver", "Cherry_MX_Speed_Silver",
-  "Cherry_MX_Silent_Red", "Cherry_MX_White"
+  'Default',
+  'Cherry_MX_Black',
+  'Cherry_MX_Blue',
+  'Cherry_MX_Brown',
+  'Cherry_MX_Clear',
+  'Cherry_MX_Green',
+  'Cherry_MX_Red',
+  'Cherry_MX_RGB_Silver',
+  'Cherry_MX_Silent_Black',
+  'Cherry_MX_Silent_Red',
+  'Cherry_MX_Silent_Silver',
+  'Cherry_MX_Tactile_Gray',
+  'Cherry_MX_White'
 ];
 
 export default function Typer({ initialSentences }: { initialSentences: Sentence[] }) {
@@ -21,7 +31,6 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
   const [currentInput, setCurrentInput] = useState('');
   const [correctChars, setCorrectChars] = useState(0);
   const [lastCompletedCharIndex, setLastCompletedCharIndex] = useState(-1);
-  const [showAnimation, setShowAnimation] = useState(true);
   const [isFetching, setIsFetching] = useState(false);
 
   const [selectedSwitch, setSelectedSwitch] = useState<string>('Default');
@@ -40,20 +49,24 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
   const [analyserNodeLeft, setAnalyserNodeLeft] = useState<AnalyserNode | null>(null);
   const [analyserNodeRight, setAnalyserNodeRight] = useState<AnalyserNode | null>(null);
   const [panValue, setPanValue] = useState(0);  // 패닝 값 상태 추가
-
-  const initAudioContext = useCallback(() => {
-    if (!audioContext) {
-      const newContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      setAudioContext(newContext);
-      loadAudio(selectedSwitch, newContext);
-    }
-  }, [audioContext, selectedSwitch]);
+  const [loadedSwitches, setLoadedSwitches] = useState<Set<string>>(new Set(['Default']));
+  const [isLoading, setIsLoading] = useState(false);
+  const [shouldAnimate, setShouldAnimate] = useState(true);
 
   useEffect(() => {
-    if (audioContext) {
-      loadAudio(selectedSwitch, audioContext);
-    }
-  }, [selectedSwitch, audioContext]);
+    // 페이지 로드 후 일정 시간이 지나면 애니메이션을 비활성화
+    const timer = setTimeout(() => {
+      setShouldAnimate(false);
+    }, 2000); // 2초 후 애니메이션 종료
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // AudioContext 초기화를 즉시 수행
+  useEffect(() => {
+    const newContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    setAudioContext(newContext);
+  }, []);
 
   useEffect(() => {
     if (audioContext) {
@@ -76,23 +89,38 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     }
   }, [audioContext]);
 
-  const loadAudio = async (switchName: string, context: AudioContext) => {
-    if (switchName === 'Default') {
-      audioBufferRef.current = null;
+  const loadAudio = useCallback(async (switchName: string, context: AudioContext, retryCount = 3) => {
+    if (switchName === 'Default' || loadedSwitches.has(switchName)) {
       return;
     }
 
-    try {
-      const response = await fetch(`https://storage.udtk.site/switches/sounds/${switchName}.mp3`);
-      const arrayBuffer = await response.arrayBuffer();
-      audioBufferRef.current = await context.decodeAudioData(arrayBuffer);
-    } catch (error) {
-      console.error('오디오 로드 실패:', error);
-    }
-  };
+    const attemptLoad = async (attempt: number): Promise<void> => {
+      try {
+        const response = await fetch(`https://storage.udtk.site/switches/sounds/${switchName}.mp3`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const arrayBuffer = await response.arrayBuffer();
+        const audioBuffer = await context.decodeAudioData(arrayBuffer);
+        audioBufferRef.current = audioBuffer;
+        setLoadedSwitches(prev => new Set(prev).add(switchName));
+      } catch (error) {
+        console.error(`오디오 로드 실패 (시도 ${attempt}/${retryCount}):`, error);
+        if (attempt < retryCount) {
+          await new Promise(resolve => setTimeout(resolve, 1000));  // 1초 대기 후 재시도
+          return attemptLoad(attempt + 1);
+        }
+        console.error('모든 시도 실패:', error);
+      }
+    };
+
+    setIsLoading(true);
+    await attemptLoad(1);
+    setIsLoading(false);
+  }, [loadedSwitches]);
 
   const playKeySound = useCallback((keyType: string) => {
-    if (!audioContext || !audioBufferRef.current) {
+    if (!audioContext || !audioBufferRef.current || !loadedSwitches.has(selectedSwitch)) {
       return;
     }
 
@@ -132,7 +160,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     } catch (error) {
       console.error('오디오 재생 중 오류 발생:', error);
     }
-  }, [audioContext, volume, analyserNodeLeft, analyserNodeRight]);
+  }, [audioContext, volume, analyserNodeLeft, analyserNodeRight, selectedSwitch, loadedSwitches]);
 
   const getKeyProperties = (key: string): { frequency: number; pan: number; gain: number } => {
     const lowerKey = key.toLowerCase();
@@ -280,21 +308,13 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
 
   const currentSentence = useMemo(() => sentences[currentIndex], [sentences, currentIndex]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowAnimation(false);
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
   const handleSwitchChange = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
     const newSwitch = event.target.value;
     setSelectedSwitch(newSwitch);
-    if (audioContext) {
+    if (audioContext && !loadedSwitches.has(newSwitch)) {
       loadAudio(newSwitch, audioContext);
     }
-  }, [audioContext]);
+  }, [audioContext, loadAudio, loadedSwitches]);
 
   const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
     if (!event.repeat) {
@@ -346,60 +366,65 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
   }, [playKeySound, pressedKeys]);
 
   return (
-    <div className={styles.typer} onClick={initAudioContext}>
-      {showAnimation && <AnimatedSentences sentences={sentences.slice(0, 20)} />}
+    <div className={styles.typer}>
+      <AnimatedSentences sentences={sentences.slice(0, 20)} shouldAnimate={shouldAnimate} />
       <div className={styles.mainContent}>
-        <SentenceDisplay
-          sentence={currentSentence}
-          currentInput={currentInput}
-          correctChars={correctChars}
-          lastCompletedCharIndex={lastCompletedCharIndex}
-        />
-        <TypingArea
-          sentence={currentSentence.content}
-          onComplete={handleSentenceComplete}
-          onInputChange={handleInputChange}
-          onSkip={handleSkip}
-          onPrevious={handlePrevious}
-          onKeyDown={handleKeyDown}
-          onKeyUp={handleKeyUp}
-        />
-        <div className={styles.controls}>
-          <div className={styles.switchSelector}>
-            <label htmlFor="switchSelect">키보드 스위치 선택: </label>
-            <select
-              id="switchSelect"
-              value={selectedSwitch}
-              onChange={handleSwitchChange}
-              className={styles.switchSelect}
-            >
-              {switchOptions.map(option => (
-                <option key={option} value={option}>{option.replace(/_/g, ' ')}</option>
-              ))}
-            </select>
+        <div className={styles.sentenceDisplayWrapper}>
+          <SentenceDisplay
+            sentence={currentSentence}
+            currentInput={currentInput}
+            correctChars={correctChars}
+            lastCompletedCharIndex={lastCompletedCharIndex}
+          />
+        </div>
+        <div className={styles.typingAreaWrapper}>
+          <TypingArea
+            sentence={currentSentence.content}
+            onComplete={handleSentenceComplete}
+            onInputChange={handleInputChange}
+            onSkip={handleSkip}
+            onPrevious={handlePrevious}
+            onKeyDown={handleKeyDown}
+            onKeyUp={handleKeyUp}
+          />
+        </div>
+        <div className={styles.controlsWrapper}>
+          <div className={styles.controls}>
+            <div className={styles.switchSelector}>
+              <label htmlFor="switchSelect">스위치 선택: </label>
+              <select
+                id="switchSelect"
+                value={selectedSwitch}
+                onChange={handleSwitchChange}
+                className={styles.switchSelect}
+              >
+                {switchOptions.map(option => (
+                  <option key={option} value={option}>{option.replace(/_/g, ' ')}</option>
+                ))}
+              </select>
+            </div>
+            <div className={styles.volumeControl}>
+              <label htmlFor="volumeSlider">볼륨: </label>
+              <input
+                id="volumeSlider"
+                type="range"
+                min="0"
+                max="1"
+                step="0.1"
+                value={volume}
+                onChange={handleVolumeChange}
+                className={styles.volumeSlider}
+              /></div>
           </div>
-          <div className={styles.volumeControl}>
-            <label htmlFor="volumeSlider">볼륨: </label>
-            <input
-              id="volumeSlider"
-              type="range"
-              min="0"
-              max="1"
-              step="0.1"
-              value={volume}
-              onChange={handleVolumeChange}
-              className={styles.volumeSlider}
+          <div className={styles.visualizerContainer}>
+            <SimpleEqualizer analyserNode={analyserNodeLeft} />
+            <StereoImager
+              analyserNodeLeft={analyserNodeLeft}
+              analyserNodeRight={analyserNodeRight}
+              panValue={panValue}
             />
           </div>
         </div>
-      </div>
-      <div className={styles.equalizerContainer}>
-        <SimpleEqualizer analyserNode={analyserNodeLeft} />
-        <StereoImager
-          analyserNodeLeft={analyserNodeLeft}
-          analyserNodeRight={analyserNodeRight}
-          panValue={panValue}  // 패닝 값을 전달
-        />
       </div>
     </div>
   );
