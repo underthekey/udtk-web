@@ -8,6 +8,7 @@
   left: 50%;
   transform: translateX(-50%);
   pointer-events: none;
+  overflow: visible; /* hidden에서 visible로 변경 */
 }
 
 .sentenceDisplay * {
@@ -21,8 +22,11 @@
   opacity: 0;
   transition: opacity 0.5s ease-in;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
+  width: max-content;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .content.visible {
