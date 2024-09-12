@@ -114,6 +114,7 @@ const TypingArea = forwardRef(({
           }, 200);
         }
       }
+      e.preventDefault(); // 엔터 키의 기본 동작 방지
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
       debouncedSkip();
