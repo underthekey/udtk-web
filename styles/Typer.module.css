@@ -3,7 +3,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: calc(100vh - 60px);
+  min-height: 100vh;
   padding: 1rem;
   background-color: #f0f0f0;
   width: 100%;
@@ -29,7 +29,6 @@
 .sentenceDisplayWrapper {
   width: 100%;
   text-align: center;
-  margin-bottom: 2rem;
   position: absolute;
   bottom: 100%;
   left: 50%;
@@ -67,8 +66,6 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  width: 100%;
-  max-width: 300px;
 }
 
 .visualizerContainer {
@@ -79,20 +76,60 @@
   margin-top: 1rem;
 }
 
-@media (min-width: 768px) {
+.visualizerContainer > * {
+  flex: 1;
+  min-width: 0; /* flex-basis가 content size 이하로 줄어들 수 있게 함 */
+}
+
+@media (max-width: 767px) {
+  .typer {
+    justify-content: flex-start;
+    padding-top: 60px; /* 헤더 높이만큼 상단 패딩 추가 */
+    min-height: calc(100vh - 60px); /* 헤더 높이를 뺀 높이로 설정 */
+  }
+
+  .mainContent {
+    position: static;
+    transform: none;
+    padding: 1rem;
+    height: auto;
+    min-height: calc(100vh - 60px); /* 헤더 높이를 뺀 높이로 설정 */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .sentenceDisplayWrapper {
+    position: static;
+    transform: none;
+    margin-bottom: 0.2rem;
+  }
+
+  .controlsWrapper {
+    position: static;
+    transform: none;
+    margin-top: 1rem;
+  }
+
   .controls {
-    flex-direction: row;
+    flex-direction: column;
+    align-items: center;
   }
 
   .switchSelector,
   .volumeControl {
-    width: auto;
+    width: 100%;
+    justify-content: center;
   }
-}
 
-@media (max-width: 767px) {
   .visualizerContainer {
-    flex-direction: column;
-    align-items: center;
+    gap: 0.5rem; /* 모바일에서 간격을 좀 더 좁힘 */
+    flex-direction: row; /* 명시적으로 가로 배치 설정 */
+  }
+
+  .visualizerContainer > * {
+    flex: 1;
+    width: calc(50% - 0.25rem); /* 간격을 고려한 너비 설정 */
+    max-width: none; /* 최대 너비 제한 제거 */
   }
 }
