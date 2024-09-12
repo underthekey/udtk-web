@@ -1,6 +1,6 @@
 {
   "name": "underthekey",
-  "short_name": "UTK",
+  "short_name": "udtk",
   "description": "Explore all about custom keyboards",
   "start_url": "/",
   "display": "standalone",
