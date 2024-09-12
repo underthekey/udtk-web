@@ -133,3 +133,50 @@
     max-width: none; /* 최대 너비 제한 제거 */
   }
 }
+
+.switchSelect {
+  /* ��존 스타일 유지 */
+  outline: none;
+}
+
+.switchSelect:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.customSelect {
+  position: relative;
+  display: inline-block;
+}
+
+.customSelect select {
+  display: none;
+}
+
+.selectedOption {
+  background-color: #f0f0f0;
+  padding: 8px 16px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.optionsList {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ccc;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.option {
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.option:hover {
+  background-color: #f0f0f0;
+}

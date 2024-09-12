@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useLayoutEffect, forwardRef, ForwardedRef } from 'react';
 import styles from '@/styles/TypingArea.module.css';
 
 interface TypingAreaProps {
@@ -11,7 +11,7 @@ interface TypingAreaProps {
   onKeyUp?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
 }
 
-export default function TypingArea({
+const TypingArea = forwardRef(({
   sentence,
   onComplete,
   onInputChange,
@@ -19,7 +19,7 @@ export default function TypingArea({
   onPrevious,
   onKeyDown,
   onKeyUp
-}: TypingAreaProps) {
+}: TypingAreaProps, ref: ForwardedRef<HTMLInputElement>) => {
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -150,4 +150,6 @@ export default function TypingArea({
       />
     </div>
   );
-}
+});
+
+export default TypingArea;

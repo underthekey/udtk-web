@@ -35,7 +35,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
 
   const [selectedSwitch, setSelectedSwitch] = useState<string>('Default');
 
-  const typingAreaRef = useRef<HTMLTextAreaElement>(null);
+  const typingAreaRef = useRef<HTMLInputElement>(null);
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const audioBufferRef = useRef<AudioBuffer | null>(null);
   const [volume, setVolume] = useState(0.5);
@@ -396,6 +396,13 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     if (audioContext && !loadedSwitches.has(newSwitch)) {
       loadAudio(newSwitch, audioContext);
     }
+    // 스위치 선택 후 타이핑 영역으로 포커스 이동
+    setTimeout(() => {
+      const typingInput = document.querySelector('input[type="text"]') as HTMLInputElement;
+      if (typingInput) {
+        typingInput.focus();
+      }
+    }, 0);
   }, [audioContext, loadAudio, loadedSwitches]);
 
   const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -461,6 +468,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
         </div>
         <div className={styles.typingAreaWrapper}>
           <TypingArea
+            ref={typingAreaRef}
             sentence={currentSentence.content}
             onComplete={handleSentenceComplete}
             onInputChange={handleInputChange}
