@@ -392,17 +392,28 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
 
   const handleSwitchChange = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
     const newSwitch = event.target.value;
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     setSelectedSwitch(newSwitch);
     if (audioContext && !loadedSwitches.has(newSwitch)) {
       loadAudio(newSwitch, audioContext);
     }
     // 스위치 선택 후 타이핑 영역으로 포커스 이동
-    setTimeout(() => {
-      const typingInput = document.querySelector('input[type="text"]') as HTMLInputElement;
-      if (typingInput) {
-        typingInput.focus();
-      }
-    }, 0);
+    if (isMobile) {
+      setTimeout(() => {
+        const typingInput = document.querySelector('input[type="text"]') as HTMLInputElement;
+        if (typingInput) {
+          typingInput.focus();
+        }
+      }, 300); // 모바일에서 더 긴 딜레이를 설정
+    } else {
+      // PC에서는 즉시 포커스
+      setTimeout(() => {
+        const typingInput = document.querySelector('input[type="text"]') as HTMLInputElement;
+        if (typingInput) {
+          typingInput.focus();
+        }
+      }, 0);
+    }
   }, [audioContext, loadAudio, loadedSwitches]);
 
   const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
