@@ -320,7 +320,7 @@ const KeyboardTester: React.FC = () => {
       <div className={`${styles.testerContainer} ${styles[currentTheme]}`}>
         <main>
           <div className={styles.themeAndLayout}>
-            <div></div>
+            {renderThemeSelector()}
             <div className={styles.sliderContainer}>
               <output className={styles.sliderValue}>{sliderValue}</output>
               <input
@@ -332,7 +332,6 @@ const KeyboardTester: React.FC = () => {
                 onChange={(e) => updateLayout(e.target.value)}
               />
             </div>
-            {renderThemeSelector()}
           </div>
           {renderKeyboard()}
         </main>

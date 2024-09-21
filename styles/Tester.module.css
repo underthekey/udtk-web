@@ -49,13 +49,14 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  /* background-image: var(--color-bg); */
+  padding-top: 6rem; /* 헤더의 높이에 따라 조정 */
 }
 
 .testerContainer {
   max-width: 130rem; /* KeyboardTester-main의 .intro와 동일한 최대 너비 설정 */
   margin: 0 auto; /* 중앙 정렬 */
-  padding: 4.8rem 3.2rem 0rem; /* KeyboardTester-main의 .intro와 동일한 패딩 설정 */
+  padding: 2rem 3.2rem 0rem; /* 상단 패딩 줄임 */
+  flex-grow: 1; /* 컨테이너가 남은 공간을 채우도록 함 */
 }
 
 .intro {
@@ -66,23 +67,29 @@
 
 .themeAndLayout {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  max-width: 120rem;
-  margin: 0 auto 2.4rem;
-  transition: all 0.25s;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  margin-bottom: 2rem;
 }
 
 .themeSection {
   display: flex;
-  justify-content: end;
-  align-items: center;
   gap: 2rem;
+  justify-self: start; /* 왼쪽 정렬 */
+  padding-left: 2rem;
+}
+
+.sliderContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-self: center; /* 중앙 정렬 */
 }
 
 .themeSection > div {
   display: flex;
-  width: 4rem;
-  height: 4rem;
+  width: 3rem;
+  height: 3rem;
   border-radius: 50%;
   overflow: hidden;
   cursor: pointer;
@@ -127,12 +134,6 @@
 }
 
 /* slider styling */
-
-.sliderContainer {
-  width: 80%;
-  margin: 1.6rem auto;
-  text-align: center;
-}
 
 .slider {
   width: 100%;
