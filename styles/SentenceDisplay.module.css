@@ -53,12 +53,11 @@
   border-radius: 50%;
 }
 
-.no-select {
+.noSelect {
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
-  -webkit-touch-callout: none;
 }
 
 @media (max-width: 767px) {

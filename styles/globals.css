@@ -12,6 +12,8 @@
   --main-text-color: #003049;
   --hover-color: #d62828;
   --correct-color: #09703c;
+  --hover-color-rgb: 214, 40, 40;
+  --correct-color-rgb: 9, 112, 60;
 }
 
 @media (prefers-color-scheme: dark) {
