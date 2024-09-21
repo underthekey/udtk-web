@@ -1,4 +1,6 @@
 .modalOverlay {
+  /* 기존 스타일 유지 */
+  z-index: 10000; /* z-index 값을 더 높게 설정 */
   position: fixed;
   top: 0;
   left: 0;
@@ -8,7 +10,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
   opacity: 0;
   visibility: hidden;
   transition: background-color 0.3s ease, opacity 0.3s ease, visibility 0s 0.3s;
@@ -31,6 +32,8 @@
   opacity: 0;
   transition: transform 0.3s ease, opacity 0.3s ease;
   outline: none; /* 포커스 시 외곽선 제거 */
+  pointer-events: auto;
+  touch-action: auto;
 }
 
 .modalContent.open {
