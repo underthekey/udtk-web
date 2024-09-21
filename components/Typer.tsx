@@ -4,10 +4,11 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { Sentence } from '@/app/types';
 import SentenceDisplay from './SentenceDisplay';
 import TypingArea from './TypingArea';
-import AnimatedSentences from './AnimatedSentences';
 import SimpleEqualizer from './SimpleEqualizer';
 import StereoImager from './StereoImager';
 import styles from '@/styles/Typer.module.css';
+import Image from 'next/image';
+import SettingsModal from './SettingsModal';
 
 const switchOptions = [
   'Default',
@@ -26,7 +27,6 @@ const switchOptions = [
 ];
 
 export default function Typer({ initialSentences }: { initialSentences: Sentence[] }) {
-  const [sentences, setSentences] = useState<Sentence[]>(initialSentences);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentInput, setCurrentInput] = useState('');
   const [correctChars, setCorrectChars] = useState(0);
@@ -35,7 +35,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
 
   const [selectedSwitch, setSelectedSwitch] = useState<string>('Default');
 
-  const typingAreaRef = useRef<HTMLTextAreaElement>(null);
+  const typingAreaRef = useRef<HTMLInputElement>(null);
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const audioBufferRef = useRef<AudioBuffer | null>(null);
   const [volume, setVolume] = useState(0.5);
@@ -51,16 +51,50 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
   const [panValue, setPanValue] = useState(0);  // 패닝 값 상태 추가
   const [loadedSwitches, setLoadedSwitches] = useState<Set<string>>(new Set(['Default']));
   const [isLoading, setIsLoading] = useState(false);
-  const [shouldAnimate, setShouldAnimate] = useState(true);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  useEffect(() => {
-    // 페이지 로드 후 일정 시간이 지나면 애니메이션을 비활성화
-    const timer = setTimeout(() => {
-      setShouldAnimate(false);
-    }, 2000); // 2초 후 애니메이션 종료
+  const [language, setLanguage] = useState<'kor' | 'eng'>('kor');
+  const [koreanSentences, setKoreanSentences] = useState<Sentence[]>(initialSentences);
+  const [englishSentences, setEnglishSentences] = useState<Sentence[]>([]);
 
-    return () => clearTimeout(timer);
+  const sentences = useMemo(() => language === 'kor' ? koreanSentences : englishSentences, [language, koreanSentences, englishSentences]);
+
+  const fetchSentences = useCallback(async (lang: 'kor' | 'eng', count: number) => {
+    const url = lang === 'kor'
+      ? 'https://sentence.udtk.site/random?count=' + count
+      : 'https://sentence.udtk.site/language?language=eng&count=' + count;
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) {
+      throw new Error('Failed to fetch sentences');
+    }
+    return res.json();
   }, []);
+
+  const [isLanguageChanging, setIsLanguageChanging] = useState(false);
+
+  const handleLanguageChange = useCallback(async () => {
+    setIsLanguageChanging(true);
+    setLanguage(prev => {
+      const newLang = prev === 'kor' ? 'eng' : 'kor';
+      if (newLang === 'eng' && englishSentences.length === 0) {
+        fetchSentences('eng', 20).then(newSentences => {
+          setEnglishSentences(newSentences);
+          setCurrentIndex(0);
+          setIsLanguageChanging(false);
+        });
+      } else if (newLang === 'kor' && koreanSentences.length === 0) {
+        fetchSentences('kor', 20).then(newSentences => {
+          setKoreanSentences(newSentences);
+          setCurrentIndex(0);
+          setIsLanguageChanging(false);
+        });
+      } else {
+        setCurrentIndex(0);
+        setIsLanguageChanging(false);
+      }
+      return newLang;
+    });
+  }, [englishSentences.length, koreanSentences.length, fetchSentences]);
 
   // AudioContext 초기화를 사용자 상호작용 후로 이동
   const initializeAudioContext = useCallback(() => {
@@ -238,6 +272,14 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
           gain = 1;
           pan = key === 'AltLeft' ? -18 : 18;
           break;
+        case 'ArrowUp':
+        case 'ArrowDown':
+        case 'ArrowLeft':
+        case 'ArrowRight':
+          frequency = 800;
+          gain = 0.8;
+          pan = 35;
+          break;
       }
     }
 
@@ -262,7 +304,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
       return;
     }
 
-    // AudioContext가 suspended 상태인 경우 resume
+    // AudioContext가 suspended 상태인 경�� resume
     if (audioContext.state === 'suspended') {
       audioContext.resume();
     }
@@ -298,7 +340,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
         filter.frequency.setValueAtTime(frequency, audioContext.currentTime);
         filter.Q.setValueAtTime(0.5, audioContext.currentTime);
 
-        // 일반 키는 100% 필터링된 신호 사용
+        // 일반 키는 100% 필터링 신 사용
         originalGain.gain.setValueAtTime(0, audioContext.currentTime);
         filteredGain.gain.setValueAtTime(1, audioContext.currentTime);
       }
@@ -339,18 +381,18 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     if (isFetching) return;
     setIsFetching(true);
     try {
-      const res = await fetch('https://sentence.udtk.site/random?count=20', { cache: 'no-store' });
-      if (!res.ok) {
-        throw new Error('Failed to fetch sentences');
+      const newSentences = await fetchSentences(language, 20);
+      if (language === 'kor') {
+        setKoreanSentences(prevSentences => [...prevSentences, ...newSentences]);
+      } else {
+        setEnglishSentences(prevSentences => [...prevSentences, ...newSentences]);
       }
-      const newSentences = await res.json();
-      setSentences(prevSentences => [...prevSentences, ...newSentences]);
     } catch (error) {
       console.error('Error fetching more sentences:', error);
     } finally {
       setIsFetching(false);
     }
-  }, [isFetching]);
+  }, [isFetching, language, fetchSentences]);
 
   const moveToNextSentence = useCallback(async () => {
     const nextIndex = currentIndex + 1;
@@ -388,7 +430,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     setLastCompletedCharIndex(newLastCompletedCharIndex);
   }, []);
 
-  const currentSentence = useMemo(() => sentences[currentIndex], [sentences, currentIndex]);
+  const currentSentence = useMemo(() => sentences[currentIndex] || { content: '', author: null }, [sentences, currentIndex]);
 
   const handleSwitchChange = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
     const newSwitch = event.target.value;
@@ -396,7 +438,16 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     if (audioContext && !loadedSwitches.has(newSwitch)) {
       loadAudio(newSwitch, audioContext);
     }
-  }, [audioContext, loadAudio, loadedSwitches]);
+    // 모달이 열려있을 때는 타이핑 영역으로 포커스 이동하지 않음
+    if (!isSettingsOpen) {
+      setTimeout(() => {
+        const typingInput = document.querySelector('input[type="text"]') as HTMLInputElement;
+        if (typingInput) {
+          typingInput.focus();
+        }
+      }, 0);
+    }
+  }, [audioContext, loadAudio, loadedSwitches, isSettingsOpen]);
 
   const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
     if (!event.repeat) {
@@ -447,67 +498,89 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     };
   }, [playKeySound, pressedKeys]);
 
+  const toggleSettings = () => {
+    setIsSettingsOpen(!isSettingsOpen);
+  };
+
+  useEffect(() => {
+    const focusTypingArea = () => {
+      if (!isSettingsOpen) {
+        const typingInput = document.querySelector('input[type="text"]') as HTMLInputElement;
+        if (typingInput) {
+          typingInput.focus();
+        }
+      }
+    };
+
+    // 컴포넌트가 마운트될 때 포커스
+    focusTypingArea();
+
+    // 윈도우가 포커스를 받을 때마다 포커스
+    window.addEventListener('focus', focusTypingArea);
+
+    // 마우스 클릭 이벤트 리스너 추가
+    document.addEventListener('click', focusTypingArea);
+
+    return () => {
+      window.removeEventListener('focus', focusTypingArea);
+      document.removeEventListener('click', focusTypingArea);
+    };
+  }, [isSettingsOpen]);
+
   return (
     <div className={styles.typer}>
-      <AnimatedSentences sentences={sentences.slice(0, 20)} shouldAnimate={shouldAnimate} />
+      <div className={styles.visualizerContainer}>
+        {/* <SimpleEqualizer analyserNode={analyserNodeLeft} /> */}
+        <StereoImager
+          analyserNodeLeft={analyserNodeLeft}
+          analyserNodeRight={analyserNodeRight}
+          panValue={panValue}
+        />
+      </div>
       <div className={styles.mainContent}>
         <div className={styles.sentenceDisplayWrapper}>
           <SentenceDisplay
             sentence={currentSentence}
+            nextSentence={sentences[currentIndex + 1] || null}
             currentInput={currentInput}
             correctChars={correctChars}
             lastCompletedCharIndex={lastCompletedCharIndex}
           />
         </div>
         <div className={styles.typingAreaWrapper}>
-          <TypingArea
-            sentence={currentSentence.content}
-            onComplete={handleSentenceComplete}
-            onInputChange={handleInputChange}
-            onSkip={handleSkip}
-            onPrevious={handlePrevious}
-            onKeyDown={handleKeyDown}
-            onKeyUp={handleKeyUp}
-          />
-        </div>
-        <div className={styles.controlsWrapper}>
-          <div className={styles.controls}>
-            <div className={styles.switchSelector}>
-              <label htmlFor="switchSelect">스위치 선택: </label>
-              <select
-                id="switchSelect"
-                value={selectedSwitch}
-                onChange={handleSwitchChange}
-                className={styles.switchSelect}
-              >
-                {switchOptions.map(option => (
-                  <option key={option} value={option}>{option.replace(/_/g, ' ')}</option>
-                ))}
-              </select>
-            </div>
-            <div className={styles.volumeControl}>
-              <label htmlFor="volumeSlider">볼륨: </label>
-              <input
-                id="volumeSlider"
-                type="range"
-                min="0"
-                max="1"
-                step="0.1"
-                value={volume}
-                onChange={handleVolumeChange}
-                className={styles.volumeSlider}
-              /></div>
-          </div>
-          <div className={styles.visualizerContainer}>
-            <SimpleEqualizer analyserNode={analyserNodeLeft} />
-            <StereoImager
-              analyserNodeLeft={analyserNodeLeft}
-              analyserNodeRight={analyserNodeRight}
-              panValue={panValue}
+          {isLanguageChanging ? (
+            <div>언어 변경 중...</div>
+          ) : (
+            <TypingArea
+              ref={typingAreaRef}
+              sentence={currentSentence?.content || ''}
+              onComplete={handleSentenceComplete}
+              onInputChange={handleInputChange}
+              onSkip={handleSkip}
+              onPrevious={handlePrevious}
+              onKeyDown={handleKeyDown}
+              onKeyUp={handleKeyUp}
+              isSettingsOpen={isSettingsOpen}
             />
-          </div>
+          )}
         </div>
       </div>
+      <div className={styles.settingIconWrapper} onClick={() => setIsSettingsOpen(true)}>
+        <svg className={styles.settingIcon} viewBox="0 0 64 64">
+          <use xlinkHref="/images/icon/setting.svg#icon" />
+        </svg>
+      </div>
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={toggleSettings}
+        selectedSwitch={selectedSwitch}
+        onSwitchChange={handleSwitchChange}
+        volume={volume}
+        onVolumeChange={handleVolumeChange}
+        switchOptions={switchOptions}
+        language={language}
+        onLanguageChange={handleLanguageChange}
+      />
     </div>
   );
 }

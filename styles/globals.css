@@ -10,8 +10,11 @@
   --text-color: #ffffff;
   --header-color: #f0f0f0;
   --main-text-color: #003049;
+  --gray-text-color: #9da3af;
   --hover-color: #d62828;
   --correct-color: #09703c;
+  --hover-color-rgb: 214, 40, 40;
+  --correct-color-rgb: 9, 112, 60;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -48,4 +51,10 @@ body {
   font-family: var(--font-family);
   background-color: var(--background-color);
   color: var(--key-text-color);
+}
+
+body.modal-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
 }

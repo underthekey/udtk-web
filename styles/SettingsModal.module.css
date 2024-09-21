@@ -1,0 +1,172 @@
+.modalOverlay {
+  /* 기존 스타일 유지 */
+  z-index: 10000; /* z-index 값을 더 높게 설정 */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: background-color 0.3s ease, opacity 0.3s ease, visibility 0s 0.3s;
+  touch-action: none; /* 모달 외부의 스크롤 방지 */
+}
+
+.modalOverlay.open {
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 1;
+  visibility: visible;
+  transition: background-color 0.3s ease, opacity 0.3s ease;
+}
+
+.modalContent {
+  background-color: var(--background-color);
+  padding: 20px;
+  border-radius: 12px;
+  width: 300px;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  outline: none; /* 포커스 시 외곽선 제거 */
+  pointer-events: auto;
+  touch-action: auto;
+}
+
+.modalContent.open {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.modalHeader {
+  margin-bottom: 1rem;
+  color: var(--primary-color);
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.settingItem {
+  margin-bottom: 1rem;
+}
+
+.settingLabel {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.switchSelect {
+  width: 100%;
+  padding: 8px 30px 8px 10px; /* 오른쪽 패딩을 늘리고 왼쪽 패딩도 약간 조정 */
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: #fff;
+  color: #000;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%23000000' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+  cursor: pointer;
+}
+
+.switchSelect::-ms-expand {
+  display: none;
+}
+
+.switchSelect:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* PC 환경을 위한 커스텀 스타일 제거 */
+
+/* 모바일 환경을 위한 스타일 수정 */
+@media (max-width: 768px) {
+  .switchSelect {
+    background-image: none; /* 모바일에서는 기본 화살표 사용 */
+    padding-right: 8px; /* 오른쪽 패딩 원래대로 복구 */
+  }
+}
+
+.volumeSlider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%; /* 전체 너비 사용 */
+  height: 8px;
+  background: #ddd;
+  outline: none;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.volumeSlider:hover {
+  opacity: 1;
+}
+
+.volumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: var(--primary-color);
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.volumeSlider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: var(--primary-color);
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+/* 모바일 환경을 위한 추가 스타일 */
+@media (max-width: 768px) {
+  .volumeSlider {
+    width: 100%; /* 모바일에서도 전체 너비 사용 */
+  }
+}
+
+.buttonGroup {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.languageButton {
+  background-color: #f0f0f0;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-right: auto; /* 언어 변경 버튼을 왼쪽으로 밀어냅니다 */
+}
+
+.languageButton:hover {
+  background-color: #e0e0e0;
+}
+
+.closeButton {
+  background-color: #f0f0f0;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.closeButton:hover {
+  background-color: #e0e0e0;
+}

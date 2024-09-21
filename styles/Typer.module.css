@@ -3,7 +3,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: calc(100vh - 60px);
+  min-height: 100vh;
   padding: 1rem;
   background-color: #f0f0f0;
   width: 100%;
@@ -29,7 +29,6 @@
 .sentenceDisplayWrapper {
   width: 100%;
   text-align: center;
-  margin-bottom: 2rem;
   position: absolute;
   bottom: 100%;
   left: 50%;
@@ -67,32 +66,140 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  width: 100%;
-  max-width: 300px;
 }
 
 .visualizerContainer {
   display: flex;
   justify-content: center;
   gap: 1rem;
-  width: 100%;
-  margin-top: 1rem;
+  width: 100vw;
+  height: 100vh;
+  padding-top: 4rem;
+  position: fixed;
+  top: 0;
+  left: 0;
 }
 
-@media (min-width: 768px) {
-  .controls {
-    flex-direction: row;
-  }
-
-  .switchSelector,
-  .volumeControl {
-    width: auto;
-  }
+.visualizerContainer > * {
+  flex: 1;
+  min-width: 0; /* flex-basis가 content size 이하로 줄어들 수 있게 함 */
 }
 
 @media (max-width: 767px) {
-  .visualizerContainer {
+  .typer {
+    justify-content: flex-start;
+    padding-top: 60px; /* 헤더 높이만큼 상단 패딩 추가 */
+    min-height: calc(100vh - 60px); /* 헤더 높이를 뺀 높이로 설정 */
+  }
+
+  .mainContent {
+    position: static;
+    transform: none;
+    padding: 1rem;
+    height: auto;
+    min-height: calc(100vh - 60px); /* 헤더 높이를 뺀 높이로 설정 */
+    display: flex;
     flex-direction: column;
-    align-items: center;
+    justify-content: center;
+  }
+
+  .sentenceDisplayWrapper {
+    position: static;
+    transform: none;
+    margin-bottom: 0.2rem;
+  }
+
+  .typingAreaWrapper {
+    margin-left: 0.4rem;
+  }
+
+  .visualizerContainer {
+    gap: 0.5rem; /* 모바일에서 간격을 좀 더 좁힘 */
+    flex-direction: row; /* 명시적으로 가로 배치 설정 */
+  }
+
+  .visualizerContainer > * {
+    flex: 1;
+    width: calc(50% - 0.25rem); /* 간격을 고려한 너비 설정 */
+    max-width: none; /* 최대 너비 제한 제거 */
+  }
+}
+
+.switchSelect {
+  /* 존 스타일 유지 */
+  outline: none;
+}
+
+.switchSelect:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.customSelect {
+  position: relative;
+  display: inline-block;
+}
+
+.customSelect select {
+  display: none;
+}
+
+.selectedOption {
+  background-color: #f0f0f0;
+  padding: 8px 16px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.optionsList {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ccc;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.option {
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.option:hover {
+  background-color: #f0f0f0;
+}
+
+.settingIconWrapper {
+  position: fixed;
+  bottom: 2rem;
+  right: 1.7rem;
+  z-index: 999;
+  cursor: pointer;
+}
+
+.settingIcon {
+  width: 36px;
+  height: 36px;
+  fill: none;
+  color: var(--main-text-color);
+  transition: stroke 0.3s ease;
+}
+
+.settingIconWrapper:hover .settingIcon {
+  stroke: var(--primary-color);
+}
+
+@media (max-width: 768px) {
+  .settingIconWrapper {
+    bottom: 1rem;
+    right: 1rem;
+  }
+
+  .settingIcon {
+    width: 36px;
+    height: 36px;
   }
 }
