@@ -10,10 +10,6 @@ const Header = () => {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const isActive = (path: string) => {
-    return pathname === path ? styles.active : '';
-  };
-
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
@@ -59,16 +55,24 @@ const Header = () => {
         className={styles.menuButton}
         onClick={toggleMenu}
         aria-label="메뉴 열기"
-        style={{ fontSize: '30px' }} // 여기에 인라인 스타일 추가
+        style={{ fontSize: '30px' }}
       >
         ☰
       </button>
       <div className={`${styles.menuDropdown} ${isMenuOpen ? styles.open : ''}`}>
         {menuItems.map((item, index) => (
-          <Link href={item.path} key={item.path} className={`${styles.menuItem} ${isActive(item.path)}`} onClick={toggleMenu} style={{ transitionDelay: `${index * 50}ms` }}>
-            <svg className={styles.menuIcon} viewBox="0 0 64 64">
-              <use xlinkHref={`${item.icon}#icon`} />
-            </svg>
+          <Link
+            href={item.path}
+            key={item.path}
+            className={`${styles.menuItem} ${pathname === item.path ? styles.active : ''}`}
+            onClick={toggleMenu}
+            style={{ transitionDelay: `${index * 50}ms` }}
+          >
+            <div className={styles.menuIconWrapper}>
+              <svg className={styles.menuIcon} viewBox="0 0 64 64">
+                <use xlinkHref={`${item.icon}#icon`} />
+              </svg>
+            </div>
             <span className={styles.menuLabel}>{item.label}</span>
           </Link>
         ))}
