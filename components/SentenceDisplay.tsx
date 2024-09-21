@@ -36,11 +36,9 @@ export default function SentenceDisplay({ sentence, currentInput, correctChars, 
       >
         {sentence.content.split('').map((char, index) => {
           let className = '';
-          if (index < currentInput.length) {
-            if (index < lastCompletedCharIndex) {
-              if (currentInput[index] !== char) {
-                className = char === ' ' ? styles.incorrectSpace : styles.incorrect;
-              }
+          if (index < currentInput.length - 1) {
+            if (currentInput[index] !== char) {
+              className = char === ' ' ? styles.incorrectSpace : styles.incorrect;
             }
           }
           return (

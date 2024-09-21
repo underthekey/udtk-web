@@ -22,8 +22,8 @@ const TypingArea = forwardRef(({
 }: TypingAreaProps, ref: ForwardedRef<HTMLInputElement>) => {
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
   const [lastCompletedCharIndex, setLastCompletedCharIndex] = useState(-1);
+  const inputRef = useRef<HTMLInputElement>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // 타이핑 영역 너비 조정
@@ -60,24 +60,21 @@ const TypingArea = forwardRef(({
       setInput(newInput);
 
       let correctChars = 0;
-      let newLastCompletedCharIndex = lastCompletedCharIndex;
+      let newLastCompletedCharIndex = -1;
 
-      for (let i = 0; i < newInput.length; i++) {
+      for (let i = 0; i < newInput.length - 1; i++) {
         if (newInput[i] === sentence[i]) {
           correctChars++;
+          newLastCompletedCharIndex = i;
         } else {
           break;
         }
       }
 
-      if (newInput.length > lastCompletedCharIndex + 1) {
-        newLastCompletedCharIndex = newInput.length - 1;
-        setLastCompletedCharIndex(newLastCompletedCharIndex);
-      }
-
+      setLastCompletedCharIndex(newLastCompletedCharIndex);
       onInputChange(newInput, correctChars, newLastCompletedCharIndex);
     },
-    [sentence, lastCompletedCharIndex, onInputChange]
+    [sentence, onInputChange]
   );
 
   const debouncedSkip = useCallback(() => {
@@ -89,7 +86,7 @@ const TypingArea = forwardRef(({
     }, 200); // 디바운스 타임 적용
   }, [onSkip]);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !isProcessing) {
       if (input === sentence) {
         setIsProcessing(true);
@@ -99,13 +96,15 @@ const TypingArea = forwardRef(({
         onComplete();
         setInput('');
 
-        setTimeout(() => {
+        // 즉시 실행 함수를 사용하여 비동기 처리
+        (async () => {
+          await new Promise(resolve => setTimeout(resolve, 300));
           setIsProcessing(false);
           if (inputRef.current) {
             inputRef.current.classList.remove(styles.correct);
-            focusInput();
+            inputRef.current.focus();
           }
-        }, 300);
+        })();
       } else {
         if (inputRef.current) {
           inputRef.current.classList.add(styles.incorrect);
@@ -114,7 +113,7 @@ const TypingArea = forwardRef(({
           }, 200);
         }
       }
-      e.preventDefault(); // 엔터 키의 기본 동작 방지
+      e.preventDefault();
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
       debouncedSkip();
@@ -122,7 +121,19 @@ const TypingArea = forwardRef(({
       e.preventDefault();
       onPrevious();
     }
-  };
+
+    // 추가된 부분: 다른 키 입력 시 onKeyDown 호출
+    if (typeof onKeyDown === 'function') {
+      onKeyDown(e);
+    }
+  }, [input, sentence, isProcessing, onComplete, debouncedSkip, onPrevious, onKeyDown]);
+
+  // 포커스 유지를 위한 useEffect 추가
+  useEffect(() => {
+    if (inputRef.current && !isProcessing) {
+      inputRef.current.focus();
+    }
+  }, [isProcessing, sentence]);
 
   useLayoutEffect(() => {
     focusInput();
@@ -148,6 +159,17 @@ const TypingArea = forwardRef(({
         onKeyUp={onKeyUp}
         className={styles.input}
         disabled={isProcessing}
+        // 추가된 부분: 포커스 이벤트 처리
+        onFocus={() => {
+          if (isProcessing) {
+            inputRef.current?.blur();
+          }
+        }}
+        onBlur={() => {
+          if (!isProcessing) {
+            inputRef.current?.focus();
+          }
+        }}
       />
     </div>
   );
