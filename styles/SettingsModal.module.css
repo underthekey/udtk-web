@@ -12,6 +12,7 @@
   opacity: 0;
   visibility: hidden;
   transition: background-color 0.3s ease, opacity 0.3s ease, visibility 0s 0.3s;
+  touch-action: none; /* 모달 외부의 스크롤 방지 */
 }
 
 .modalOverlay.open {
@@ -29,6 +30,7 @@
   transform: translateY(20px);
   opacity: 0;
   transition: transform 0.3s ease, opacity 0.3s ease;
+  outline: none; /* 포커스 시 외곽선 제거 */
 }
 
 .modalContent.open {
@@ -86,6 +88,8 @@
     -webkit-appearance: menulist;
     -moz-appearance: menulist;
     appearance: menulist;
+    cursor: default; /* 기본 커서로 변경 */
+    touch-action: manipulation; /* 터치 동작 최적화 */
   }
 }
 

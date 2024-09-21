@@ -340,7 +340,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
         filter.frequency.setValueAtTime(frequency, audioContext.currentTime);
         filter.Q.setValueAtTime(0.5, audioContext.currentTime);
 
-        // 일반 키는 100% 필터링��� 신 사용
+        // 일반 키는 100% 필터링 신 사용
         originalGain.gain.setValueAtTime(0, audioContext.currentTime);
         filteredGain.gain.setValueAtTime(1, audioContext.currentTime);
       }

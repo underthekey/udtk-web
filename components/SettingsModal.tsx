@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import styles from '@/styles/SettingsModal.module.css';
 
 interface SettingsModalProps {
@@ -26,11 +26,16 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 }) => {
     const [isVisible, setIsVisible] = useState(false);
     const [isContentVisible, setIsContentVisible] = useState(false);
+    const modalRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (isOpen) {
             setIsVisible(true);
-            setTimeout(() => setIsContentVisible(true), 50);
+            setTimeout(() => {
+                setIsContentVisible(true);
+                // 모달이 열릴 때 포커스를 모달로 이동
+                modalRef.current?.focus();
+            }, 50);
         } else {
             setIsContentVisible(false);
             setTimeout(() => setIsVisible(false), 300);
@@ -64,7 +69,11 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             className={`${styles.modalOverlay} ${isContentVisible ? styles.open : ''}`}
             onClick={handleOverlayClick}
         >
-            <div className={`${styles.modalContent} ${isContentVisible ? styles.open : ''}`}>
+            <div
+                className={`${styles.modalContent} ${isContentVisible ? styles.open : ''}`}
+                ref={modalRef}
+                tabIndex={-1} // 포커스를 받을 수 있도록 설정
+            >
                 <div className={styles.modalHeader}>
                     <span className={styles.title}>Setting</span>
                 </div>
@@ -75,6 +84,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                         value={selectedSwitch}
                         onChange={onSwitchChange}
                         className={styles.switchSelect}
+                        style={{ cursor: 'pointer' }}  // 포인터 커서 추가
                     >
                         {switchOptions.map(option => (
                             <option key={option} value={option}>
