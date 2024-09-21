@@ -467,6 +467,14 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
 
   return (
     <div className={styles.typer}>
+      <div className={styles.visualizerContainer}>
+        {/* <SimpleEqualizer analyserNode={analyserNodeLeft} /> */}
+        <StereoImager
+          analyserNodeLeft={analyserNodeLeft}
+          analyserNodeRight={analyserNodeRight}
+          panValue={panValue}
+        />
+      </div>
       <AnimatedSentences sentences={sentences.slice(0, 20)} shouldAnimate={shouldAnimate} />
       <div className={styles.mainContent}>
         <div className={styles.sentenceDisplayWrapper}>
@@ -517,14 +525,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
                 className={styles.volumeSlider}
               /></div>
           </div>
-          <div className={styles.visualizerContainer}>
-            <SimpleEqualizer analyserNode={analyserNodeLeft} />
-            <StereoImager
-              analyserNodeLeft={analyserNodeLeft}
-              analyserNodeRight={analyserNodeRight}
-              panValue={panValue}
-            />
-          </div>
+
         </div>
       </div>
     </div>

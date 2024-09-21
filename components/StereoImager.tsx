@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styles from '@/styles/StereoImager.module.css';
 
 interface StereoImagerProps {
@@ -7,14 +7,32 @@ interface StereoImagerProps {
     panValue: number;  // 패닝 값
 }
 
-const DECAY_SPEED = 0.007;
+const RISE_SPEED = 0.01; // 상향 decay
+const DECAY_SPEED = 0.005; // 하향 decay
 
 const StereoImager: React.FC<StereoImagerProps> = ({ analyserNodeLeft, analyserNodeRight, panValue }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [canvasSize, setCanvasSize] = useState({ width: 600, height: 300 });
     const previousDataRef = useRef<Float32Array | null>(null);
     const animationIdRef = useRef<number | null>(null);  // 애니메이션 프레임 ID 저장
     const dataArrayLeft = useRef<Float32Array | null>(null);  // 재사용할 수 있도록 useRef로 관리
     const dataArrayRight = useRef<Float32Array | null>(null);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setCanvasSize({
+                width: window.innerWidth,
+                height: window.innerHeight, // 높이를 화면 높이의 절반으로 설정
+            });
+        };
+
+        handleResize(); // 초기 크기 설정
+        window.addEventListener('resize', handleResize);
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
     useEffect(() => {
         if (!analyserNodeLeft || !analyserNodeRight) return;
@@ -25,8 +43,8 @@ const StereoImager: React.FC<StereoImagerProps> = ({ analyserNodeLeft, analyserN
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        const width = canvas.width;
-        const height = canvas.height;
+        const width = canvasSize.width;
+        const height = canvasSize.height;
 
         const bufferLength = analyserNodeLeft.frequencyBinCount;
 
@@ -54,15 +72,23 @@ const StereoImager: React.FC<StereoImagerProps> = ({ analyserNodeLeft, analyserN
             ctx.strokeStyle = 'rgba(0, 48, 73, 0.5)';
             ctx.stroke();
 
-            for (let i = 0; i < bufferLength; i++) {
+            const step = Math.ceil(bufferLength / 180); // 약 180개의 점만 그리도록 설정
+
+            for (let i = 0; i < bufferLength; i += step) {
                 const leftValue = Math.max((dataArrayLeft.current![i] + 140) / 140, 0);
                 const rightValue = Math.max((dataArrayRight.current![i] + 140) / 140, 0);
 
                 const prevLeftValue = previousDataRef.current?.[i * 2] ?? 0;
                 const prevRightValue = previousDataRef.current?.[i * 2 + 1] ?? 0;
 
-                const currentLeftValue = Math.max(leftValue, prevLeftValue - DECAY_SPEED);
-                const currentRightValue = Math.max(rightValue, prevRightValue - DECAY_SPEED);
+                // 임계값 추가
+                const threshold = 0.1;
+                const currentLeftValue = leftValue > prevLeftValue
+                    ? Math.min(prevLeftValue + RISE_SPEED, leftValue) // 부드럽게 상승
+                    : prevLeftValue > threshold ? Math.max(prevLeftValue - DECAY_SPEED, 0) : 0;
+                const currentRightValue = rightValue > prevRightValue
+                    ? Math.min(prevRightValue + RISE_SPEED, rightValue) // 부드럽게 상승
+                    : prevRightValue > threshold ? Math.max(prevRightValue - DECAY_SPEED, 0) : 0;
 
                 if (previousDataRef.current) {
                     previousDataRef.current[i * 2] = currentLeftValue;
@@ -132,13 +158,13 @@ const StereoImager: React.FC<StereoImagerProps> = ({ analyserNodeLeft, analyserN
                 cancelAnimationFrame(animationIdRef.current);
             }
         };
-    }, [analyserNodeLeft, analyserNodeRight, panValue]);
+    }, [analyserNodeLeft, analyserNodeRight, panValue, canvasSize]);
 
     return (
         <canvas
             ref={canvasRef}
-            width={600}
-            height={300}
+            width={canvasSize.width}
+            height={canvasSize.height}
             className={styles.stereoImager}
         />
     );
