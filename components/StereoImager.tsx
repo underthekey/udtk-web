@@ -7,7 +7,7 @@ interface StereoImagerProps {
     panValue: number;  // 패닝 값
 }
 
-const RISE_SPEED = 0.01; // 상향 decay
+const RISE_SPEED = 0.02; // 상향 decay
 const DECAY_SPEED = 0.005; // 하향 decay
 
 const StereoImager: React.FC<StereoImagerProps> = ({ analyserNodeLeft, analyserNodeRight, panValue }) => {
@@ -67,12 +67,12 @@ const StereoImager: React.FC<StereoImagerProps> = ({ analyserNodeLeft, analyserN
             ctx.clearRect(0, 0, width, height);
 
             // 반원 그리기
-            ctx.beginPath();
-            ctx.arc(width / 2, height, width / 2, Math.PI, 0);
-            ctx.strokeStyle = 'rgba(0, 48, 73, 0.5)';
-            ctx.stroke();
+            // ctx.beginPath();
+            // ctx.arc(width / 2, height, width / 2, Math.PI, 0);
+            // ctx.strokeStyle = 'rgba(0, 48, 73, 0.5)';
+            // ctx.stroke();
 
-            const step = Math.ceil(bufferLength / 180); // 약 180개의 점만 그리도록 설정
+            const step = Math.ceil(bufferLength / 270); // 약 180개의 점만 그리도록 설정
 
             for (let i = 0; i < bufferLength; i += step) {
                 const leftValue = Math.max((dataArrayLeft.current![i] + 140) / 140, 0);
@@ -102,27 +102,33 @@ const StereoImager: React.FC<StereoImagerProps> = ({ analyserNodeLeft, analyserN
                 const leftIntensity = currentLeftValue * (1 - panFactor * 0.5);
                 const rightIntensity = currentRightValue * (0.5 + panFactor * 0.5);
 
-                // 좌우 포인트 그리기
+                // 중앙 강도 계산 추가
+                const centerIntensity = (leftIntensity + rightIntensity) / 2;
+
+                // 점 그리기 함수 수정
                 const drawPoint = (intensity: number, side: number) => {
                     const maxRadius = (height / 2) * 0.95; // 최대 반지름을 반원 크기의 95%로 제한
                     const radius = Math.min(maxRadius, Math.max((height / 2) * (0.1 + intensity * 0.9), 0));
-                    const x = width / 2 + Math.cos(angle) * radius * side * (1 + Math.abs(panValue) * 0.2);
-                    const y = height - Math.sin(angle) * radius;
+                    const adjustedAngle = Math.PI - angle; // 각도 조정
+                    const x = width / 2 + Math.cos(adjustedAngle) * radius * side;
+                    const y = height - Math.sin(adjustedAngle) * radius;
 
                     ctx.beginPath();
                     ctx.arc(x, y, Math.max(2 + intensity * 2, 0), 0, 2 * Math.PI);
                     ctx.fillStyle = `rgba(0, 48, 73, ${0.3 + intensity * 0.7})`;
                     ctx.fill();
                 };
-                drawPoint(leftIntensity, -1);  // 왼쪽
-                drawPoint(rightIntensity, 1);  // 오른쪽
 
-                // 중앙 포인트 그리기
-                const centerIntensity = (leftIntensity + rightIntensity) / 2;
+                drawPoint(leftIntensity, 1);  // 왼쪽
+                drawPoint(rightIntensity, -1);  // 오른쪽
+
+                // 중앙 포인트 그리기 수정
                 const drawCenterPoint = () => {
-                    const radius = Math.max((height / 2) * (0.1 + centerIntensity * 0.9), 0);
-                    const x = width / 2 + Math.cos(angle) * radius * panValue * 0.2;
-                    const y = height - Math.sin(angle) * radius;
+                    const maxRadius = (height / 2) * 0.95;
+                    const radius = Math.min(maxRadius, Math.max((height / 2) * (0.1 + centerIntensity * 0.9), 0));
+                    const adjustedAngle = Math.PI - angle;
+                    const x = width / 2 + Math.cos(adjustedAngle) * radius * panValue * 0.2;
+                    const y = height - Math.sin(adjustedAngle) * radius;
 
                     ctx.beginPath();
                     ctx.arc(x, y, Math.max(1 + centerIntensity * 2, 0), 0, 2 * Math.PI);
@@ -132,13 +138,15 @@ const StereoImager: React.FC<StereoImagerProps> = ({ analyserNodeLeft, analyserN
 
                 drawCenterPoint();
 
-                // 연결선 그리기
+                // 연결선 그리기 수정
                 if (i % 4 === 0) {
-                    const leftRadius = Math.max((height / 2) * (0.1 + leftIntensity * 0.9), 0);
-                    const rightRadius = Math.max((height / 2) * (0.1 + rightIntensity * 0.9), 0);
-                    const leftX = width / 2 - Math.cos(angle) * leftRadius * (1 + Math.abs(panValue) * 0.2);
-                    const rightX = width / 2 + Math.cos(angle) * rightRadius * (1 + Math.abs(panValue) * 0.2);
-                    const y = height - Math.sin(angle) * ((leftRadius + rightRadius) / 2);
+                    const maxRadius = (height / 2) * 0.95;
+                    const leftRadius = Math.min(maxRadius, Math.max((height / 2) * (0.1 + leftIntensity * 0.9), 0));
+                    const rightRadius = Math.min(maxRadius, Math.max((height / 2) * (0.1 + rightIntensity * 0.9), 0));
+                    const adjustedAngle = Math.PI - angle;
+                    const leftX = width / 2 - Math.cos(adjustedAngle) * leftRadius;
+                    const rightX = width / 2 + Math.cos(adjustedAngle) * rightRadius;
+                    const y = height - Math.sin(adjustedAngle) * ((leftRadius + rightRadius) / 2);
 
                     ctx.beginPath();
                     ctx.moveTo(leftX, y);

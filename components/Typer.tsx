@@ -230,6 +230,14 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
           gain = 1;
           pan = key === 'AltLeft' ? -18 : 18;
           break;
+        case 'ArrowUp':
+        case 'ArrowDown':
+        case 'ArrowLeft':
+        case 'ArrowRight':
+          frequency = 800;
+          gain = 0.8;
+          pan = 35;
+          break;
       }
     }
 
