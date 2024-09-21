@@ -78,7 +78,7 @@
   flex-direction: row-reverse;
   justify-content: flex-start;
   align-items: center;
-  padding: 1rem 0;
+  padding: 1rem;
   color: var(--main-text-color);
   text-decoration: none;
   transition: transform 0.3s ease;
@@ -142,7 +142,7 @@
 
 @media (max-width: 768px) {
   .header {
-    padding: 0.6rem 0.8rem;
+    padding: 0.8rem 1.5rem;
   }
 
   .logo {
@@ -154,13 +154,27 @@
     height: 25px;
   }
 
-  .menuButton,
-  .menuDropdown {
-    right: 0.8rem;
+  .menuButton {
+    right: 1rem;
+    font-size: 1rem; /* 24px에 가까운 크기로 조정 */
   }
 
   .menuDropdown {
-    top: calc(0.6rem + 1rem + 0.3rem);
+    top: calc(0.6rem + 1rem + 2rem);
+    right: 1rem; /* 오른쪽 간격 조정 */
+  }
+
+  .menuItem {
+    padding: 0.8rem 0; /* 패딩 줄임 */
+  }
+
+  .menuIcon {
+    width: 24px; /* 아이콘 크기 줄임 */
+    height: 24px;
+  }
+
+  .menuLabel {
+    font-size: 0.9rem; /* 글자 크기 줄임 */
   }
 }
 

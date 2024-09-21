@@ -109,21 +109,8 @@
     margin-bottom: 0.2rem;
   }
 
-  .controlsWrapper {
-    position: static;
-    transform: none;
-    margin-top: 1rem;
-  }
-
-  .controls {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .switchSelector,
-  .volumeControl {
-    width: 100%;
-    justify-content: center;
+  .typingAreaWrapper {
+    margin-left: 0.4rem;
   }
 
   .visualizerContainer {
@@ -139,7 +126,7 @@
 }
 
 .switchSelect {
-  /* ��존 스타일 유지 */
+  /* 존 스타일 유지 */
   outline: none;
 }
 
@@ -183,4 +170,36 @@
 
 .option:hover {
   background-color: #f0f0f0;
+}
+
+.settingIconWrapper {
+  position: fixed;
+  bottom: 2rem;
+  right: 1.7rem;
+  z-index: 999;
+  cursor: pointer;
+}
+
+.settingIcon {
+  width: 36px;
+  height: 36px;
+  fill: none;
+  color: var(--main-text-color);
+  transition: stroke 0.3s ease;
+}
+
+.settingIconWrapper:hover .settingIcon {
+  stroke: var(--primary-color);
+}
+
+@media (max-width: 768px) {
+  .settingIconWrapper {
+    bottom: 1rem;
+    right: 1rem;
+  }
+
+  .settingIcon {
+    width: 36px;
+    height: 36px;
+  }
 }

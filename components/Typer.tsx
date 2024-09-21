@@ -4,10 +4,11 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { Sentence } from '@/app/types';
 import SentenceDisplay from './SentenceDisplay';
 import TypingArea from './TypingArea';
-import AnimatedSentences from './AnimatedSentences';
 import SimpleEqualizer from './SimpleEqualizer';
 import StereoImager from './StereoImager';
 import styles from '@/styles/Typer.module.css';
+import Image from 'next/image';
+import SettingsModal from './SettingsModal';
 
 const switchOptions = [
   'Default',
@@ -51,16 +52,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
   const [panValue, setPanValue] = useState(0);  // 패닝 값 상태 추가
   const [loadedSwitches, setLoadedSwitches] = useState<Set<string>>(new Set(['Default']));
   const [isLoading, setIsLoading] = useState(false);
-  const [shouldAnimate, setShouldAnimate] = useState(true);
-
-  useEffect(() => {
-    // 페이지 로드 후 일정 시간이 지나면 애니메이션을 비활성화
-    const timer = setTimeout(() => {
-      setShouldAnimate(false);
-    }, 2000); // 2초 후 애니메이션 종료
-
-    return () => clearTimeout(timer);
-  }, []);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // AudioContext 초기화를 사용자 상호작용 후로 이동
   const initializeAudioContext = useCallback(() => {
@@ -298,7 +290,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
         filter.frequency.setValueAtTime(frequency, audioContext.currentTime);
         filter.Q.setValueAtTime(0.5, audioContext.currentTime);
 
-        // 일반 키는 100% 필터링된 신호 사용
+        // 일반 키는 100% 필터링된 신 사용
         originalGain.gain.setValueAtTime(0, audioContext.currentTime);
         filteredGain.gain.setValueAtTime(1, audioContext.currentTime);
       }
@@ -465,6 +457,10 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     };
   }, [playKeySound, pressedKeys]);
 
+  const toggleSettings = () => {
+    setIsSettingsOpen(!isSettingsOpen);
+  };
+
   return (
     <div className={styles.typer}>
       <div className={styles.visualizerContainer}>
@@ -475,7 +471,6 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
           panValue={panValue}
         />
       </div>
-      <AnimatedSentences sentences={sentences.slice(0, 20)} shouldAnimate={shouldAnimate} />
       <div className={styles.mainContent}>
         <div className={styles.sentenceDisplayWrapper}>
           <SentenceDisplay
@@ -497,37 +492,21 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
             onKeyUp={handleKeyUp}
           />
         </div>
-        <div className={styles.controlsWrapper}>
-          <div className={styles.controls}>
-            <div className={styles.switchSelector}>
-              <label htmlFor="switchSelect">스위치 선택: </label>
-              <select
-                id="switchSelect"
-                value={selectedSwitch}
-                onChange={handleSwitchChange}
-                className={styles.switchSelect}
-              >
-                {switchOptions.map(option => (
-                  <option key={option} value={option}>{option.replace(/_/g, ' ')}</option>
-                ))}
-              </select>
-            </div>
-            <div className={styles.volumeControl}>
-              <label htmlFor="volumeSlider">볼륨: </label>
-              <input
-                id="volumeSlider"
-                type="range"
-                min="0"
-                max="1"
-                step="0.1"
-                value={volume}
-                onChange={handleVolumeChange}
-                className={styles.volumeSlider}
-              /></div>
-          </div>
-
-        </div>
       </div>
+      <div className={styles.settingIconWrapper} onClick={() => setIsSettingsOpen(true)}>
+        <svg className={styles.settingIcon} viewBox="0 0 64 64">
+          <use xlinkHref="/images/icon/setting.svg#icon" />
+        </svg>
+      </div>
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={toggleSettings}
+        selectedSwitch={selectedSwitch}
+        onSwitchChange={handleSwitchChange}
+        volume={volume}
+        onVolumeChange={handleVolumeChange}
+        switchOptions={switchOptions}
+      />
     </div>
   );
 }
