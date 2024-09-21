@@ -27,7 +27,6 @@ const switchOptions = [
 ];
 
 export default function Typer({ initialSentences }: { initialSentences: Sentence[] }) {
-  const [sentences, setSentences] = useState<Sentence[]>(initialSentences);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentInput, setCurrentInput] = useState('');
   const [correctChars, setCorrectChars] = useState(0);
@@ -53,6 +52,49 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
   const [loadedSwitches, setLoadedSwitches] = useState<Set<string>>(new Set(['Default']));
   const [isLoading, setIsLoading] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  const [language, setLanguage] = useState<'kor' | 'eng'>('kor');
+  const [koreanSentences, setKoreanSentences] = useState<Sentence[]>(initialSentences);
+  const [englishSentences, setEnglishSentences] = useState<Sentence[]>([]);
+
+  const sentences = useMemo(() => language === 'kor' ? koreanSentences : englishSentences, [language, koreanSentences, englishSentences]);
+
+  const fetchSentences = useCallback(async (lang: 'kor' | 'eng', count: number) => {
+    const url = lang === 'kor'
+      ? 'https://sentence.udtk.site/random?count=' + count
+      : 'https://sentence.udtk.site/language?language=eng&count=' + count;
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) {
+      throw new Error('Failed to fetch sentences');
+    }
+    return res.json();
+  }, []);
+
+  const [isLanguageChanging, setIsLanguageChanging] = useState(false);
+
+  const handleLanguageChange = useCallback(async () => {
+    setIsLanguageChanging(true);
+    setLanguage(prev => {
+      const newLang = prev === 'kor' ? 'eng' : 'kor';
+      if (newLang === 'eng' && englishSentences.length === 0) {
+        fetchSentences('eng', 20).then(newSentences => {
+          setEnglishSentences(newSentences);
+          setCurrentIndex(0);
+          setIsLanguageChanging(false);
+        });
+      } else if (newLang === 'kor' && koreanSentences.length === 0) {
+        fetchSentences('kor', 20).then(newSentences => {
+          setKoreanSentences(newSentences);
+          setCurrentIndex(0);
+          setIsLanguageChanging(false);
+        });
+      } else {
+        setCurrentIndex(0);
+        setIsLanguageChanging(false);
+      }
+      return newLang;
+    });
+  }, [englishSentences.length, koreanSentences.length, fetchSentences]);
 
   // AudioContext 초기화를 사용자 상호작용 후로 이동
   const initializeAudioContext = useCallback(() => {
@@ -298,7 +340,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
         filter.frequency.setValueAtTime(frequency, audioContext.currentTime);
         filter.Q.setValueAtTime(0.5, audioContext.currentTime);
 
-        // 일반 키는 100% 필터링된 신 사용
+        // 일반 키는 100% 필터링��� 신 사용
         originalGain.gain.setValueAtTime(0, audioContext.currentTime);
         filteredGain.gain.setValueAtTime(1, audioContext.currentTime);
       }
@@ -339,18 +381,18 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     if (isFetching) return;
     setIsFetching(true);
     try {
-      const res = await fetch('https://sentence.udtk.site/random?count=20', { cache: 'no-store' });
-      if (!res.ok) {
-        throw new Error('Failed to fetch sentences');
+      const newSentences = await fetchSentences(language, 20);
+      if (language === 'kor') {
+        setKoreanSentences(prevSentences => [...prevSentences, ...newSentences]);
+      } else {
+        setEnglishSentences(prevSentences => [...prevSentences, ...newSentences]);
       }
-      const newSentences = await res.json();
-      setSentences(prevSentences => [...prevSentences, ...newSentences]);
     } catch (error) {
       console.error('Error fetching more sentences:', error);
     } finally {
       setIsFetching(false);
     }
-  }, [isFetching]);
+  }, [isFetching, language, fetchSentences]);
 
   const moveToNextSentence = useCallback(async () => {
     const nextIndex = currentIndex + 1;
@@ -388,7 +430,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     setLastCompletedCharIndex(newLastCompletedCharIndex);
   }, []);
 
-  const currentSentence = useMemo(() => sentences[currentIndex], [sentences, currentIndex]);
+  const currentSentence = useMemo(() => sentences[currentIndex] || { content: '', author: null }, [sentences, currentIndex]);
 
   const handleSwitchChange = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
     const newSwitch = event.target.value;
@@ -490,16 +532,20 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
           />
         </div>
         <div className={styles.typingAreaWrapper}>
-          <TypingArea
-            ref={typingAreaRef}
-            sentence={currentSentence.content}
-            onComplete={handleSentenceComplete}
-            onInputChange={handleInputChange}
-            onSkip={handleSkip}
-            onPrevious={handlePrevious}
-            onKeyDown={handleKeyDown}
-            onKeyUp={handleKeyUp}
-          />
+          {isLanguageChanging ? (
+            <div>언어 변경 중...</div>
+          ) : (
+            <TypingArea
+              ref={typingAreaRef}
+              sentence={currentSentence?.content || ''}
+              onComplete={handleSentenceComplete}
+              onInputChange={handleInputChange}
+              onSkip={handleSkip}
+              onPrevious={handlePrevious}
+              onKeyDown={handleKeyDown}
+              onKeyUp={handleKeyUp}
+            />
+          )}
         </div>
       </div>
       <div className={styles.settingIconWrapper} onClick={() => setIsSettingsOpen(true)}>
@@ -515,6 +561,8 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
         volume={volume}
         onVolumeChange={handleVolumeChange}
         switchOptions={switchOptions}
+        language={language}
+        onLanguageChange={handleLanguageChange}
       />
     </div>
   );

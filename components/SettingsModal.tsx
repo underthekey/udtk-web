@@ -9,6 +9,8 @@ interface SettingsModalProps {
     volume: number;
     onVolumeChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
     switchOptions: string[];
+    language: string;
+    onLanguageChange: () => void;
 }
 
 const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -19,6 +21,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     volume,
     onVolumeChange,
     switchOptions,
+    language,
+    onLanguageChange,
 }) => {
     const [isVisible, setIsVisible] = useState(false);
     const [isContentVisible, setIsContentVisible] = useState(false);
@@ -32,6 +36,20 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             setTimeout(() => setIsVisible(false), 300);
         }
     }, [isOpen]);
+
+    useEffect(() => {
+        const handleEscKey = (event: KeyboardEvent) => {
+            if (event.key === 'Escape' && isOpen) {
+                onClose();
+            }
+        };
+
+        document.addEventListener('keydown', handleEscKey);
+
+        return () => {
+            document.removeEventListener('keydown', handleEscKey);
+        };
+    }, [isOpen, onClose]);
 
     if (!isVisible) return null;
 
@@ -77,6 +95,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     />
                 </div>
                 <div className={styles.buttonGroup}>
+                    <button onClick={onLanguageChange} className={styles.languageButton}>
+                        {language === 'kor' ? 'English' : '한국어'}
+                    </button>
                     <button onClick={onClose} className={styles.closeButton}>Close</button>
                 </div>
             </div>

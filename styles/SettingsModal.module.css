@@ -112,7 +112,22 @@
 
 .buttonGroup {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.languageButton {
+  background-color: #f0f0f0;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-right: auto; /* 언어 변경 버튼을 왼쪽으로 밀어냅니다 */
+}
+
+.languageButton:hover {
+  background-color: #e0e0e0;
 }
 
 .closeButton {
