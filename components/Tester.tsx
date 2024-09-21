@@ -318,19 +318,6 @@ const KeyboardTester: React.FC = () => {
   return (
     <div className={`${styles.testerWrapper}`}>
       <div className={`${styles.testerContainer} ${styles[currentTheme]}`}>
-        <header>
-          <section className={styles.intro}>
-            <h1 className={`${styles.headingPrimary} ${styles.title} ${styles.centerText}`}>
-              <span>Test Your Keyboard</span>
-            </h1>
-            <p className={`${styles.paragraph} ${styles.description} ${styles.centerText}`}>
-              This interactive tool is designed to help users identify and
-              troubleshoot any issues with their physical keyboard or simply explore
-              its layout
-            </p>
-          </section>
-        </header>
-
         <main>
           <div className={styles.themeAndLayout}>
             <div></div>
