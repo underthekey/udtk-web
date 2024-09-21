@@ -1,14 +1,19 @@
-.typingArea {
+.typingAreaWrapper {
   width: 100%;
-  margin: 0 auto;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
+.typingArea {
+  display: inline-block;
+  position: relative;
+}
+
 .input {
   width: 100%;
-  max-width: 600px;
+  white-space: nowrap;
+  overflow: hidden;
   padding-left: 0.3rem;
   font-size: 1.5rem;
   line-height: 1.5;
@@ -20,6 +25,7 @@
   background-color: var(--main-background-color);
   box-sizing: border-box;
   transition: box-shadow 0.3s ease;
+  text-align: left;
 }
 
 .input:focus {

@@ -148,29 +148,30 @@ const TypingArea = forwardRef(({
   }, []);
 
   return (
-    <div className={styles.typingArea}>
-      <input
-        ref={inputRef}
-        type="text"
-        value={input}
-        placeholder={sentence}
-        onChange={handleInputChange}
-        onKeyDown={handleKeyDown}
-        onKeyUp={onKeyUp}
-        className={styles.input}
-        disabled={isProcessing}
-        // 추가된 부분: 포커스 이벤트 처리
-        onFocus={() => {
-          if (isProcessing) {
-            inputRef.current?.blur();
-          }
-        }}
-        onBlur={() => {
-          if (!isProcessing) {
-            inputRef.current?.focus();
-          }
-        }}
-      />
+    <div className={styles.typingAreaWrapper}>
+      <div className={styles.typingArea}>
+        <input
+          ref={inputRef}
+          type="text"
+          value={input}
+          placeholder={sentence}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+          onKeyUp={onKeyUp}
+          className={styles.input}
+          disabled={isProcessing}
+          onFocus={() => {
+            if (isProcessing) {
+              inputRef.current?.blur();
+            }
+          }}
+          onBlur={() => {
+            if (!isProcessing) {
+              inputRef.current?.focus();
+            }
+          }}
+        />
+      </div>
     </div>
   );
 });
