@@ -69,7 +69,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     <span className={styles.title}>Setting</span>
                 </div>
                 <div className={styles.settingItem}>
-                    <span className={styles.settingLabel}>Switch</span>
+                    <label htmlFor="switchSelect" className={styles.settingLabel}>Switch</label>
                     <select
                         id="switchSelect"
                         value={selectedSwitch}
@@ -77,7 +77,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                         className={styles.switchSelect}
                     >
                         {switchOptions.map(option => (
-                            <option key={option} value={option}>{option.replace(/_/g, ' ')}</option>
+                            <option key={option} value={option}>
+                                {option.replace(/_/g, ' ')}
+                            </option>
                         ))}
                     </select>
                 </div>
