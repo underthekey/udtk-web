@@ -9,6 +9,7 @@ interface TypingAreaProps {
   onPrevious: () => void;
   onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   onKeyUp?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+  isSettingsOpen: boolean;
 }
 
 const TypingArea = forwardRef(({
@@ -18,7 +19,8 @@ const TypingArea = forwardRef(({
   onSkip,
   onPrevious,
   onKeyDown,
-  onKeyUp
+  onKeyUp,
+  isSettingsOpen
 }: TypingAreaProps, ref: ForwardedRef<HTMLInputElement>) => {
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -159,17 +161,8 @@ const TypingArea = forwardRef(({
           onKeyDown={handleKeyDown}
           onKeyUp={onKeyUp}
           className={styles.input}
-          disabled={isProcessing}
-          onFocus={() => {
-            if (isProcessing) {
-              inputRef.current?.blur();
-            }
-          }}
-          onBlur={() => {
-            if (!isProcessing) {
-              inputRef.current?.focus();
-            }
-          }}
+          disabled={isProcessing || isSettingsOpen}  // isSettingsOpen을 사용합니다
+          style={{ caretColor: isSettingsOpen ? 'transparent' : 'auto' }}  // isSettingsOpen을 사용합니다
         />
       </div>
     </div>

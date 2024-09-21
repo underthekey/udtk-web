@@ -52,3 +52,9 @@ body {
   background-color: var(--background-color);
   color: var(--key-text-color);
 }
+
+body.modal-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}

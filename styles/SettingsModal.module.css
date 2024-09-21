@@ -63,36 +63,38 @@
 
 .switchSelect {
   width: 100%;
-  padding: 8px;
+  padding: 8px 30px 8px 10px; /* 오른쪽 패딩을 늘리고 왼쪽 패딩도 약간 조정 */
   font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
   background-color: #fff;
   color: #000;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%23000000' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+  cursor: pointer;
 }
 
-/* PC 환경을 위한 커스텀 스타일 */
-@media (min-width: 769px) {
-  .switchSelect {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background-image: url('data:image/svg+xml;utf8,<svg fill="black" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    background-size: 12px;
-    padding-right: 30px;
-  }
+.switchSelect::-ms-expand {
+  display: none;
 }
 
-/* 모바일 환경을 위한 네이티브 스타일 */
+.switchSelect:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* PC 환경을 위한 커스텀 스타일 제거 */
+
+/* 모바일 환경을 위한 스타일 수정 */
 @media (max-width: 768px) {
   .switchSelect {
-    -webkit-appearance: menulist;
-    -moz-appearance: menulist;
-    appearance: menulist;
-    cursor: default; /* 기본 커서로 변경 */
-    touch-action: manipulation; /* 터치 동작 최적화 */
+    background-image: none; /* 모바일에서는 기본 화살표 사용 */
+    padding-right: 8px; /* 오른쪽 패딩 원래대로 복구 */
   }
 }
 

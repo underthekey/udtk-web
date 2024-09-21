@@ -31,6 +31,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     useEffect(() => {
         if (isOpen) {
             setIsVisible(true);
+            document.body.classList.add('modal-open');
             setTimeout(() => {
                 setIsContentVisible(true);
                 // 모달이 열릴 때 포커스를 모달로 이동
@@ -38,6 +39,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             }, 50);
         } else {
             setIsContentVisible(false);
+            document.body.classList.remove('modal-open');
             setTimeout(() => setIsVisible(false), 300);
         }
     }, [isOpen]);
@@ -60,6 +62,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
     const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
         if (e.target === e.currentTarget) {
+            e.preventDefault();
             onClose();
         }
     };
@@ -84,7 +87,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                         value={selectedSwitch}
                         onChange={onSwitchChange}
                         className={styles.switchSelect}
-                        style={{ cursor: 'pointer' }}  // 포인터 커서 추가
                     >
                         {switchOptions.map(option => (
                             <option key={option} value={option}>

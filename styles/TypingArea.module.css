@@ -77,3 +77,8 @@
 .input::placeholder {
   color: var(--gray-text-color);
 }
+
+.input:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}

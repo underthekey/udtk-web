@@ -304,7 +304,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
       return;
     }
 
-    // AudioContext가 suspended 상태인 경우 resume
+    // AudioContext가 suspended 상태인 경�� resume
     if (audioContext.state === 'suspended') {
       audioContext.resume();
     }
@@ -440,10 +440,12 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     }
     // 모달이 열려있을 때는 타이핑 영역으로 포커스 이동하지 않음
     if (!isSettingsOpen) {
-      const typingInput = document.querySelector('input[type="text"]') as HTMLInputElement;
-      if (typingInput) {
-        typingInput.focus();
-      }
+      setTimeout(() => {
+        const typingInput = document.querySelector('input[type="text"]') as HTMLInputElement;
+        if (typingInput) {
+          typingInput.focus();
+        }
+      }, 0);
     }
   }, [audioContext, loadAudio, loadedSwitches, isSettingsOpen]);
 
@@ -500,6 +502,31 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     setIsSettingsOpen(!isSettingsOpen);
   };
 
+  useEffect(() => {
+    const focusTypingArea = () => {
+      if (!isSettingsOpen) {
+        const typingInput = document.querySelector('input[type="text"]') as HTMLInputElement;
+        if (typingInput) {
+          typingInput.focus();
+        }
+      }
+    };
+
+    // 컴포넌트가 마운트될 때 포커스
+    focusTypingArea();
+
+    // 윈도우가 포커스를 받을 때마다 포커스
+    window.addEventListener('focus', focusTypingArea);
+
+    // 마우스 클릭 이벤트 리스너 추가
+    document.addEventListener('click', focusTypingArea);
+
+    return () => {
+      window.removeEventListener('focus', focusTypingArea);
+      document.removeEventListener('click', focusTypingArea);
+    };
+  }, [isSettingsOpen]);
+
   return (
     <div className={styles.typer}>
       <div className={styles.visualizerContainer}>
@@ -533,6 +560,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
               onPrevious={handlePrevious}
               onKeyDown={handleKeyDown}
               onKeyUp={handleKeyUp}
+              isSettingsOpen={isSettingsOpen}
             />
           )}
         </div>
