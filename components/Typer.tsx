@@ -475,6 +475,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
         <div className={styles.sentenceDisplayWrapper}>
           <SentenceDisplay
             sentence={currentSentence}
+            nextSentence={sentences[currentIndex + 1] || null}
             currentInput={currentInput}
             correctChars={correctChars}
             lastCompletedCharIndex={lastCompletedCharIndex}

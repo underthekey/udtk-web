@@ -73,3 +73,7 @@
     line-height: 1.2;
   }
 }
+
+.input::placeholder {
+  color: var(--gray-text-color);
+}
