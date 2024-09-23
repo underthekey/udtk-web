@@ -61,8 +61,8 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
 
   const fetchSentences = useCallback(async (lang: 'kor' | 'eng', count: number) => {
     const url = lang === 'kor'
-      ? 'https://sentence.udtk.site/random?count=' + count
-      : 'https://sentence.udtk.site/language?language=eng&count=' + count;
+      ? 'https://sentence.underthekey.com/random?count=' + count
+      : 'https://sentence.underthekey.com/language?language=eng&count=' + count;
     const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) {
       throw new Error('Failed to fetch sentences');
@@ -149,7 +149,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
 
     const attemptLoad = async (attempt: number): Promise<void> => {
       try {
-        const response = await fetch(`https://storage.udtk.site/switches/sounds/${switchName}.mp3`);
+        const response = await fetch(`https://storage.underthekey.com/switches/sounds/${switchName}.mp3`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

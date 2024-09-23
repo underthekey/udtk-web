@@ -26,11 +26,11 @@ pipeline {
                                 envMap[key.trim()] = value.trim()
                             }
                         }
-
+                        
                         env.BRANCH_NAME = params.ENV_TYPE == 'prod' ? 'main' : 'dev'
                         env.DEPLOY_URL = params.ENV_TYPE == 'prod'
-                                ? 'https://udtk.site'
-                                : 'https://dev.udtk.site'
+                                ? 'https://underthekey.com'
+                                : 'https://dev.underthekey.com'
                         env.SERVER_PORT = params.ENV_TYPE == 'prod'
                                 ? envMap['PROD_SERVER_PORT']
                                 : envMap['DEV_SERVER_PORT']

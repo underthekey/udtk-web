@@ -10,7 +10,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "storage.udtk.site",
+        hostname: "storage.underthekey.com",
         port: "",
         pathname: "/**",
       },
