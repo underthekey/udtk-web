@@ -1,13 +1,12 @@
 import '@/styles/globals.css'
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
 import Header from "@/components/Header";  // Header 컴포넌트 import
-
-const inter = Inter({ subsets: ["latin"] });
+import Script from 'next/script';
 
 export const metadata: Metadata = {
-  title: "underthekey",
-  description: "Explore all about custom keyboards",
+  title: "underthekey | 언더더키",
+  description: "Explore all about custom keyboards | 커스텀 키보드에 대한 모든 것",
+  keywords: "underthekey, 언더더키, custom keyboard, 커스텀 키보드",
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
@@ -52,6 +51,24 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <Script
+          strategy="afterInteractive"
+          src={`https://www.googletagmanager.com/gtag/js?id=G-1MC3X2SVR7`}
+        />
+        <Script
+          id="google-analytics"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-1MC3X2SVR7');
+            `,
+          }}
+        />
+      </head>
       <body>
         <Header />  {/* Header 컴포넌트 추가 */}
         {children}

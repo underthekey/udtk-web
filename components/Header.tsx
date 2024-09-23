@@ -76,7 +76,7 @@ const Header = () => {
             <div className={styles.logoImageWrapper}>
               <Image
                 src="/images/image-logo/3d/logo-3d-512.png"
-                alt="underthekey logo"
+                alt="underthekey logo | 언더더키"
                 width={256}
                 height={256}
                 sizes="(max-width: 768px) 100px, (max-width: 1200px) 150px, 200px"
