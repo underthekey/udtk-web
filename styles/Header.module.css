@@ -51,11 +51,29 @@
   color: var(--main-text-color);
   font-size: 1.5rem;
   cursor: pointer;
+  transition: opacity 0.3s ease, color 0.3s ease; /* color 트랜지션 추가 */
+}
+
+.menuButton svg {
+  width: 24px;
+  height: 24px;
+  fill: var(--main-text-color); /* 기본 색상 설정 */
+  transition: fill 0.3s ease; /* fill 트랜지션 추가 */
+}
+
+/* switch.svg 아이콘에 대한 고정된 색상 설정 */
+.menuButton svg#icon {
+  fill: var(--main-text-color); /* 고정된 색상 설정 */
+}
+
+/* switch.svg 아이콘 대한 호버 스타일 제거 */
+.menuButton:hover svg#icon {
+  fill: var(--main-text-color); /* 호버 시에도 동일한 색상 유지 */
 }
 
 .menuDropdown {
   position: fixed;
-  top: calc(1.5rem + 1.5rem + 1rem);
+  top: calc(1.5rem + 1.5rem + 1.3rem);
   right: 1.05rem;
   display: flex;
   flex-direction: column;
@@ -64,13 +82,18 @@
   overflow: hidden;
   max-height: 0;
   opacity: 0;
-  transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+  transition: max-height 0.3s ease-out, opacity 0.3s ease-out, transform 0.3s ease-out; /* transform 트랜지션 추가 */
 }
 
 .menuDropdown.open {
   max-height: 300px;
   opacity: 1;
-  transition: max-height 0.5s ease-in, opacity 0.5s ease-in;
+  transform: translateY(0); /* 열릴 때 위치 초기화 */
+  transition: max-height 0.5s ease-in, opacity 0.5s ease-in, transform 0.5s ease-in;
+}
+
+.menuDropdown:not(.open) {
+  transform: translateY(0); /* 닫힐 때 위치 초기화 */
 }
 
 .menuItem {
@@ -81,14 +104,24 @@
   padding: 1rem;
   color: var(--main-text-color);
   text-decoration: none;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, opacity 0.3s ease; /* 트랜지션 추가 */
   opacity: 0;
   transform: translateY(-20px);
+  transition-delay: 0s; /* 기본 지연 시간 */
 }
 
 .menuDropdown.open .menuItem {
   opacity: 1;
   transform: translateY(0);
+  transition-delay: calc(var(--menu-item-index) * 0.1s); /* 열릴 때 지연 시간 */
+}
+
+.menuDropdown:not(.open) .menuItem {
+  opacity: 0;
+  transform: translateY(-20px); /* 닫힐 때 위로 이동 */
+  transition-delay: calc(
+    (var(--menu-item-count) - var(--menu-item-index) - 1) * 0.1s
+  ); /* 닫힐 때 지연 시간 */
 }
 
 .menuItem svg {
@@ -165,7 +198,7 @@
 .menuIcon::after {
   content: "";
   position: absolute;
-  right: -4px; /* 점의 위치 조정 */
+  right: -4px; /* 점의 치 조정 */
   top: 50%;
   transform: translateY(-50%);
   width: 6px;
@@ -221,4 +254,24 @@
 
 .menuItem[href="/tester"] svg {
   transform: translateY(1px); /* 필요에 따라 값 조정 */
+}
+
+/* 메뉴 아이 스타일과 유사하게 설정 */
+.menuIcon {
+  width: 24px;
+  height: 24px;
+  fill: var(--main-text-color);
+  transition: fill 0.3s ease;
+}
+
+.menuItem[href="/custom"] .menuIcon {
+  fill: var(--main-text-color) !important; /* 고정된 색상 설정 */
+}
+
+.menuDropdown .menuItem[href="/custom"]:hover .menuIcon {
+  fill: var(--main-text-color) !important; /* 호버 시에도 동일한 색상 유지 */
+}
+
+.menuDropdown .menuItem[href="/custom"]:hover {
+  background-color: transparent !important; /* 배경색 변경 방지 */
 }

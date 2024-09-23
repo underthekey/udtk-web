@@ -33,17 +33,15 @@
 }
 
 .incorrect {
-  box-shadow: 0 0 0 2px rgba(var(--hover-color-rgb), 0.3) !important;
   animation: shake 0.2s;
 }
 
 .correct {
-  box-shadow: 0 0 0 2px rgba(var(--correct-color-rgb), 0.3) !important;
-  transition: box-shadow 0s ease-in-out;
+  transition: none;
 }
 
 .input.correct-remove {
-  transition: box-shadow 0.5s ease-in-out;
+  transition: none;
   box-shadow: none;
 }
 
@@ -76,9 +74,4 @@
 
 .input::placeholder {
   color: var(--gray-text-color);
-}
-
-.input:disabled {
-  opacity: 0.5;
-  pointer-events: none;
 }

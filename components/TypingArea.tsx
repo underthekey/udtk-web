@@ -89,12 +89,9 @@ const TypingArea = forwardRef(({
   }, [onSkip]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !isProcessing) {
+    if ((e.key === 'Enter' || (e.key === ' ' && input === sentence)) && !isProcessing) {
       if (input === sentence) {
         setIsProcessing(true);
-        if (inputRef.current) {
-          inputRef.current.classList.add(styles.correct);
-        }
         onComplete();
         setInput('');
 
@@ -103,7 +100,6 @@ const TypingArea = forwardRef(({
           await new Promise(resolve => setTimeout(resolve, 300));
           setIsProcessing(false);
           if (inputRef.current) {
-            inputRef.current.classList.remove(styles.correct);
             inputRef.current.focus();
           }
         })();

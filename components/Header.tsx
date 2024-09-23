@@ -25,6 +25,17 @@ const Header = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, [isMenuOpen]);
 
+  useEffect(() => {
+    const menuItems = document.querySelectorAll(`.${styles.menuItem}`);
+    const itemCount = menuItems.length;
+
+    menuItems.forEach((item, index) => {
+      const element = item as HTMLElement;
+      element.style.setProperty('--menu-item-index', index.toString());
+      element.style.setProperty('--menu-item-count', itemCount.toString());
+    });
+  }, [isMenuOpen]);
+
   const menuItems = [
     { path: '/', icon: '/images/icon/typer.svg', label: 'Typer' },
     { path: '/tester', icon: '/images/icon/keyboard.svg', label: 'Tester' },
@@ -55,9 +66,10 @@ const Header = () => {
         className={styles.menuButton}
         onClick={toggleMenu}
         aria-label="메뉴 열기"
-        style={{ fontSize: '30px' }}
       >
-        ☰
+        <svg viewBox="0 0 64 64">
+          <use xlinkHref={isMenuOpen ? "/images/icon/close.svg#icon" : "/images/icon/menu.svg#icon"} />
+        </svg>
       </button>
       <div className={`${styles.menuDropdown} ${isMenuOpen ? styles.open : ''}`}>
         {menuItems.map((item, index) => (
