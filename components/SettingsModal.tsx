@@ -1,13 +1,13 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import styles from '@/styles/SettingsModal.module.css';
 
 interface SettingsModalProps {
     isOpen: boolean;
     onClose: () => void;
     selectedSwitch: string;
-    onSwitchChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+    onSwitchChange: (switchName: string) => void;
     volume: number;
-    onVolumeChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    onVolumeChange: (volume: number) => void;
     switchOptions: string[];
     language: string;
     onLanguageChange: () => void;
@@ -24,6 +24,36 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     language,
     onLanguageChange,
 }) => {
+    const [tempSelectedSwitch, setTempSelectedSwitch] = useState(selectedSwitch);
+    const [tempVolume, setTempVolume] = useState(volume);
+    const [tempLanguage, setTempLanguage] = useState(language);
+
+    useEffect(() => {
+        if (isOpen) {
+            setTempSelectedSwitch(selectedSwitch);
+            setTempVolume(volume);
+            setTempLanguage(language);
+        }
+    }, [isOpen, selectedSwitch, volume, language]);
+
+    const handleSwitchChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        const newSwitch = event.target.value;
+        if (newSwitch !== selectedSwitch) {
+            onSwitchChange(newSwitch);
+        }
+    };
+
+    const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const newVolume = parseFloat(event.target.value);
+        setTempVolume(newVolume);
+        onVolumeChange(newVolume);
+    };
+
+    const handleLanguageChange = useCallback(() => {
+        setTempLanguage(prev => prev === 'kor' ? 'eng' : 'kor');
+        onLanguageChange();
+    }, [onLanguageChange]);
+
     const [isVisible, setIsVisible] = useState(false);
     const [isContentVisible, setIsContentVisible] = useState(false);
     const modalRef = useRef<HTMLDivElement>(null);
@@ -85,7 +115,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     <select
                         id="switchSelect"
                         value={selectedSwitch}
-                        onChange={onSwitchChange}
+                        onChange={handleSwitchChange}
                         className={styles.switchSelect}
                     >
                         {switchOptions.map(option => (
@@ -104,7 +134,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                         max="1"
                         step="0.1"
                         value={volume}
-                        onChange={onVolumeChange}
+                        onChange={(e) => onVolumeChange(parseFloat(e.target.value))}
                         className={styles.volumeSlider}
                     />
                 </div>
