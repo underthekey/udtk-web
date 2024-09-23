@@ -52,7 +52,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body>
         <Header />  {/* Header 컴포넌트 추가 */}
         {children}
       </body>
