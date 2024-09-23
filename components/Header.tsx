@@ -1,18 +1,40 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from '@/styles/Header.module.css';
+import { useRouter } from 'next/navigation';
 
 const Header = () => {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const router = useRouter();
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+  const toggleMenu = useCallback(() => {
+    setIsMenuOpen(prev => !prev);
+  }, []);
+
+  const closeMenu = useCallback(() => {
+    setIsMenuOpen(false);
+  }, []);
+
+  const handleMenuItemClick = useCallback((e: React.MouseEvent, path: string) => {
+    e.preventDefault();
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+    const isCurrentPage = pathname === path;
+
+    if (!isCurrentPage) {
+      if (isMobile) {
+        window.location.href = path;
+      } else {
+        router.push(path);
+      }
+    }
+
+    closeMenu();  // 항상 메뉴를 닫습니다.
+  }, [pathname, router, closeMenu]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -35,6 +57,10 @@ const Header = () => {
       element.style.setProperty('--menu-item-count', itemCount.toString());
     });
   }, [isMenuOpen]);
+
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [pathname]);
 
   const menuItems = [
     { path: '/', icon: '/images/icon/typer.svg', label: 'Typer' },
@@ -77,7 +103,7 @@ const Header = () => {
             href={item.path}
             key={item.path}
             className={`${styles.menuItem} ${pathname === item.path ? styles.active : ''}`}
-            onClick={toggleMenu}
+            onClick={(e) => handleMenuItemClick(e, item.path)}
             style={{ transitionDelay: `${index * 50}ms` }}
           >
             <div className={styles.menuIconWrapper}>

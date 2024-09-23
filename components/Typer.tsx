@@ -501,7 +501,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
 
   useEffect(() => {
     const focusTypingArea = () => {
-      if (!isSettingsOpen) {
+      if (!isSettingsOpen && !isMobileDevice()) {
         const typingInput = document.querySelector('input[type="text"]') as HTMLInputElement;
         if (typingInput) {
           typingInput.focus();
@@ -523,6 +523,11 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
       document.removeEventListener('click', focusTypingArea);
     };
   }, [isSettingsOpen]);
+
+  // 모바일 기기 감지 함수 추가
+  const isMobileDevice = () => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  };
 
   useEffect(() => {
     // 클라이언트 사이드에서만 localStorage에 접근
