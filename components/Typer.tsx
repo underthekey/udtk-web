@@ -11,6 +11,7 @@ import Image from 'next/image';
 import SettingsModal from './SettingsModal';
 
 const switchOptions = [
+  'None',
   'Default',
   'Cherry_MX_Black',
   'Cherry_MX_Blue',
@@ -49,7 +50,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
   const [analyserNodeLeft, setAnalyserNodeLeft] = useState<AnalyserNode | null>(null);
   const [analyserNodeRight, setAnalyserNodeRight] = useState<AnalyserNode | null>(null);
   const [panValue, setPanValue] = useState(0);  // 패닝 값 상태 추가
-  const [loadedSwitches, setLoadedSwitches] = useState<Set<string>>(new Set(['Default']));
+  const [loadedSwitches, setLoadedSwitches] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -142,8 +143,15 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     }
   }, [audioContext]);
 
+  const [audioBuffers, setAudioBuffers] = useState<{ [key: string]: AudioBuffer }>({});
+
   const loadAudio = useCallback(async (switchName: string, context: AudioContext, retryCount = 3) => {
-    if (switchName === 'Default' || loadedSwitches.has(switchName)) {
+    if (switchName === 'None') {
+      return;
+    }
+
+    if (audioBuffers[switchName]) {
+      audioBufferRef.current = audioBuffers[switchName];
       return;
     }
 
@@ -156,6 +164,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
         const arrayBuffer = await response.arrayBuffer();
         const audioBuffer = await context.decodeAudioData(arrayBuffer);
         audioBufferRef.current = audioBuffer;
+        setAudioBuffers(prev => ({ ...prev, [switchName]: audioBuffer }));
         setLoadedSwitches(prev => new Set(prev).add(switchName));
       } catch (error) {
         console.error(`오디오 로드 실패 (시도 ${attempt}/${retryCount}):`, error);
@@ -170,7 +179,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     setIsLoading(true);
     await attemptLoad(1);
     setIsLoading(false);
-  }, [loadedSwitches]);
+  }, [audioBuffers]);
 
   const getKeyProperties = (key: string): { frequency: number; pan: number; gain: number; isSpecialKey: boolean } => {
     // 키 매핑 객체 추가
@@ -304,7 +313,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
       return;
     }
 
-    // AudioContext가 suspended 상태인 경�� resume
+    // AudioContext가 suspended 상태인 경 resume
     if (audioContext.state === 'suspended') {
       audioContext.resume();
     }
@@ -435,7 +444,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
   const handleSwitchChange = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
     const newSwitch = event.target.value;
     setSelectedSwitch(newSwitch);
-    if (audioContext && !loadedSwitches.has(newSwitch)) {
+    if (audioContext) {
       loadAudio(newSwitch, audioContext);
     }
     // 모달이 열려있을 때는 타이핑 영역으로 포커스 이동하지 않음
@@ -447,7 +456,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
         }
       }, 0);
     }
-  }, [audioContext, loadAudio, loadedSwitches, isSettingsOpen]);
+  }, [audioContext, loadAudio, isSettingsOpen]);
 
   const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
     if (!event.repeat) {
