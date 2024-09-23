@@ -4,9 +4,9 @@ import Header from "@/components/Header";  // Header 컴포넌트 import
 import Script from 'next/script';
 
 export const metadata: Metadata = {
-  title: "underthekey | 언더더키",
-  description: "Explore all about custom keyboards | 커스텀 키보드에 대한 모든 것",
-  keywords: "underthekey, 언더더키, custom keyboard, 커스텀 키보드",
+  title: "underthekey",
+  description: "언더더키 - 온라인 타건샵에서 타이핑 연습, 키보드 테스트, 스위치 및 커스텀 키보드 정보를 탐색하세요.",
+  keywords: "언더더키, 커스텀 키보드, 타건샵, 키보드 ASMR, 타이핑 연습, 키보드 스위치 정보, 키보드 테스트, underthekey, custom keyboard, typing",
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
