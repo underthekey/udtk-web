@@ -11,6 +11,7 @@ import Image from 'next/image';
 import SettingsModal from './SettingsModal';
 
 const switchOptions = [
+  'None',
   'Default',
   'Cherry_MX_Black',
   'Cherry_MX_Blue',
@@ -34,11 +35,12 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
   const [isFetching, setIsFetching] = useState(false);
 
   const [selectedSwitch, setSelectedSwitch] = useState<string>('Default');
+  const [volume, setVolume] = useState(0.5);
+  const [language, setLanguage] = useState<'kor' | 'eng'>('kor');
 
   const typingAreaRef = useRef<HTMLInputElement>(null);
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const audioBufferRef = useRef<AudioBuffer | null>(null);
-  const [volume, setVolume] = useState(0.5);
   const [isShiftPressed, setIsShiftPressed] = useState(false);
   const [isCapsLockOn, setIsCapsLockOn] = useState(false);
   const [pressedKeys, setPressedKeys] = useState<Set<string>>(new Set());
@@ -49,11 +51,10 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
   const [analyserNodeLeft, setAnalyserNodeLeft] = useState<AnalyserNode | null>(null);
   const [analyserNodeRight, setAnalyserNodeRight] = useState<AnalyserNode | null>(null);
   const [panValue, setPanValue] = useState(0);  // 패닝 값 상태 추가
-  const [loadedSwitches, setLoadedSwitches] = useState<Set<string>>(new Set(['Default']));
+  const [loadedSwitches, setLoadedSwitches] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  const [language, setLanguage] = useState<'kor' | 'eng'>('kor');
   const [koreanSentences, setKoreanSentences] = useState<Sentence[]>(initialSentences);
   const [englishSentences, setEnglishSentences] = useState<Sentence[]>([]);
 
@@ -96,30 +97,53 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     });
   }, [englishSentences.length, koreanSentences.length, fetchSentences]);
 
-  // AudioContext 초기화를 사용자 상호작용 후로 이동
-  const initializeAudioContext = useCallback(() => {
-    if (!audioContext) {
-      const newContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      setAudioContext(newContext);
+  const [audioBuffers, setAudioBuffers] = useState<{ [key: string]: AudioBuffer }>({});
+
+  // loadAudio 함수 수정
+  const loadAudio = useCallback(async (switchName: string, context: AudioContext, retryCount = 3) => {
+    if (switchName === 'None') {
+      return;
     }
-  }, [audioContext]);
 
-  // 사용자 상호작용 이벤트 핸들러에 AudioContext 초기화 추가
-  const handleUserInteraction = useCallback(() => {
-    initializeAudioContext();
-    // 기존의 다른 로직들...
-  }, [initializeAudioContext]);
+    if (audioBuffers[switchName]) {
+      audioBufferRef.current = audioBuffers[switchName];
+      return;
+    }
 
+    setIsLoading(true);
+    try {
+      const response = await fetch(`https://storage.underthekey.com/switches/sounds/${switchName}.mp3`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const arrayBuffer = await response.arrayBuffer();
+      const audioBuffer = await context.decodeAudioData(arrayBuffer);
+      audioBufferRef.current = audioBuffer;
+      setAudioBuffers(prev => ({ ...prev, [switchName]: audioBuffer }));
+      setLoadedSwitches(prev => new Set(prev).add(switchName));
+    } catch (error) {
+      console.error(`오디오 로드 실패 (${switchName}):`, error);
+      if (switchName !== 'Default' && retryCount > 0) {
+        console.log('Default 스위치로 fallback');
+        await loadAudio('Default', context, retryCount - 1);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, [audioBuffers]);
+
+  // AudioContext 초기화를 즉시 실행
   useEffect(() => {
-    // 페이지에 사용자 상호작용 이벤트 리스너 추가
-    document.addEventListener('click', handleUserInteraction);
-    document.addEventListener('keydown', handleUserInteraction);
+    const newContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    setAudioContext(newContext);
+  }, []);
 
-    return () => {
-      document.removeEventListener('click', handleUserInteraction);
-      document.removeEventListener('keydown', handleUserInteraction);
-    };
-  }, [handleUserInteraction]);
+  // 선택된 스위치의 오디오 로드
+  useEffect(() => {
+    if (audioContext && selectedSwitch) {
+      loadAudio(selectedSwitch, audioContext);
+    }
+  }, [audioContext, selectedSwitch, loadAudio]);
 
   useEffect(() => {
     if (audioContext) {
@@ -141,36 +165,6 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
       merger.connect(audioContext.destination);
     }
   }, [audioContext]);
-
-  const loadAudio = useCallback(async (switchName: string, context: AudioContext, retryCount = 3) => {
-    if (switchName === 'Default' || loadedSwitches.has(switchName)) {
-      return;
-    }
-
-    const attemptLoad = async (attempt: number): Promise<void> => {
-      try {
-        const response = await fetch(`https://storage.underthekey.com/switches/sounds/${switchName}.mp3`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const arrayBuffer = await response.arrayBuffer();
-        const audioBuffer = await context.decodeAudioData(arrayBuffer);
-        audioBufferRef.current = audioBuffer;
-        setLoadedSwitches(prev => new Set(prev).add(switchName));
-      } catch (error) {
-        console.error(`오디오 로드 실패 (시도 ${attempt}/${retryCount}):`, error);
-        if (attempt < retryCount) {
-          await new Promise(resolve => setTimeout(resolve, 1000));  // 1초 대기 후 재시도
-          return attemptLoad(attempt + 1);
-        }
-        console.error('모든 시도 실패:', error);
-      }
-    };
-
-    setIsLoading(true);
-    await attemptLoad(1);
-    setIsLoading(false);
-  }, [loadedSwitches]);
 
   const getKeyProperties = (key: string): { frequency: number; pan: number; gain: number; isSpecialKey: boolean } => {
     // 키 매핑 객체 추가
@@ -304,7 +298,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
       return;
     }
 
-    // AudioContext가 suspended 상태인 경�� resume
+    // AudioContext가 suspended 상태인 경 resume
     if (audioContext.state === 'suspended') {
       audioContext.resume();
     }
@@ -373,9 +367,10 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     }
   }, [audioContext, volume, analyserNodeLeft, analyserNodeRight, selectedSwitch, loadedSwitches]);
 
-  const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setVolume(parseFloat(event.target.value));
-  };
+  const handleVolumeChange = useCallback((newVolume: number) => {
+    setVolume(newVolume);
+    localStorage.setItem('volume', newVolume.toString());
+  }, []);
 
   const fetchMoreSentences = useCallback(async () => {
     if (isFetching) return;
@@ -432,22 +427,24 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
 
   const currentSentence = useMemo(() => sentences[currentIndex] || { content: '', author: null }, [sentences, currentIndex]);
 
-  const handleSwitchChange = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
-    const newSwitch = event.target.value;
-    setSelectedSwitch(newSwitch);
-    if (audioContext && !loadedSwitches.has(newSwitch)) {
-      loadAudio(newSwitch, audioContext);
+  const handleSwitchChange = useCallback((newSwitch: string) => {
+    if (newSwitch !== selectedSwitch) {
+      setSelectedSwitch(newSwitch);
+      localStorage.setItem('selectedSwitch', newSwitch);
     }
-    // 모달이 열려있을 때는 타이핑 영역으로 포커스 이동하지 않음
-    if (!isSettingsOpen) {
-      setTimeout(() => {
-        const typingInput = document.querySelector('input[type="text"]') as HTMLInputElement;
-        if (typingInput) {
-          typingInput.focus();
-        }
-      }, 0);
-    }
-  }, [audioContext, loadAudio, loadedSwitches, isSettingsOpen]);
+  }, [selectedSwitch]);
+
+  const handleSaveSettings = useCallback((settings: { selectedSwitch: string; volume: number; language: string }) => {
+    setSelectedSwitch(settings.selectedSwitch);
+    setVolume(settings.volume);
+    setLanguage(settings.language as 'kor' | 'eng');
+
+    localStorage.setItem('selectedSwitch', settings.selectedSwitch);
+    localStorage.setItem('volume', settings.volume.toString());
+    localStorage.setItem('language', settings.language);
+
+    // 여기서 loadAudio를 호출하지 않습니다. useEffect에서 처리됩니다.
+  }, []);
 
   const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
     if (!event.repeat) {
@@ -504,7 +501,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
 
   useEffect(() => {
     const focusTypingArea = () => {
-      if (!isSettingsOpen) {
+      if (!isSettingsOpen && !isMobileDevice()) {
         const typingInput = document.querySelector('input[type="text"]') as HTMLInputElement;
         if (typingInput) {
           typingInput.focus();
@@ -526,6 +523,25 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
       document.removeEventListener('click', focusTypingArea);
     };
   }, [isSettingsOpen]);
+
+  // 모바일 기기 감지 함수 추가
+  const isMobileDevice = () => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  };
+
+  useEffect(() => {
+    // 클라이언트 사이드에서만 localStorage에 접근
+    const storedSwitch = localStorage.getItem('selectedSwitch');
+    if (!storedSwitch) {
+      localStorage.setItem('selectedSwitch', 'Default');
+    }
+    setSelectedSwitch(storedSwitch || 'Default');
+
+    const storedVolume = localStorage.getItem('volume');
+    setVolume(storedVolume ? parseFloat(storedVolume) : 0.5);
+
+    setLanguage((localStorage.getItem('language') as 'kor' | 'eng') || 'kor');
+  }, []);
 
   return (
     <div className={styles.typer}>

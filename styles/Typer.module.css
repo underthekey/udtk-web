@@ -113,14 +113,10 @@
     margin-left: 0.4rem;
   }
 
-  .visualizerContainer {
-    gap: 0.5rem; /* 모바일에서 간격을 좀 더 좁힘 */
-    flex-direction: row; /* 명시적으로 가로 배치 설정 */
-  }
-
   .visualizerContainer > * {
     flex: 1;
-    width: calc(50% - 0.25rem); /* 간격을 고려한 너비 설정 */
+    width: 100vw;
+    height: 100vh;
     max-width: none; /* 최대 너비 제한 제거 */
   }
 }
