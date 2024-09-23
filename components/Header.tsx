@@ -55,9 +55,10 @@ const Header = () => {
         className={styles.menuButton}
         onClick={toggleMenu}
         aria-label="메뉴 열기"
-        style={{ fontSize: '30px' }}
       >
-        ☰
+        <svg viewBox="0 0 64 64">
+          <use xlinkHref={isMenuOpen ? "/images/icon/close.svg#icon" : "/images/icon/menu.svg#icon"} />
+        </svg>
       </button>
       <div className={`${styles.menuDropdown} ${isMenuOpen ? styles.open : ''}`}>
         {menuItems.map((item, index) => (
