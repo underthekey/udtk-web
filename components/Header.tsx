@@ -25,6 +25,17 @@ const Header = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, [isMenuOpen]);
 
+  useEffect(() => {
+    const menuItems = document.querySelectorAll(`.${styles.menuItem}`);
+    const itemCount = menuItems.length;
+
+    menuItems.forEach((item, index) => {
+      const element = item as HTMLElement;
+      element.style.setProperty('--menu-item-index', index.toString());
+      element.style.setProperty('--menu-item-count', itemCount.toString());
+    });
+  }, [isMenuOpen]);
+
   const menuItems = [
     { path: '/', icon: '/images/icon/typer.svg', label: 'Typer' },
     { path: '/tester', icon: '/images/icon/keyboard.svg', label: 'Tester' },
