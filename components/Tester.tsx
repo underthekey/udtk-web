@@ -24,8 +24,10 @@ const Tester: React.FC = () => {
   const changeTheme = useCallback((themeName: string) => {
     setCurrentTheme(themeName);
     localStorage.setItem('currentTheme', themeName);
-    document.documentElement.className = themeName;
-  }, []);
+    if (keyboardRef.current) {
+      keyboardRef.current.className = `${styles.keyboard} ${styles[layout]} ${styles[`theme${themeName.charAt(0).toUpperCase() + themeName.slice(1)}`]}`;
+    }
+  }, [layout]);
 
   const handleKeyPress = useCallback((event: KeyboardEvent) => {
     const key = event.code.toLowerCase();
@@ -200,7 +202,7 @@ const Tester: React.FC = () => {
       }
     });
 
-    // 나머지 키들의 위치 조정
+    // 나머지 키 위치 조정
     const keyPositions: { [key: string]: { col: string, row: string, transform?: string } } = {
       'Delete': { col: is75 ? '3' : '1', row: is75 ? '1' : '2', transform: is75 ? 'translateY(-120%)' : 'translateY(0%)' },
       'Home': { col: is75 ? '3' : '2', row: is75 ? '1' : '1' },
@@ -266,18 +268,15 @@ const Tester: React.FC = () => {
 
   const renderKey = useCallback((keyCode: string, label: string, additionalClass: string = '') => {
     const isPressed = pressedKeys.has(keyCode.toLowerCase());
-    const classes = `${styles.key} ${additionalClass} ${isPressed ? styles.keyPressed : ''}`;
-    const isHidden = layout === 'seventyFivePercent' && (keyCode === 'ScrollLock' || keyCode === 'Insert' || keyCode === 'ContextMenu');
+    const isAccentKey = ['Backquote', 'Backspace', 'Tab', 'CapsLock', 'Enter', 'Space', 'ShiftLeft', 'ShiftRight', 'ControlLeft', 'ControlRight', 'AltLeft', 'AltRight', 'MetaLeft', 'MetaRight', 'ContextMenu', 'Insert', 'Home', 'PageUp', 'Delete', 'End', 'PageDown', 'NumLock', 'NumpadDivide', 'NumpadMultiply', 'NumpadSubtract', 'NumpadAdd', 'NumpadEnter', 'PrintScreen', 'ScrollLock', 'Pause', 'Backslash'].includes(keyCode);
+    const classes = `${styles.key} ${additionalClass} ${isPressed ? styles.keyPressed : ''} ${isAccentKey ? styles.keyAccentColor : ''}`;
 
     return (
-      <div
-        className={`${classes} ${isHidden ? styles.hidden : ''}`}
-        data-key={keyCode}
-      >
+      <div key={keyCode} className={classes} data-key={keyCode}>
         {label}
       </div>
     );
-  }, [pressedKeys, layout]);
+  }, [pressedKeys]);
 
   const renderKeyboard = () => {
     return (
@@ -478,13 +477,13 @@ const Tester: React.FC = () => {
             </div>
           </div>
           <div className={styles.themeSection}>
-            <div className={styles.retro} onClick={() => changeTheme('retro')}>
+            <div className={styles.retro} onClick={() => changeTheme('Retro')}>
               <div className={styles.themeColor}></div>
               <div className={styles.themeColor}></div>
               <div className={styles.themeColor}></div>
               <div className={styles.themeColor}></div>
             </div>
-            <div className={styles.navyBlue} onClick={() => changeTheme('navy-blue')}>
+            <div className={styles.navyBlue} onClick={() => changeTheme('NavyBlue')}>
               <div className={styles.themeColor}></div>
               <div className={styles.themeColor}></div>
               <div className={styles.themeColor}></div>
@@ -493,7 +492,10 @@ const Tester: React.FC = () => {
           </div>
         </div>
 
-        <div className={`${styles.keyboard} ${styles[layout]}`} ref={keyboardRef}>
+        <div
+          className={`${styles.keyboard} ${styles[layout]} ${styles[`theme${currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1)}`]}`}
+          ref={keyboardRef}
+        >
           {renderKeyboard()}
         </div>
       </main>
