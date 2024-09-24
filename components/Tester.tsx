@@ -132,64 +132,126 @@ const Tester: React.FC = () => {
     }
   }, []);
 
-  const undo75 = useCallback(() => {
-    updateStylesFor75(false);
-  }, [updateStylesFor75]);
+  const applyFullSizeStyles = useCallback(() => {
+    if (keyboardRef.current) {
+      keyboardRef.current.style.maxWidth = '122rem';
+      keyboardRef.current.style.gridTemplateColumns = '215fr 2fr 45fr 1fr 60fr';
+    }
+    if (numpadRef.current) {
+      numpadRef.current.style.display = 'grid';
+    }
+    updateCommonStyles('fullSize');
+  }, []);
 
-  const undoTKL = useCallback(() => {
-    if (keyboardRef.current && numpadRef.current) {
-      keyboardRef.current.classList.remove(styles.tkl);
-      numpadRef.current.classList.remove(styles.hiddenStep1, styles.hiddenStep2);
+  const applyTKLStyles = useCallback(() => {
+    if (keyboardRef.current) {
+      keyboardRef.current.style.maxWidth = '100rem';
+      keyboardRef.current.style.gridTemplateColumns = '215fr 7fr 45fr';
+    }
+    if (numpadRef.current) {
+      numpadRef.current.style.display = 'none';
+    }
+    updateCommonStyles('tkl');
+  }, []);
+
+  const apply75Styles = useCallback(() => {
+    if (keyboardRef.current) {
+      keyboardRef.current.style.maxWidth = '85rem';
+      keyboardRef.current.style.gridTemplateColumns = '79rem 0 16.5rem';
+    }
+    if (numpadRef.current) {
+      numpadRef.current.style.display = 'none';
+    }
+    updateCommonStyles('seventyFivePercent');
+    updateStylesFor75(true);
+  }, []);
+
+  const updateCommonStyles = useCallback((layoutType: 'fullSize' | 'tkl' | 'seventyFivePercent') => {
+    const isFullSize = layoutType === 'fullSize';
+    const isTKL = layoutType === 'tkl';
+    const is75 = layoutType === 'seventyFivePercent';
+
+    if (functionRegionRef.current) {
+      functionRegionRef.current.style.gridTemplateColumns = is75
+        ? '2fr 0 repeat(4, 2fr) 0 repeat(4, 2fr) 0 repeat(4,2fr)'
+        : '2fr 2fr repeat(4, 2fr) 1fr repeat(4, 2fr) 1fr repeat(4,2fr)';
+      functionRegionRef.current.style.width = is75 ? '86.7%' : '100%';
+    }
+
+    if (controlRegionRef.current) {
+      controlRegionRef.current.style.width = is75 ? '95%' : '100%';
+      controlRegionRef.current.style.transform = is75 ? 'translateX(-68%)' : 'translateX(0%)';
+    }
+
+    if (navigationRegionRef.current) {
+      navigationRegionRef.current.style.transform = is75 ? 'translateX(-68%)' : 'translateX(0%)';
+    }
+
+    const hiddenKeys = ['ScrollLock', 'Insert', 'ContextMenu'];
+    hiddenKeys.forEach(key => {
+      const keyElement = document.querySelector(`[data-key="${key}"]`) as HTMLElement;
+      if (keyElement) {
+        keyElement.style.display = is75 ? 'none' : 'flex';
+      }
+    });
+
+    // 나머지 키들의 위치 조정
+    const keyPositions: { [key: string]: { col: string, row: string, transform?: string } } = {
+      'Delete': { col: is75 ? '3' : '1', row: is75 ? '1' : '2', transform: is75 ? 'translateY(-120%)' : 'translateY(0%)' },
+      'Home': { col: is75 ? '3' : '2', row: is75 ? '1' : '1' },
+      'End': { col: is75 ? '3' : '2', row: is75 ? '2' : '2' },
+      'PageUp': { col: is75 ? '3' : '3', row: is75 ? '3' : '1' },
+      'PageDown': { col: is75 ? '3' : '3', row: is75 ? '4' : '2' },
+    };
+
+    Object.entries(keyPositions).forEach(([key, position]) => {
+      const keyElement = document.querySelector(`[data-key="${key}"]`) as HTMLElement;
+      if (keyElement) {
+        keyElement.style.gridColumn = position.col;
+        keyElement.style.gridRow = position.row;
+        if (position.transform) {
+          keyElement.style.transform = position.transform;
+        }
+      }
+    });
+
+    if (fourthRowRef.current) {
+      fourthRowRef.current.style.gridTemplateColumns = is75
+        ? '2.29fr repeat(10, 1fr) 1.75fr 1.04fr'
+        : '2.29fr repeat(10, 1fr) 2.79fr';
+    }
+
+    if (fifthRowRef.current) {
+      fifthRowRef.current.style.gridTemplateColumns = is75
+        ? 'repeat(3, 1.29fr) 6.36fr repeat(3, 1fr) 2.15fr'
+        : 'repeat(3, 1.29fr) 6.36fr repeat(4, 1.29fr)';
     }
   }, []);
 
   const changeToFullSize = useCallback(() => {
-    undo75();
-    undoTKL();
-    if (keyboardRef.current) {
-      keyboardRef.current.style.maxWidth = '120rem';
-      keyboardRef.current.classList.add(styles.fullSize);
-    }
-  }, [undo75, undoTKL]);
+    setLayout('fullSize');
+    applyFullSizeStyles();
+  }, [applyFullSizeStyles]);
 
   const changeToTKL = useCallback(() => {
-    return new Promise<void>(resolve => {
-      undo75();
-      if (numpadRef.current && keyboardRef.current) {
-        numpadRef.current.classList.add(styles.hiddenStep1);
-        keyboardRef.current.style.maxWidth = '98rem';
-        setTimeout(() => {
-          keyboardRef.current?.classList.remove(styles.fullSize);
-          keyboardRef.current?.classList.add(styles.tkl);
-          numpadRef.current?.classList.add(styles.hiddenStep2);
-          resolve();
-        }, 150);
-      } else {
-        resolve();
-      }
-    });
-  }, [undo75]);
+    setLayout('tkl');
+    applyTKLStyles();
+  }, [applyTKLStyles]);
 
-  const changeTo75 = useCallback(async () => {
-    await changeToTKL();
-    if (keyboardRef.current) {
-      keyboardRef.current.style.maxWidth = '85rem';
-    }
-    updateStylesFor75(true);
-  }, [changeToTKL, updateStylesFor75]);
+  const changeTo75 = useCallback(() => {
+    setLayout('seventyFivePercent');
+    apply75Styles();
+  }, [apply75Styles]);
 
   const updateLayout = useCallback((value: number) => {
     switch (value) {
       case 1:
-        setLayout('fullSize');
         changeToFullSize();
         break;
       case 2:
-        setLayout('tkl');
         changeToTKL();
         break;
       case 3:
-        setLayout('seventyFivePercent');
         changeTo75();
         break;
       default:
