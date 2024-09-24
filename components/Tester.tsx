@@ -54,7 +54,7 @@ const Tester: React.FC = () => {
   const updateStylesFor75 = useCallback((is75Percent: boolean) => {
     const paddingValue = is75Percent ? '0.15rem' : '0.5rem';
     const displayValue = is75Percent ? 'none' : 'flex';
-    const transformValue = is75Percent ? '-66.7%' : '0%';
+    const transformValue = is75Percent ? '-68%' : '0%';
 
     if (keyboardRef.current) {
       keyboardRef.current.classList.toggle(styles.seventyFivePercent, is75Percent);
@@ -74,6 +74,45 @@ const Tester: React.FC = () => {
     if (controlRegionRef.current) {
       controlRegionRef.current.style.width = is75Percent ? '95%' : '100%';
       controlRegionRef.current.style.transform = `translateX(${transformValue})`;
+    }
+
+    const btnScrollLock = document.querySelector(`[data-key="ScrollLock"]`) as HTMLElement;
+    const btnInsert = document.querySelector(`[data-key="Insert"]`) as HTMLElement;
+    const btnContextMenu = document.querySelector(`[data-key="ContextMenu"]`) as HTMLElement;
+    const btnDelete = document.querySelector(`[data-key="Delete"]`) as HTMLElement;
+    const btnHome = document.querySelector(`[data-key="Home"]`) as HTMLElement;
+    const btnEnd = document.querySelector(`[data-key="End"]`) as HTMLElement;
+    const btnPgUp = document.querySelector(`[data-key="PageUp"]`) as HTMLElement;
+    const btnPgDn = document.querySelector(`[data-key="PageDown"]`) as HTMLElement;
+
+    if (btnScrollLock) btnScrollLock.style.display = displayValue;
+    if (btnInsert) btnInsert.style.display = displayValue;
+    if (btnContextMenu) btnContextMenu.style.display = displayValue;
+
+    if (btnDelete) {
+      btnDelete.style.gridColumn = is75Percent ? '3' : '1';
+      btnDelete.style.gridRow = is75Percent ? '1' : '2';
+      btnDelete.style.transform = is75Percent ? 'translateY(-120%)' : 'translateY(0%)';
+    }
+
+    if (btnHome) {
+      btnHome.style.gridColumn = is75Percent ? '3' : '2';
+      btnHome.style.gridRow = is75Percent ? '1' : '1';
+    }
+
+    if (btnEnd) {
+      btnEnd.style.gridColumn = is75Percent ? '3' : '2';
+      btnEnd.style.gridRow = is75Percent ? '2' : '2';
+    }
+
+    if (btnPgUp) {
+      btnPgUp.style.gridColumn = is75Percent ? '3' : '3';
+      btnPgUp.style.gridRow = is75Percent ? '3' : '1';
+    }
+
+    if (btnPgDn) {
+      btnPgDn.style.gridColumn = is75Percent ? '3' : '3';
+      btnPgDn.style.gridRow = is75Percent ? '4' : '2';
     }
 
     if (navigationRegionRef.current) {
