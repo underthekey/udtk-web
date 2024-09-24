@@ -152,6 +152,11 @@ const Tester: React.FC = () => {
       numpadRef.current.style.display = 'none';
     }
     updateCommonStyles('tkl');
+    // 75%에서 TKL로 전환할 때 numpad를 숨기는 로직 추가
+    const numpadSection = document.querySelector(`.${styles.numpad}`) as HTMLElement;
+    if (numpadSection) {
+      numpadSection.style.display = 'none';
+    }
   }, []);
 
   const apply75Styles = useCallback(() => {
@@ -391,27 +396,29 @@ const Tester: React.FC = () => {
           {renderKey('ArrowRight', '→', styles.arrowRight)}
         </section>
 
-        {layout !== 'seventyFivePercent' && (
-          <section className={`${styles.region} ${styles.numpad}`} ref={numpadRef}>
-            {renderKey('NumLock', 'Num')}
-            {renderKey('NumpadDivide', '/')}
-            {renderKey('NumpadMultiply', '*')}
-            {renderKey('NumpadSubtract', '-')}
-            {renderKey('Numpad7', '7')}
-            {renderKey('Numpad8', '8')}
-            {renderKey('Numpad9', '9')}
-            {renderKey('NumpadAdd', '+', styles.numpadadd)}
-            {renderKey('Numpad4', '4')}
-            {renderKey('Numpad5', '5')}
-            {renderKey('Numpad6', '6')}
-            {renderKey('Numpad1', '1')}
-            {renderKey('Numpad2', '2')}
-            {renderKey('Numpad3', '3')}
-            {renderKey('NumpadEnter', 'Enter', styles.numpadenter)}
-            {renderKey('Numpad0', '0', styles.numpad0)}
-            {renderKey('NumpadDecimal', '.')}
-          </section>
-        )}
+        <section
+          className={`${styles.region} ${styles.numpad}`}
+          ref={numpadRef}
+          style={{ display: layout === 'fullSize' ? 'grid' : 'none' }}
+        >
+          {renderKey('NumLock', 'Num')}
+          {renderKey('NumpadDivide', '/')}
+          {renderKey('NumpadMultiply', '*')}
+          {renderKey('NumpadSubtract', '-')}
+          {renderKey('Numpad7', '7')}
+          {renderKey('Numpad8', '8')}
+          {renderKey('Numpad9', '9')}
+          {renderKey('NumpadAdd', '+', styles.numpadadd)}
+          {renderKey('Numpad4', '4')}
+          {renderKey('Numpad5', '5')}
+          {renderKey('Numpad6', '6')}
+          {renderKey('Numpad1', '1')}
+          {renderKey('Numpad2', '2')}
+          {renderKey('Numpad3', '3')}
+          {renderKey('NumpadEnter', 'Enter', styles.numpadenter)}
+          {renderKey('Numpad0', '0', styles.numpad0)}
+          {renderKey('NumpadDecimal', '.')}
+        </section>
       </>
     );
   };
