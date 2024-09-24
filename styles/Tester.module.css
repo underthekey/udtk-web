@@ -182,26 +182,22 @@
   background-color: var(--color-keyboard);
   box-shadow: 0 0.4rem 0 0.6rem var(--color-keyboard-border), 0 1.2rem 3.2rem rgba(0, 0, 0, 0.1);
 
-  /* force GPU acceleration to reduce
-   potential subrendering issues */
   transform: translateZ(0);
-
   transition: all 0.2s;
+  width: var(--keyboard-width, 100%);
+  max-width: 122rem;
 }
 
 .fullSize {
   grid-template-columns: 215fr 2fr 45fr 1fr 60fr;
-  max-width: 122rem;
 }
 
 .tkl {
   grid-template-columns: 215fr 7fr 45fr;
-  max-width: 100rem;
 }
 
 .seventyFivePercent {
   grid-template-columns: 79rem 0 16.5rem;
-  max-width: 86rem;
 }
 
 .key {
@@ -577,6 +573,8 @@ in media queries! Instead, 1rem = 1em = 16px */
 @media (max-width: 87em) {
   .testerWrapper {
     font-size: 56.25%;
+    --standard-key-size: 4.5rem;
+    --keyboard-width: 90%;
   }
 }
 
@@ -586,6 +584,8 @@ in media queries! Instead, 1rem = 1em = 16px */
 @media (max-width: 79em) {
   .testerWrapper {
     font-size: 50%;
+    --standard-key-size: 4rem;
+    --keyboard-width: 80%;
   }
 }
 
@@ -595,6 +595,8 @@ in media queries! Instead, 1rem = 1em = 16px */
 @media (max-width: 66em) {
   .testerWrapper {
     font-size: 43.75%;
+    --standard-key-size: 3.5rem;
+    --keyboard-width: 70%;
   }
 }
 
@@ -604,6 +606,8 @@ in media queries! Instead, 1rem = 1em = 16px */
 @media (max-width: 58em) {
   .testerWrapper {
     font-size: 37.5%;
+    --standard-key-size: 3rem;
+    --keyboard-width: 60%;
   }
 }
 
@@ -613,6 +617,8 @@ in media queries! Instead, 1rem = 1em = 16px */
 @media (max-width: 49em) {
   .testerWrapper {
     font-size: 31.25%;
+    --standard-key-size: 2.5rem;
+    --keyboard-width: 50%;
   }
 }
 
@@ -622,6 +628,8 @@ in media queries! Instead, 1rem = 1em = 16px */
 @media (max-width: 40em) {
   .testerWrapper {
     font-size: 25%;
+    --standard-key-size: 2rem;
+    --keyboard-width: 40%;
   }
 }
 
@@ -631,6 +639,8 @@ in media queries! Instead, 1rem = 1em = 16px */
 @media (max-width: 32em) {
   .testerWrapper {
     font-size: 18.75%;
+    --standard-key-size: 1.5rem;
+    --keyboard-width: 30%;
   }
 }
 
@@ -640,5 +650,7 @@ in media queries! Instead, 1rem = 1em = 16px */
 @media (max-width: 24em) {
   .testerWrapper {
     font-size: 16%;
+    --standard-key-size: 1.2rem;
+    --keyboard-width: 25%;
   }
 }

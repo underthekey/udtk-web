@@ -219,7 +219,9 @@ const KeyboardTester: React.FC = () => {
     };
 
     return (
-      <div className={`${styles.keyboard} ${styles[layout]}`}>
+      <div className={`${styles.keyboard} ${styles[layout]}`} style={{
+        width: layout === 'fullSize' ? '100%' : layout === 'tkl' ? '82%' : '70%'
+      }}>
         <div className={`${styles.region} ${styles.function}`} style={{
           gridTemplateColumns: layout === 'seventyFivePercent'
             ? '2fr 0 repeat(4, 2fr) 0 repeat(4, 2fr) 0 repeat(4,2fr)'
@@ -335,12 +337,6 @@ const KeyboardTester: React.FC = () => {
           </div>
           {renderKeyboard()}
         </main>
-
-        <footer className={styles.footer}>
-          <p className={styles.footerText}>
-            Made with ❤️ by <a href="https://github.com/Mostafa-Abbasi" target="_blank" rel="noopener noreferrer">Mostafa Abbasi</a>
-          </p>
-        </footer>
       </div>
     </div>
   );
