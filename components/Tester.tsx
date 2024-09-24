@@ -161,7 +161,7 @@ const Tester: React.FC = () => {
 
   const apply75Styles = useCallback(() => {
     if (keyboardRef.current) {
-      keyboardRef.current.style.maxWidth = '85rem';
+      keyboardRef.current.style.maxWidth = '86rem';
       keyboardRef.current.style.gridTemplateColumns = '79rem 0 16.5rem';
     }
     if (numpadRef.current) {
@@ -422,6 +422,29 @@ const Tester: React.FC = () => {
       </>
     );
   };
+
+  const updateFontSize = useCallback(() => {
+    const width = window.innerWidth;
+    let fontSize;
+
+    if (width > 1392) fontSize = '62.5%';
+    else if (width > 1264) fontSize = '56.25%';
+    else if (width > 1056) fontSize = '50%';
+    else if (width > 928) fontSize = '43.75%';
+    else if (width > 784) fontSize = '37.5%';
+    else if (width > 640) fontSize = '31.25%';
+    else if (width > 512) fontSize = '25%';
+    else if (width > 384) fontSize = '18.75%';
+    else fontSize = '16%';
+
+    document.documentElement.style.fontSize = fontSize;
+  }, []);
+
+  useEffect(() => {
+    updateFontSize();
+    window.addEventListener('resize', updateFontSize);
+    return () => window.removeEventListener('resize', updateFontSize);
+  }, [updateFontSize]);
 
   return (
     <div className={styles.container}>
