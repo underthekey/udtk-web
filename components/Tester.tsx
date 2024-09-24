@@ -368,21 +368,6 @@ const Tester: React.FC = () => {
       </main>
 
       <footer className={styles.footer}>
-        <p className={styles.footerText}>
-          Copyright © 2023 | Contact:
-          <a href="mailto:mostafaabbac@gmail.com" className={styles.link}>
-            mostafaabbac@gmail.com
-          </a>
-          |
-          <a
-            href="https://github.com/Mostafa-Abbasi/KeyboardTester"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.link}
-          >
-            Repository
-          </a>
-        </p>
       </footer>
     </div>
   );
