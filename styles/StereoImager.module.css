@@ -1,20 +1,28 @@
+.stereoImagerWrapper {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+  height: 50vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
 .stereoImager {
   width: 100vw;
-  /* max-width: 300px; */
-  height: 100vh;
+  height: 56.25vw; /* 16:9 비율 유지 */
+  max-height: 200vh;
+  object-fit: cover;
   opacity: 20%;
+  transform: translateY(7.5%);
 }
 
-@media (max-width: 800px) {
+@media (max-aspect-ratio: 16/9) {
   .stereoImager {
-    max-width: 250px;
-    height: 125px;
-  }
-}
-
-@media (max-width: 600px) {
-  .stereoImager {
-    max-width: 200px;
-    height: 100px;
+    width: 100%;
+    height: auto;
+    transform: translateY(12.5%);
   }
 }
