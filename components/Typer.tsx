@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Sentence } from '@/app/types';
 import SentenceDisplay from './SentenceDisplay';
 import TypingArea from './TypingArea';
@@ -9,6 +9,7 @@ import StereoImager from './StereoImager';
 import styles from '@/styles/Typer.module.css';
 import Image from 'next/image';
 import SettingsModal from './SettingsModal';
+import { TypingAreaRef } from './TypingArea';
 
 const switchOptions = [
   'None',
@@ -38,7 +39,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
   const [volume, setVolume] = useState(0.5);
   const [language, setLanguage] = useState<'kor' | 'eng'>('kor');
 
-  const typingAreaRef = useRef<HTMLInputElement>(null);
+  const typingAreaRef = useRef<TypingAreaRef>(null);
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const audioBufferRef = useRef<AudioBuffer | null>(null);
   const [isShiftPressed, setIsShiftPressed] = useState(false);
@@ -92,6 +93,9 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
       } else {
         setCurrentIndex(0);
         setIsLanguageChanging(false);
+      }
+      if (typingAreaRef.current) {
+        typingAreaRef.current.resetTypingSpeed();
       }
       return newLang;
     });
@@ -274,6 +278,17 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
           gain = 0.8;
           pan = 35;
           break;
+        case 'Tab':
+          frequency = 900;
+          gain = 0.6;
+          pan = -30;
+          isSpecialKey = true;
+          break;
+        case 'Escape':
+          frequency = 800;
+          gain = 0.7;
+          pan = -35;
+          break;
       }
     }
 
@@ -446,20 +461,24 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     localStorage.setItem('volume', settings.volume.toString());
     localStorage.setItem('language', settings.language);
 
-    // 여기서 loadAudio를 호출하지 않습니다. useEffect에서 처리됩니다.
   }, []);
 
-  const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!event.repeat) {
-      playKeySound(event.code);
-    }
+  const [lastPlayedKey, setLastPlayedKey] = useState<string | null>(null);
 
-    if (event.key === 'Shift') {
-      setIsShiftPressed(true);
-    } else if (event.key === 'CapsLock') {
-      setIsCapsLockOn(prev => !prev);
+  const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      typingAreaRef.current?.resetTypingArea();
     }
-  }, [playKeySound, setIsShiftPressed, setIsCapsLockOn]);
+    if (event.key === 'Tab') {
+      event.preventDefault(); // Tab 키의 기본 동작 방지
+    }
+    if (event.repeat) return; // 키 반복 시 소리 재생 방지
+
+    // 모든 키에 대해 소리 재생
+    playKeySound(event.code);
+    setLastPlayedKey(event.code);
+  }, [playKeySound]);
 
   const handleKeyUp = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
     setPressedKeys(prev => {
@@ -471,13 +490,16 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     if (event.key === 'Shift') {
       setIsShiftPressed(false);
     }
+    setLastPlayedKey(null); // 키를 놓았을 때 lastPlayedKey 초기화
   }, [setIsShiftPressed]);
 
   useEffect(() => {
     const handleGlobalKeyDown = (event: KeyboardEvent) => {
-      if (!pressedKeys.has(event.code)) {
+      if (event.repeat) return; // 키 반복 시 소리 재생 방지
+      if (!pressedKeys.has(event.code) && lastPlayedKey !== event.code) {
         setPressedKeys(prev => new Set(prev).add(event.code));
         playKeySound(event.code);
+        setLastPlayedKey(event.code);
       }
     };
 
@@ -487,6 +509,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
         newSet.delete(event.code);
         return newSet;
       });
+      setLastPlayedKey(null); // 키를 놓았을 때 lastPlayedKey 초기화
     };
 
     window.addEventListener('keydown', handleGlobalKeyDown);
@@ -496,7 +519,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
       window.removeEventListener('keydown', handleGlobalKeyDown);
       window.removeEventListener('keyup', handleGlobalKeyUp);
     };
-  }, [playKeySound, pressedKeys]);
+  }, [playKeySound, pressedKeys, lastPlayedKey]);
 
   const toggleSettings = () => {
     setIsSettingsOpen(!isSettingsOpen);
@@ -546,6 +569,21 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     setLanguage((localStorage.getItem('language') as 'kor' | 'eng') || 'kor');
   }, []);
 
+  const playTestSound = useCallback((newVolume: number) => {
+    if (audioContext && audioBufferRef.current) {
+      const source = audioContext.createBufferSource();
+      source.buffer = audioBufferRef.current;
+
+      const gainNode = audioContext.createGain();
+      gainNode.gain.setValueAtTime(newVolume * 2, audioContext.currentTime);
+
+      source.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      source.start(0);
+    }
+  }, [audioContext]);
+
   return (
     <div className={styles.typer}>
       <div className={styles.visualizerContainer}>
@@ -580,7 +618,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
               onKeyDown={handleKeyDown}
               onKeyUp={handleKeyUp}
               isSettingsOpen={isSettingsOpen}
-              maxLength={currentSentence?.content.length} // 최대 입력 길이 추가
+              maxLength={currentSentence?.content.length}
             />
           )}
         </div>
@@ -600,6 +638,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
         switchOptions={switchOptions}
         language={language}
         onLanguageChange={handleLanguageChange}
+        playTestSound={playTestSound}
       />
     </div>
   );

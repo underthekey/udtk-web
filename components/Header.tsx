@@ -65,7 +65,7 @@ const Header = () => {
   const menuItems = [
     { path: '/', icon: '/images/icon/typer.svg', label: 'Typer' },
     { path: '/tester', icon: '/images/icon/keyboard.svg', label: 'Tester' },
-    { path: '/custom', icon: '/images/icon/switch.svg', label: 'Custom' },
+    // { path: '/custom', icon: '/images/icon/switch.svg', label: 'Custom' },
   ];
 
   return (

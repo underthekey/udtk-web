@@ -7,12 +7,12 @@ interface StereoImagerProps {
     panValue: number;  // 패닝 값
 }
 
-const RISE_SPEED = 0.02; // 상향 decay
-const DECAY_SPEED = 0.005; // 하향 decay
+const RISE_SPEED = 0.005; // 상향 attack
+const DECAY_SPEED = 0.007; // 하향 decay
 
 const StereoImager: React.FC<StereoImagerProps> = ({ analyserNodeLeft, analyserNodeRight, panValue }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const [canvasSize, setCanvasSize] = useState({ width: 600, height: 300 });
+    const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
     const previousDataRef = useRef<Float32Array | null>(null);
     const animationIdRef = useRef<number | null>(null);  // 애니메이션 프레임 ID 저장
     const dataArrayLeft = useRef<Float32Array | null>(null);  // 재사용할 수 있도록 useRef로 관리
@@ -20,13 +20,22 @@ const StereoImager: React.FC<StereoImagerProps> = ({ analyserNodeLeft, analyserN
 
     useEffect(() => {
         const handleResize = () => {
-            setCanvasSize({
-                width: window.innerWidth,
-                height: window.innerHeight, // 높이를 화면 높이의 절반으로 설정
-            });
+            const aspectRatio = window.innerWidth / window.innerHeight;
+            let width = window.innerWidth;
+            let height = window.innerHeight;
+
+            if (aspectRatio < 16 / 9) { // 세로가 긴 화면
+                width = window.innerWidth;
+                height = width / (16 / 9);
+            } else { // 가로가 긴 화면
+                height = window.innerHeight;
+                width = height * (16 / 9);
+            }
+
+            setCanvasSize({ width, height });
         };
 
-        handleResize(); // 초기 크기 설정
+        handleResize();
         window.addEventListener('resize', handleResize);
 
         return () => {
@@ -105,17 +114,41 @@ const StereoImager: React.FC<StereoImagerProps> = ({ analyserNodeLeft, analyserN
                 // 중앙 강도 계산 추가
                 const centerIntensity = (leftIntensity + rightIntensity) / 2;
 
-                // 점 그리기 함수 수정
                 const drawPoint = (intensity: number, side: number) => {
-                    const maxRadius = (height / 2) * 0.95; // 최대 반지름을 반원 크기의 95%로 제한
-                    const radius = Math.min(maxRadius, Math.max((height / 2) * (0.1 + intensity * 0.9), 0));
-                    const adjustedAngle = Math.PI - angle; // 각도 조정
+                    const maxRadius = (height / 2) * 0.98;
+                    const baseRadius = (height / 2) * (0.1 + intensity * 0.9);
+
+                    const centerAmplification = Math.exp(-Math.pow(panValue / 30, 2)) * 3;
+                    const scatter = Math.random() * 0.3 * centerAmplification;
+
+                    const radius = Math.min(maxRadius, Math.max(baseRadius * (1 + scatter), 0));
+
+                    const adjustedAngle = Math.PI - angle + (Math.random() - 0.5) * scatter * Math.PI;
+
                     const x = width / 2 + Math.cos(adjustedAngle) * radius * side;
                     const y = height - Math.sin(adjustedAngle) * radius;
 
+                    // 가장자리 효과를 약간 줄임
+                    const edgeFactor = 1 - Math.pow(radius / maxRadius, 2);
+
+                    // 점 크기 계산 함수 수정
+                    const calculatePointSize = (intensity: number) => {
+                        const baseSize = Math.min(width, height) / 200; // 기본 크기를 더 작게 조정 (200에서 300으로 변경)
+                        const maxSize = Math.min(width, height) / 100; // 최대 크기 제한 추가
+                        return Math.min(
+                            maxSize,
+                            Math.max(baseSize + intensity * baseSize, 0) * (edgeFactor * 0.7 + 0.3)
+                        );
+                    };
+
+                    const pointSize = calculatePointSize(intensity);
+
+                    // 투명도 조정
+                    const alpha = 0.4 + intensity * 0.6; // 최소 투명도를 높이고, 강도에 따라 더 불투명하게
+
                     ctx.beginPath();
-                    ctx.arc(x, y, Math.max(2 + intensity * 2, 0), 0, 2 * Math.PI);
-                    ctx.fillStyle = `rgba(0, 48, 73, ${0.3 + intensity * 0.7})`;
+                    ctx.arc(x, y, pointSize, 0, 2 * Math.PI);
+                    ctx.fillStyle = `rgba(0, 48, 73, ${alpha})`;
                     ctx.fill();
                 };
 
@@ -124,15 +157,37 @@ const StereoImager: React.FC<StereoImagerProps> = ({ analyserNodeLeft, analyserN
 
                 // 중앙 포인트 그리기 수정
                 const drawCenterPoint = () => {
-                    const maxRadius = (height / 2) * 0.95;
-                    const radius = Math.min(maxRadius, Math.max((height / 2) * (0.1 + centerIntensity * 0.9), 0));
-                    const adjustedAngle = Math.PI - angle;
+                    const maxRadius = (height / 2) * 0.98;
+                    const baseRadius = (height / 2) * (0.1 + centerIntensity * 0.9);
+
+                    const centerAmplification = Math.exp(-Math.pow(panValue / 30, 2)) * 3;
+                    const scatter = Math.random() * 0.3 * centerAmplification;
+
+                    const radius = Math.min(maxRadius, Math.max(baseRadius * (1 + scatter), 0));
+
+                    const adjustedAngle = Math.PI - angle + (Math.random() - 0.5) * scatter * Math.PI;
+
                     const x = width / 2 + Math.cos(adjustedAngle) * radius * panValue * 0.2;
                     const y = height - Math.sin(adjustedAngle) * radius;
 
+                    const edgeFactor = 1 - Math.pow(radius / maxRadius, 2);
+
+                    const calculatePointSize = (intensity: number) => {
+                        const baseSize = Math.min(width, height) / 300; // 기본 크기를 더 작게 조정 (200에서 300으로 변경)
+                        const maxSize = Math.min(width, height) / 100; // 최대 크기 제한 추가
+                        return Math.min(
+                            maxSize,
+                            Math.max(baseSize + intensity * baseSize, 0) * (edgeFactor * 0.7 + 0.3)
+                        );
+                    };
+
+                    const pointSize = calculatePointSize(centerIntensity) / 2; // 중앙 포인트 크기를 더 작게 조정 (1.5에서 2로 변경)
+
+                    const alpha = 0.3 + centerIntensity * 0.7; // 중앙 포인트 투명도 조정
+
                     ctx.beginPath();
-                    ctx.arc(x, y, Math.max(1 + centerIntensity * 2, 0), 0, 2 * Math.PI);
-                    ctx.fillStyle = `rgba(0, 48, 73, ${0.2 + centerIntensity * 0.5})`;
+                    ctx.arc(x, y, pointSize, 0, 2 * Math.PI);
+                    ctx.fillStyle = `rgba(0, 48, 73, ${alpha})`;
                     ctx.fill();
                 };
 
@@ -169,12 +224,14 @@ const StereoImager: React.FC<StereoImagerProps> = ({ analyserNodeLeft, analyserN
     }, [analyserNodeLeft, analyserNodeRight, panValue, canvasSize]);
 
     return (
-        <canvas
-            ref={canvasRef}
-            width={canvasSize.width}
-            height={canvasSize.height}
-            className={styles.stereoImager}
-        />
+        <div className={styles.stereoImagerWrapper}>
+            <canvas
+                ref={canvasRef}
+                width={canvasSize.width}
+                height={canvasSize.height}
+                className={styles.stereoImager}
+            />
+        </div>
     );
 };
 

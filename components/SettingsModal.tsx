@@ -11,6 +11,7 @@ interface SettingsModalProps {
     switchOptions: string[];
     language: string;
     onLanguageChange: () => void;
+    playTestSound: (volume: number) => void;
 }
 
 const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -23,6 +24,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     switchOptions,
     language,
     onLanguageChange,
+    playTestSound,
 }) => {
     const [tempSelectedSwitch, setTempSelectedSwitch] = useState(selectedSwitch);
     const [tempVolume, setTempVolume] = useState(volume);
@@ -43,11 +45,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         }
     };
 
-    const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleVolumeChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
         const newVolume = parseFloat(event.target.value);
         setTempVolume(newVolume);
         onVolumeChange(newVolume);
-    };
+
+        const adjustedVolume = newVolume * 1.5 * 10;
+        playTestSound(adjustedVolume);
+    }, [onVolumeChange, playTestSound]);
 
     const handleLanguageChange = useCallback(() => {
         setTempLanguage(prev => prev === 'kor' ? 'eng' : 'kor');
@@ -133,8 +138,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                         min="0"
                         max="1"
                         step="0.1"
-                        value={volume}
-                        onChange={(e) => onVolumeChange(parseFloat(e.target.value))}
+                        value={tempVolume}
+                        onChange={handleVolumeChange}
                         className={styles.volumeSlider}
                     />
                 </div>

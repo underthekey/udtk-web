@@ -1,6 +1,7 @@
 import '@/styles/globals.css'
 import type { Metadata, Viewport } from "next";
-import Header from "@/components/Header";  // Header 컴포넌트 import
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import Script from 'next/script';
 
 export const metadata: Metadata = {
@@ -72,6 +73,7 @@ export default function RootLayout({
       <body>
         <Header />  {/* Header 컴포넌트 추가 */}
         {children}
+        <Footer />  {/* Footer 컴포넌트 추가 */}
       </body>
     </html>
   );

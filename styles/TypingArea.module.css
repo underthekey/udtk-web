@@ -75,3 +75,46 @@
 .input::placeholder {
   color: var(--gray-text-color);
 }
+
+.typingSpeed {
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.8rem; /* 기본 크기 */
+  color: var(--gray-text-color);
+  transition: font-size 0.3s ease, bottom 0.3s ease;
+}
+
+@media (min-width: 768px) {
+  .input {
+    font-size: 1.5rem;
+    line-height: 1.5;
+  }
+
+  .typingSpeed {
+    font-size: 0.8rem;
+    bottom: -30px;
+  }
+}
+
+@media (max-width: 767px) {
+  .input {
+    font-size: 1.2rem;
+    padding: 0.3rem;
+    padding-left: 0.1rem;
+    line-height: 1.2;
+  }
+
+  .typingSpeed {
+    font-size: 0.7rem;
+    bottom: -25px;
+  }
+}
+
+@media (max-width: 480px) {
+  .typingSpeed {
+    font-size: 0.6rem;
+    bottom: -20px;
+  }
+}

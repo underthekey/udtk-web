@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useLayoutEffect, forwardRef, ForwardedRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useImperativeHandle, forwardRef, useLayoutEffect } from 'react';
 import styles from '@/styles/TypingArea.module.css';
 
 interface TypingAreaProps {
@@ -13,7 +13,12 @@ interface TypingAreaProps {
   maxLength?: number;
 }
 
-const TypingArea = forwardRef<HTMLInputElement, TypingAreaProps>(({
+export interface TypingAreaRef {
+  resetTypingSpeed: () => void;
+  resetTypingArea: () => void;
+}
+
+const TypingArea = forwardRef<TypingAreaRef, TypingAreaProps>(({
   sentence,
   onComplete,
   onInputChange,
@@ -27,10 +32,40 @@ const TypingArea = forwardRef<HTMLInputElement, TypingAreaProps>(({
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [lastCompletedCharIndex, setLastCompletedCharIndex] = useState(-1);
+  const [typingSpeed, setTypingSpeed] = useState(0);
+  const [finalSpeed, setFinalSpeed] = useState(0);
+  const startTimeRef = useRef<number | null>(null);
+  const syllablesTypedRef = useRef(0);
+  const lastUpdateTimeRef = useRef<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 타이핑 영역 너비 조정
+  const isKoreanSyllable = (char: string) => {
+    if (!char) return false; // 빈 문자열 체크
+    const code = char.charCodeAt(0);
+    return code >= 0xAC00 && code <= 0xD7A3;
+  };
+
+  const isEnglishChar = (char: string) => {
+    if (!char) return false;
+    const code = char.charCodeAt(0);
+    return (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+  };
+
+  const isKoreanJamo = (char: string) => {
+    const code = char.charCodeAt(0);
+    return (code >= 0x1100 && code <= 0x11FF) || // 한글 자음, 모음
+      (code >= 0x3130 && code <= 0x318F);   // 호환용 한글 자음, 모음
+  };
+
+  const countKoreanJamo = (char: string) => {
+    if (!isKoreanSyllable(char)) return 0;
+    const code = char.charCodeAt(0) - 0xAC00;
+    const jong = code % 28;
+    return jong ? 3 : 2; // 종성이 있으면 3, 없으면 2
+  };
+
+
   const adjustInputWidth = useCallback(() => {
     if (inputRef.current) {
       const canvas = document.createElement('canvas');
@@ -49,6 +84,7 @@ const TypingArea = forwardRef<HTMLInputElement, TypingAreaProps>(({
     adjustInputWidth();
     setInput('');
     setLastCompletedCharIndex(-1);
+    resetTypingSpeed();
   }, [sentence, adjustInputWidth]);
 
   const focusInput = useCallback(() => {
@@ -57,18 +93,37 @@ const TypingArea = forwardRef<HTMLInputElement, TypingAreaProps>(({
     });
   }, []);
 
-  // 타이핑 입력 값 변경 처리 (디바운스 적용)
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const input = e.target.value;
-      // 최대 길이를 초과하지 않는 경우에만 입력 처리
       if (input.length <= (maxLength || Infinity)) {
+        if (input.length === 1 && startTimeRef.current === null) {
+          startTimeRef.current = Date.now();
+          lastUpdateTimeRef.current = Date.now();
+          setFinalSpeed(0);
+        }
         setInput(input);
+
+        let correctJamo = 0;
+        for (let i = 0; i < input.length; i++) {
+          if (input[i] === sentence[i]) {
+            if (isKoreanSyllable(input[i])) {
+              correctJamo += countKoreanJamo(input[i]);
+            } else if (isKoreanJamo(input[i]) || isEnglishChar(input[i])) {
+              correctJamo += 1;
+            }
+          } else {
+            break;
+          }
+        }
+        syllablesTypedRef.current = correctJamo;
+
+        calculateTypingSpeed();
 
         let correctChars = 0;
         let newLastCompletedCharIndex = -1;
 
-        for (let i = 0; i < input.length - 1; i++) {
+        for (let i = 0; i < input.length; i++) {
           if (input[i] === sentence[i]) {
             correctChars++;
             newLastCompletedCharIndex = i;
@@ -84,23 +139,73 @@ const TypingArea = forwardRef<HTMLInputElement, TypingAreaProps>(({
     [sentence, onInputChange, maxLength]
   );
 
-  const debouncedSkip = useCallback(() => {
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
+  const calculateTypingSpeed = useCallback(() => {
+    if (startTimeRef.current === null) return;
+    const currentTime = Date.now();
+    const elapsedSeconds = (currentTime - startTimeRef.current) / 1000;
+
+    if (elapsedSeconds > 0) {
+      const cpm = Math.round((syllablesTypedRef.current / elapsedSeconds) * 60);
+      setTypingSpeed(Math.min(cpm, 1000));
     }
-    debounceTimerRef.current = setTimeout(() => {
-      onSkip();
-    }, 200); // 디바운스 타임 적용
-  }, [onSkip]);
+
+    lastUpdateTimeRef.current = currentTime;
+  }, []);
+
+  useEffect(() => {
+    const intervalId = setInterval(calculateTypingSpeed, 100);
+    return () => clearInterval(intervalId);
+  }, [calculateTypingSpeed]);
+
+  const resetTypingSpeed = useCallback(() => {
+    setTypingSpeed(0);
+    startTimeRef.current = null;
+    lastUpdateTimeRef.current = null;
+    syllablesTypedRef.current = 0;
+  }, []);
+
+  const resetTypingArea = useCallback(() => {
+    setInput('');
+    setLastCompletedCharIndex(-1);
+    resetTypingSpeed();
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+    onInputChange('', 0, -1);  // 입력 초기화를 부모 컴포넌트에 알림
+  }, [resetTypingSpeed, onInputChange]);
+
+  useImperativeHandle(ref, () => ({
+    resetTypingSpeed,
+    resetTypingArea
+  }));
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Ctrl 또는 Command 키와 함께 사용되는 특정 단축키 방지
+    if ((e.ctrlKey || e.metaKey) && ['a', 'c', 'v', 'x', 'z', 'y', 'r', 'f', 'p', 's'].includes(e.key.toLowerCase())) {
+      e.preventDefault();
+      return;
+    }
+
+    // Shift + 방향키 조합 방지
+    if (e.shiftKey && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(e.key)) {
+      e.preventDefault();
+      return;
+    }
+
+    // 나머지 키 처리 로직
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      resetTypingArea();
+      return;
+    }
+
     if ((e.key === 'Enter' || (e.key === ' ' && input === sentence)) && !isProcessing) {
       if (input === sentence) {
         setIsProcessing(true);
+        setFinalSpeed(typingSpeed);
         onComplete();
         setInput('');
 
-        // 즉시 실행 함수를 사용하여 비동기 처리
         (async () => {
           await new Promise(resolve => setTimeout(resolve, 300));
           setIsProcessing(false);
@@ -119,19 +224,22 @@ const TypingArea = forwardRef<HTMLInputElement, TypingAreaProps>(({
       e.preventDefault();
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
-      debouncedSkip();
+      onSkip();
+      setFinalSpeed(0);
+      resetTypingSpeed();
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       onPrevious();
+      setFinalSpeed(0);
+      resetTypingSpeed();
     }
 
-    // 다른 키 입력 시 onKeyDown 호출
+    // 모든 키 입력에 대해 onKeyDown 콜백 호출
     if (typeof onKeyDown === 'function') {
       onKeyDown(e);
     }
-  }, [input, sentence, isProcessing, onComplete, debouncedSkip, onPrevious, onKeyDown]);
+  }, [input, sentence, isProcessing, onComplete, onSkip, onPrevious, onKeyDown, typingSpeed, resetTypingSpeed, resetTypingArea]);
 
-  // 포커스 유지를 위한 useEffect 추가
   useEffect(() => {
     if (inputRef.current && !isProcessing) {
       inputRef.current.focus();
@@ -161,11 +269,17 @@ const TypingArea = forwardRef<HTMLInputElement, TypingAreaProps>(({
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           onKeyUp={onKeyUp}
+          onCopy={(e) => e.preventDefault()}
+          onPaste={(e) => e.preventDefault()}
           className={styles.input}
           disabled={isProcessing || isSettingsOpen}
           style={{ caretColor: isSettingsOpen ? 'transparent' : 'auto' }}
           maxLength={maxLength}
+          spellCheck="false"
         />
+        <div className={styles.typingSpeed}>
+          {finalSpeed > 0 ? `${finalSpeed} CPM` : `${typingSpeed} CPM`}
+        </div>
       </div>
     </div>
   );
