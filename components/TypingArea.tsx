@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useLayoutEffect, forwardRef, ForwardedRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useLayoutEffect, forwardRef } from 'react';
 import styles from '@/styles/TypingArea.module.css';
 
 interface TypingAreaProps {
@@ -27,6 +27,11 @@ const TypingArea = forwardRef<HTMLInputElement, TypingAreaProps>(({
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [lastCompletedCharIndex, setLastCompletedCharIndex] = useState(-1);
+  const [typingSpeed, setTypingSpeed] = useState(0);
+  const [finalSpeed, setFinalSpeed] = useState(0);
+  const startTimeRef = useRef<number | null>(null);
+  const charactersTypedRef = useRef(0);
+  const lastUpdateTimeRef = useRef<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -63,7 +68,22 @@ const TypingArea = forwardRef<HTMLInputElement, TypingAreaProps>(({
       const input = e.target.value;
       // 최대 길이를 초과하지 않는 경우에만 입력 처리
       if (input.length <= (maxLength || Infinity)) {
+        if (input.length === 1 && startTimeRef.current === null) {
+          startTimeRef.current = Date.now();
+          lastUpdateTimeRef.current = Date.now();
+          setFinalSpeed(0); // 새로운 입력 시작 시 finalSpeed 리셋
+        }
+        const currentTime = Date.now();
+        if (startTimeRef.current === null) {
+          startTimeRef.current = currentTime;
+          lastUpdateTimeRef.current = currentTime;
+          setFinalSpeed(0); // 새로운 입력 시작 시 finalSpeed 리셋
+        }
+        charactersTypedRef.current = input.length;
         setInput(input);
+
+        // 입력이 있을 때마다 속도 계산
+        calculateTypingSpeed();
 
         let correctChars = 0;
         let newLastCompletedCharIndex = -1;
@@ -93,20 +113,46 @@ const TypingArea = forwardRef<HTMLInputElement, TypingAreaProps>(({
     }, 200); // 디바운스 타임 적용
   }, [onSkip]);
 
+  const calculateTypingSpeed = useCallback(() => {
+    if (startTimeRef.current === null) return;
+    const currentTime = Date.now();
+    const elapsedSeconds = (currentTime - startTimeRef.current) / 1000;
+
+    if (elapsedSeconds > 0) {
+      const cpm = Math.round((charactersTypedRef.current / elapsedSeconds) * 60);
+      setTypingSpeed(Math.min(cpm, 1000));
+    }
+
+    lastUpdateTimeRef.current = currentTime;
+  }, []);
+
+  useEffect(() => {
+    const intervalId = setInterval(calculateTypingSpeed, 100); // 100ms마다 업데이트
+    return () => clearInterval(intervalId);
+  }, [calculateTypingSpeed]);
+
+  const resetTypingSpeed = useCallback(() => {
+    setTypingSpeed(0);
+    startTimeRef.current = null;
+    lastUpdateTimeRef.current = null;
+    charactersTypedRef.current = 0;
+  }, []);
+
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if ((e.key === 'Enter' || (e.key === ' ' && input === sentence)) && !isProcessing) {
       if (input === sentence) {
         setIsProcessing(true);
+        setFinalSpeed(typingSpeed); // 최종 속도 저장
         onComplete();
         setInput('');
 
-        // 즉시 실행 함수를 사용하여 비동기 처리
         (async () => {
           await new Promise(resolve => setTimeout(resolve, 300));
           setIsProcessing(false);
           if (inputRef.current) {
             inputRef.current.focus();
           }
+          // resetTypingSpeed를 여기서 호출하지 않습니다.
         })();
       } else {
         if (inputRef.current) {
@@ -120,16 +166,20 @@ const TypingArea = forwardRef<HTMLInputElement, TypingAreaProps>(({
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
       debouncedSkip();
+      setFinalSpeed(0);
+      resetTypingSpeed();
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       onPrevious();
+      setFinalSpeed(0);
+      resetTypingSpeed();
     }
 
     // 다른 키 입력 시 onKeyDown 호출
     if (typeof onKeyDown === 'function') {
       onKeyDown(e);
     }
-  }, [input, sentence, isProcessing, onComplete, debouncedSkip, onPrevious, onKeyDown]);
+  }, [input, sentence, isProcessing, onComplete, debouncedSkip, onPrevious, onKeyDown, typingSpeed]);
 
   // 포커스 유지를 위한 useEffect 추가
   useEffect(() => {
@@ -150,6 +200,13 @@ const TypingArea = forwardRef<HTMLInputElement, TypingAreaProps>(({
     };
   }, []);
 
+  // 새로운 useEffect 추가
+  useEffect(() => {
+    if (!isProcessing && input === '') {
+      resetTypingSpeed();
+    }
+  }, [isProcessing, input, resetTypingSpeed]);
+
   return (
     <div className={styles.typingAreaWrapper}>
       <div className={styles.typingArea}>
@@ -167,6 +224,9 @@ const TypingArea = forwardRef<HTMLInputElement, TypingAreaProps>(({
           maxLength={maxLength}
           spellCheck="false"
         />
+        <div className={styles.typingSpeed}>
+          {finalSpeed > 0 ? `${finalSpeed} CPM` : `${typingSpeed} CPM`}
+        </div>
       </div>
     </div>
   );

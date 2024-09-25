@@ -75,3 +75,12 @@
 .input::placeholder {
   color: var(--gray-text-color);
 }
+
+.typingSpeed {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.8rem;
+  color: var(--gray-text-color);
+}
