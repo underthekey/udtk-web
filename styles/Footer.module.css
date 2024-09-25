@@ -1,5 +1,39 @@
 .footer {
-  text-align: center;
-  padding: 1rem;
-  background-color: #f8f8f8;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+}
+
+.githubIconWrapper {
+  position: fixed;
+  bottom: 2.2rem;
+  left: 2rem;
+  z-index: 999;
+  cursor: pointer;
+}
+
+.githubIcon {
+  width: 30px;
+  height: 30px;
+  fill: none;
+  color: var(--gray-text-color);
+  transition: color 0.3s ease;
+}
+
+.githubIconWrapper:hover .githubIcon {
+  color: var(--primary-color);
+}
+
+@media (max-width: 768px) {
+  .githubIconWrapper {
+    bottom: 1.3rem;
+    left: 1.2rem;
+  }
+
+  .githubIcon {
+    width: 28px;
+    height: 28px;
+  }
 }
