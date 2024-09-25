@@ -546,6 +546,21 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     setLanguage((localStorage.getItem('language') as 'kor' | 'eng') || 'kor');
   }, []);
 
+  const playTestSound = useCallback((newVolume: number) => {
+    if (audioContext && audioBufferRef.current) {
+      const source = audioContext.createBufferSource();
+      source.buffer = audioBufferRef.current;
+
+      const gainNode = audioContext.createGain();
+      gainNode.gain.setValueAtTime(newVolume * 2, audioContext.currentTime);
+
+      source.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      source.start(0);
+    }
+  }, [audioContext]);
+
   return (
     <div className={styles.typer}>
       <div className={styles.visualizerContainer}>
@@ -600,6 +615,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
         switchOptions={switchOptions}
         language={language}
         onLanguageChange={handleLanguageChange}
+        playTestSound={playTestSound}
       />
     </div>
   );
