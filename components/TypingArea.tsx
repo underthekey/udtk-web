@@ -149,6 +149,19 @@ const TypingArea = forwardRef<TypingAreaRef, TypingAreaProps>(({
   }));
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Ctrl 또는 Command 키와 함께 사용되는 특정 단축키 방지
+    if ((e.ctrlKey || e.metaKey) && ['a', 'c', 'v', 'x', 'z', 'y', 'r', 'f', 'p', 's'].includes(e.key.toLowerCase())) {
+      e.preventDefault();
+      return;
+    }
+
+    // Shift + 방향키 조합 방지
+    if (e.shiftKey && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(e.key)) {
+      e.preventDefault();
+      return;
+    }
+
+    // 나머지 키 처리 로직
     if ((e.key === 'Enter' || (e.key === ' ' && input === sentence)) && !isProcessing) {
       if (input === sentence) {
         setIsProcessing(true);
@@ -184,6 +197,7 @@ const TypingArea = forwardRef<TypingAreaRef, TypingAreaProps>(({
       resetTypingSpeed();
     }
 
+    // 모든 키 입력에 대해 onKeyDown 콜백 호출
     if (typeof onKeyDown === 'function') {
       onKeyDown(e);
     }
@@ -218,6 +232,8 @@ const TypingArea = forwardRef<TypingAreaRef, TypingAreaProps>(({
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           onKeyUp={onKeyUp}
+          onCopy={(e) => e.preventDefault()}
+          onPaste={(e) => e.preventDefault()}
           className={styles.input}
           disabled={isProcessing || isSettingsOpen}
           style={{ caretColor: isSettingsOpen ? 'transparent' : 'auto' }}
