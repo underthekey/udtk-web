@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Sentence } from '@/app/types';
 import SentenceDisplay from './SentenceDisplay';
 import TypingArea from './TypingArea';
@@ -9,6 +9,7 @@ import StereoImager from './StereoImager';
 import styles from '@/styles/Typer.module.css';
 import Image from 'next/image';
 import SettingsModal from './SettingsModal';
+import { TypingAreaRef } from './TypingArea';
 
 const switchOptions = [
   'None',
@@ -38,7 +39,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
   const [volume, setVolume] = useState(0.5);
   const [language, setLanguage] = useState<'kor' | 'eng'>('kor');
 
-  const typingAreaRef = useRef<HTMLInputElement>(null);
+  const typingAreaRef = useRef<TypingAreaRef>(null);
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const audioBufferRef = useRef<AudioBuffer | null>(null);
   const [isShiftPressed, setIsShiftPressed] = useState(false);
@@ -92,6 +93,9 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
       } else {
         setCurrentIndex(0);
         setIsLanguageChanging(false);
+      }
+      if (typingAreaRef.current) {
+        typingAreaRef.current.resetTypingSpeed();
       }
       return newLang;
     });
