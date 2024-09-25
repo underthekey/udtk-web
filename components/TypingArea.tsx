@@ -165,6 +165,7 @@ const TypingArea = forwardRef<HTMLInputElement, TypingAreaProps>(({
           disabled={isProcessing || isSettingsOpen}
           style={{ caretColor: isSettingsOpen ? 'transparent' : 'auto' }}
           maxLength={maxLength}
+          spellCheck="false"
         />
       </div>
     </div>
