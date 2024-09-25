@@ -42,7 +42,7 @@
   --color-keycaps-bg-pressed: #a4a9b0;
   --color-keycaps-shadow-pressed: #7f8489;
 
-  --color-bg-toggle: linear-gradient(45deg, #4dabf7, #228be6, #1c70c0, #3c56da);
+  --color-bg-toggle: linear-gradient(45deg, #c6cdd3, var(--primary-color));
 
   display: flex;
   flex-direction: column;
@@ -71,6 +71,7 @@
 
 .slider {
   -webkit-appearance: none;
+  appearance: none;
   width: 100%;
   height: 0.8rem;
   border-radius: 0.5rem;
@@ -105,11 +106,12 @@
   position: relative;
   width: 6rem;
   color: var(--main-text-color);
+  font-size: 2rem !important;
   line-height: 2rem;
   text-align: center;
   border-radius: 0.3rem;
   background: none;
-  padding: 0.5rem 1rem;
+  padding-top: 2rem;
   margin-left: 0.8rem;
 }
 
@@ -492,5 +494,5 @@
 .sliderValue {
   margin-top: 1rem;
   font-size: 1.6rem;
-  font-weight: bold;
+  font-weight: medium;
 }
