@@ -10,9 +10,10 @@ interface TypingAreaProps {
   onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   onKeyUp?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   isSettingsOpen: boolean;
+  maxLength?: number;
 }
 
-const TypingArea = forwardRef(({
+const TypingArea = forwardRef<HTMLInputElement, TypingAreaProps>(({
   sentence,
   onComplete,
   onInputChange,
@@ -20,8 +21,9 @@ const TypingArea = forwardRef(({
   onPrevious,
   onKeyDown,
   onKeyUp,
-  isSettingsOpen
-}: TypingAreaProps, ref: ForwardedRef<HTMLInputElement>) => {
+  isSettingsOpen,
+  maxLength
+}, ref) => {
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [lastCompletedCharIndex, setLastCompletedCharIndex] = useState(-1);
@@ -37,7 +39,7 @@ const TypingArea = forwardRef(({
         const computedStyle = window.getComputedStyle(inputRef.current);
         context.font = computedStyle.font;
         const textWidth = context.measureText(sentence).width;
-        const totalWidth = textWidth + 10; // 10px 여유 공간 추가
+        const totalWidth = textWidth + 10;
         inputRef.current.style.width = `${totalWidth}px`;
       }
     }
@@ -58,25 +60,28 @@ const TypingArea = forwardRef(({
   // 타이핑 입력 값 변경 처리 (디바운스 적용)
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newInput = e.target.value;
-      setInput(newInput);
+      const input = e.target.value;
+      // 최대 길이를 초과하지 않는 경우에만 입력 처리
+      if (input.length <= (maxLength || Infinity)) {
+        setInput(input);
 
-      let correctChars = 0;
-      let newLastCompletedCharIndex = -1;
+        let correctChars = 0;
+        let newLastCompletedCharIndex = -1;
 
-      for (let i = 0; i < newInput.length - 1; i++) {
-        if (newInput[i] === sentence[i]) {
-          correctChars++;
-          newLastCompletedCharIndex = i;
-        } else {
-          break;
+        for (let i = 0; i < input.length - 1; i++) {
+          if (input[i] === sentence[i]) {
+            correctChars++;
+            newLastCompletedCharIndex = i;
+          } else {
+            break;
+          }
         }
-      }
 
-      setLastCompletedCharIndex(newLastCompletedCharIndex);
-      onInputChange(newInput, correctChars, newLastCompletedCharIndex);
+        setLastCompletedCharIndex(newLastCompletedCharIndex);
+        onInputChange(input, correctChars, newLastCompletedCharIndex);
+      }
     },
-    [sentence, onInputChange]
+    [sentence, onInputChange, maxLength]
   );
 
   const debouncedSkip = useCallback(() => {
@@ -120,7 +125,7 @@ const TypingArea = forwardRef(({
       onPrevious();
     }
 
-    // 추가된 부분: 다른 키 입력 시 onKeyDown 호출
+    // 다른 키 입력 시 onKeyDown 호출
     if (typeof onKeyDown === 'function') {
       onKeyDown(e);
     }
@@ -157,8 +162,9 @@ const TypingArea = forwardRef(({
           onKeyDown={handleKeyDown}
           onKeyUp={onKeyUp}
           className={styles.input}
-          disabled={isProcessing || isSettingsOpen}  // isSettingsOpen을 사용합니다
-          style={{ caretColor: isSettingsOpen ? 'transparent' : 'auto' }}  // isSettingsOpen을 사용합니다
+          disabled={isProcessing || isSettingsOpen}
+          style={{ caretColor: isSettingsOpen ? 'transparent' : 'auto' }}
+          maxLength={maxLength}
         />
       </div>
     </div>

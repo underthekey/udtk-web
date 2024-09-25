@@ -419,13 +419,16 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     }
   }, [currentIndex]);
 
-  const handleInputChange = useCallback((input: string, newCorrectChars: number, newLastCompletedCharIndex: number) => {
-    setCurrentInput(input);
-    setCorrectChars(newCorrectChars);
-    setLastCompletedCharIndex(newLastCompletedCharIndex);
-  }, []);
-
   const currentSentence = useMemo(() => sentences[currentIndex] || { content: '', author: null }, [sentences, currentIndex]);
+
+  const handleInputChange = useCallback((input: string, newCorrectChars: number, newLastCompletedCharIndex: number) => {
+    // 현재 문장 길이를 초과하지 않는 경우에만 입력 업데이트
+    if (input.length <= currentSentence.content.length) {
+      setCurrentInput(input);
+      setCorrectChars(newCorrectChars);
+      setLastCompletedCharIndex(newLastCompletedCharIndex);
+    }
+  }, [currentSentence.content.length]);
 
   const handleSwitchChange = useCallback((newSwitch: string) => {
     if (newSwitch !== selectedSwitch) {
@@ -577,6 +580,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
               onKeyDown={handleKeyDown}
               onKeyUp={handleKeyUp}
               isSettingsOpen={isSettingsOpen}
+              maxLength={currentSentence?.content.length} // 최대 입력 길이 추가
             />
           )}
         </div>
