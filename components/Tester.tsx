@@ -1,3 +1,8 @@
+// This file is part of the Tester component.
+// Original code is under MIT License by Mostafa Abbasi.
+// Modifications and additions are copyrighted by takealook97.
+// For full license information, please see the LICENSE.md file in the app/tester directory.
+
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
