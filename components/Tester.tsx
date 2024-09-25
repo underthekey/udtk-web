@@ -61,6 +61,7 @@ const Tester: React.FC = () => {
   }, [layout]);
 
   const handleKeyPress = useCallback((event: KeyboardEvent) => {
+    event.preventDefault();
     const key = event.code.toLowerCase();
     setPressedKeys(prevKeys => {
       const newKeys = new Set(prevKeys);
@@ -75,12 +76,23 @@ const Tester: React.FC = () => {
 
   useEffect(() => {
     initializeTheme();
-    document.addEventListener('keydown', handleKeyPress);
-    document.addEventListener('keyup', handleKeyPress);
+
+    const keydownHandler = (e: KeyboardEvent) => {
+      e.preventDefault();
+      handleKeyPress(e);
+    };
+
+    const keyupHandler = (e: KeyboardEvent) => {
+      e.preventDefault();
+      handleKeyPress(e);
+    };
+
+    document.addEventListener('keydown', keydownHandler);
+    document.addEventListener('keyup', keyupHandler);
 
     return () => {
-      document.removeEventListener('keydown', handleKeyPress);
-      document.removeEventListener('keyup', handleKeyPress);
+      document.removeEventListener('keydown', keydownHandler);
+      document.removeEventListener('keyup', keyupHandler);
     };
   }, [initializeTheme, handleKeyPress]);
 
@@ -454,7 +466,17 @@ const Tester: React.FC = () => {
   };
 
   return (
-    <div ref={containerRef} className={styles.container}>
+    <div
+      ref={containerRef}
+      className={styles.container}
+      tabIndex={0}
+      onFocus={() => {
+        document.body.style.overflow = 'hidden';
+      }}
+      onBlur={() => {
+        document.body.style.overflow = 'auto';
+      }}
+    >
       <main>
         <div className={styles.themeAndLayout}>
           <div></div>
