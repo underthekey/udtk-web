@@ -52,6 +52,20 @@ const TypingArea = forwardRef<TypingAreaRef, TypingAreaProps>(({
     return (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
   };
 
+  const isKoreanJamo = (char: string) => {
+    const code = char.charCodeAt(0);
+    return (code >= 0x1100 && code <= 0x11FF) || // 한글 자음, 모음
+      (code >= 0x3130 && code <= 0x318F);   // 호환용 한글 자음, 모음
+  };
+
+  const countKoreanJamo = (char: string) => {
+    if (!isKoreanSyllable(char)) return 0;
+    const code = char.charCodeAt(0) - 0xAC00;
+    const jong = code % 28;
+    return jong ? 3 : 2; // 종성이 있으면 3, 없으면 2
+  };
+
+
   const adjustInputWidth = useCallback(() => {
     if (inputRef.current) {
       const canvas = document.createElement('canvas');
@@ -90,14 +104,19 @@ const TypingArea = forwardRef<TypingAreaRef, TypingAreaProps>(({
         }
         setInput(input);
 
-        const lastChar = input[input.length - 1];
-        if (lastChar) {
-          if (isKoreanSyllable(lastChar)) {
-            syllablesTypedRef.current += 1;
-          } else if (isEnglishChar(lastChar)) {
-            syllablesTypedRef.current += 1;
+        let correctJamo = 0;
+        for (let i = 0; i < input.length; i++) {
+          if (input[i] === sentence[i]) {
+            if (isKoreanSyllable(input[i])) {
+              correctJamo += countKoreanJamo(input[i]);
+            } else if (isKoreanJamo(input[i]) || isEnglishChar(input[i])) {
+              correctJamo += 1;
+            }
+          } else {
+            break;
           }
         }
+        syllablesTypedRef.current = correctJamo;
 
         calculateTypingSpeed();
 
