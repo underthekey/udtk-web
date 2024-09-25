@@ -452,13 +452,19 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
 
   }, []);
 
+  const [lastPlayedKey, setLastPlayedKey] = useState<string | null>(null);
+
   const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Escape') {
       event.preventDefault();
       typingAreaRef.current?.resetTypingArea();
     }
-    playKeySound(event.code);
-  }, [playKeySound]);
+    if (event.repeat) return; // 키 반복 시 소리 재생 방지
+    if (lastPlayedKey !== event.code) {
+      playKeySound(event.code);
+      setLastPlayedKey(event.code);
+    }
+  }, [playKeySound, lastPlayedKey]);
 
   const handleKeyUp = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
     setPressedKeys(prev => {
@@ -470,13 +476,16 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     if (event.key === 'Shift') {
       setIsShiftPressed(false);
     }
+    setLastPlayedKey(null); // 키를 놓았을 때 lastPlayedKey 초기화
   }, [setIsShiftPressed]);
 
   useEffect(() => {
     const handleGlobalKeyDown = (event: KeyboardEvent) => {
-      if (!pressedKeys.has(event.code)) {
+      if (event.repeat) return; // 키 반복 시 소리 재생 방지
+      if (!pressedKeys.has(event.code) && lastPlayedKey !== event.code) {
         setPressedKeys(prev => new Set(prev).add(event.code));
         playKeySound(event.code);
+        setLastPlayedKey(event.code);
       }
     };
 
@@ -486,6 +495,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
         newSet.delete(event.code);
         return newSet;
       });
+      setLastPlayedKey(null); // 키를 놓았을 때 lastPlayedKey 초기화
     };
 
     window.addEventListener('keydown', handleGlobalKeyDown);
@@ -495,7 +505,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
       window.removeEventListener('keydown', handleGlobalKeyDown);
       window.removeEventListener('keyup', handleGlobalKeyUp);
     };
-  }, [playKeySound, pressedKeys]);
+  }, [playKeySound, pressedKeys, lastPlayedKey]);
 
   const toggleSettings = () => {
     setIsSettingsOpen(!isSettingsOpen);
