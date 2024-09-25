@@ -15,6 +15,7 @@ interface TypingAreaProps {
 
 export interface TypingAreaRef {
   resetTypingSpeed: () => void;
+  resetTypingArea: () => void;
 }
 
 const TypingArea = forwardRef<TypingAreaRef, TypingAreaProps>(({
@@ -144,8 +145,19 @@ const TypingArea = forwardRef<TypingAreaRef, TypingAreaProps>(({
     syllablesTypedRef.current = 0;
   }, []);
 
+  const resetTypingArea = useCallback(() => {
+    setInput('');
+    setLastCompletedCharIndex(-1);
+    resetTypingSpeed();
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+    onInputChange('', 0, -1);  // 입력 초기화를 부모 컴포넌트에 알림
+  }, [resetTypingSpeed, onInputChange]);
+
   useImperativeHandle(ref, () => ({
-    resetTypingSpeed
+    resetTypingSpeed,
+    resetTypingArea
   }));
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -162,6 +174,12 @@ const TypingArea = forwardRef<TypingAreaRef, TypingAreaProps>(({
     }
 
     // 나머지 키 처리 로직
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      resetTypingArea();
+      return;
+    }
+
     if ((e.key === 'Enter' || (e.key === ' ' && input === sentence)) && !isProcessing) {
       if (input === sentence) {
         setIsProcessing(true);
@@ -201,7 +219,7 @@ const TypingArea = forwardRef<TypingAreaRef, TypingAreaProps>(({
     if (typeof onKeyDown === 'function') {
       onKeyDown(e);
     }
-  }, [input, sentence, isProcessing, onComplete, onSkip, onPrevious, onKeyDown, typingSpeed, resetTypingSpeed]);
+  }, [input, sentence, isProcessing, onComplete, onSkip, onPrevious, onKeyDown, typingSpeed, resetTypingSpeed, resetTypingArea]);
 
   useEffect(() => {
     if (inputRef.current && !isProcessing) {

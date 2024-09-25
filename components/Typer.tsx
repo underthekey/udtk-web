@@ -450,20 +450,15 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     localStorage.setItem('volume', settings.volume.toString());
     localStorage.setItem('language', settings.language);
 
-    // 여기서 loadAudio를 호출하지 않습니다. useEffect에서 처리됩니다.
   }, []);
 
   const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!event.repeat) {
-      playKeySound(event.code);
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      typingAreaRef.current?.resetTypingArea();
     }
-
-    if (event.key === 'Shift') {
-      setIsShiftPressed(true);
-    } else if (event.key === 'CapsLock') {
-      setIsCapsLockOn(prev => !prev);
-    }
-  }, [playKeySound, setIsShiftPressed, setIsCapsLockOn]);
+    playKeySound(event.code);
+  }, [playKeySound]);
 
   const handleKeyUp = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
     setPressedKeys(prev => {
