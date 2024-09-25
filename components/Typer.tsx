@@ -278,6 +278,17 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
           gain = 0.8;
           pan = 35;
           break;
+        case 'Tab':
+          frequency = 900;
+          gain = 0.6;
+          pan = -30;
+          isSpecialKey = true;
+          break;
+        case 'Escape':
+          frequency = 800;
+          gain = 0.7;
+          pan = -35;
+          break;
       }
     }
 
@@ -459,12 +470,15 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
       event.preventDefault();
       typingAreaRef.current?.resetTypingArea();
     }
-    if (event.repeat) return; // 키 반복 시 소리 재생 방지
-    if (lastPlayedKey !== event.code) {
-      playKeySound(event.code);
-      setLastPlayedKey(event.code);
+    if (event.key === 'Tab') {
+      event.preventDefault(); // Tab 키의 기본 동작 방지
     }
-  }, [playKeySound, lastPlayedKey]);
+    if (event.repeat) return; // 키 반복 시 소리 재생 방지
+
+    // 모든 키에 대해 소리 재생
+    playKeySound(event.code);
+    setLastPlayedKey(event.code);
+  }, [playKeySound]);
 
   const handleKeyUp = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
     setPressedKeys(prev => {
@@ -604,7 +618,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
               onKeyDown={handleKeyDown}
               onKeyUp={handleKeyUp}
               isSettingsOpen={isSettingsOpen}
-              maxLength={currentSentence?.content.length} // 최대 입력 길이 추가
+              maxLength={currentSentence?.content.length}
             />
           )}
         </div>
