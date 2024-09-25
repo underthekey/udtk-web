@@ -15,6 +15,32 @@ const Tester: React.FC = () => {
   const navigationRegionRef = useRef<HTMLDivElement>(null);
   const fourthRowRef = useRef<HTMLDivElement>(null);
   const fifthRowRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const updateScale = useCallback(() => {
+    if (!containerRef.current) return;
+
+    const width = window.innerWidth;
+    let scale;
+
+    if (width > 1392) scale = 0.625;
+    else if (width > 1264) scale = 0.5625;
+    else if (width > 1056) scale = 0.5;
+    else if (width > 928) scale = 0.4375;
+    else if (width > 784) scale = 0.375;
+    else if (width > 640) scale = 0.3125;
+    else if (width > 512) scale = 0.25;
+    else if (width > 384) scale = 0.1875;
+    else scale = 0.15625;
+
+    containerRef.current.style.setProperty('--tester-scale', scale.toString());
+  }, []);
+
+  useEffect(() => {
+    updateScale();
+    window.addEventListener('resize', updateScale);
+    return () => window.removeEventListener('resize', updateScale);
+  }, [updateScale]);
 
   const initializeTheme = useCallback(() => {
     const savedTheme = localStorage.getItem('currentTheme');
@@ -422,58 +448,24 @@ const Tester: React.FC = () => {
     );
   };
 
-  const updateFontSize = useCallback(() => {
-    const width = window.innerWidth;
-    let fontSize;
-
-    if (width > 1392) fontSize = '62.5%';
-    else if (width > 1264) fontSize = '56.25%';
-    else if (width > 1056) fontSize = '50%';
-    else if (width > 928) fontSize = '43.75%';
-    else if (width > 784) fontSize = '37.5%';
-    else if (width > 640) fontSize = '31.25%';
-    else if (width > 512) fontSize = '25%';
-    else if (width > 384) fontSize = '18.75%';
-    else fontSize = '16%';
-
-    document.documentElement.style.fontSize = fontSize;
-  }, []);
-
-  useEffect(() => {
-    updateFontSize();
-    window.addEventListener('resize', updateFontSize);
-    return () => window.removeEventListener('resize', updateFontSize);
-  }, [updateFontSize]);
-
   return (
-    <div className={styles.container}>
-      <header>
-        <section className={styles.intro}>
-          <h1 className={`${styles.headingPrimary} ${styles.title} ${styles.centerText}`}>
-            <span>Test Your Keyboard</span>
-          </h1>
-          <p className={`${styles.paragraph} ${styles.description} ${styles.centerText}`}>
-            This interactive tool is designed to help users identify and
-            troubleshoot any issues with their physical keyboard or simply explore
-            its layout
-          </p>
-        </section>
-      </header>
-
+    <div ref={containerRef} className={styles.container}>
       <main>
         <div className={styles.themeAndLayout}>
           <div></div>
           <div className={styles.layoutSection}>
-            <input
-              type="range"
-              min="1"
-              max="3"
-              value={layout === 'fullSize' ? 1 : layout === 'tkl' ? 2 : 3}
-              className={styles.slider}
-              onChange={(e) => updateLayout(parseInt(e.target.value))}
-            />
-            <div className={styles.sliderValue}>
-              {layout === 'fullSize' ? 'Full' : layout === 'tkl' ? 'TKL' : '75%'}
+            <div className={styles.sliderContainer}>
+              <input
+                type="range"
+                min="1"
+                max="3"
+                value={layout === 'fullSize' ? 1 : layout === 'tkl' ? 2 : 3}
+                className={styles.slider}
+                onChange={(e) => updateLayout(parseInt(e.target.value))}
+              />
+              <div className={styles.sliderValue}>
+                {layout === 'fullSize' ? 'Full' : layout === 'tkl' ? 'TKL' : '75%'}
+              </div>
             </div>
           </div>
           <div className={styles.themeSection}>
@@ -499,9 +491,6 @@ const Tester: React.FC = () => {
           {renderKeyboard()}
         </div>
       </main>
-
-      <footer className={styles.footer}>
-      </footer>
     </div>
   );
 };
