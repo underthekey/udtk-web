@@ -7,7 +7,7 @@ interface StereoImagerProps {
     panValue: number;  // 패닝 값
 }
 
-const RISE_SPEED = 0.02; // 상향 decay
+const RISE_SPEED = 0.01; // 상향 attack
 const DECAY_SPEED = 0.005; // 하향 decay
 
 const StereoImager: React.FC<StereoImagerProps> = ({ analyserNodeLeft, analyserNodeRight, panValue }) => {
