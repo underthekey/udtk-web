@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Script from 'next/script';
 import { ThemeProvider } from 'next-themes';
+import ThemeWrapper from '@/components/ThemeWrapper';
 
 export const metadata: Metadata = {
   title: "underthekey",
@@ -73,9 +74,11 @@ export default function RootLayout({
       </head>
       <body>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-          <Header />
-          {children}
-          <Footer />
+          <ThemeWrapper>
+            <Header />
+            {children}
+            <Footer />
+          </ThemeWrapper>
         </ThemeProvider>
       </body>
     </html>
