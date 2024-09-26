@@ -31,7 +31,7 @@ export default function SentenceDisplay({ sentence, nextSentence, currentInput, 
 
   return (
     <div
-      className={styles.sentenceDisplay}
+      className={`${styles.sentenceDisplay} ${visible ? styles.visible : styles.hidden}`}
       onMouseDown={preventSelection}
       onTouchStart={preventSelection}
     >

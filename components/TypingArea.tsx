@@ -40,6 +40,7 @@ const TypingArea = forwardRef<TypingAreaRef, TypingAreaProps>(({
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const arrowDownPressedRef = useRef(false);
+  const [visible, setVisible] = useState(false);
 
   const isKoreanSyllable = (char: string) => {
     if (!char) return false; // 빈 문자열 체크
@@ -272,8 +273,14 @@ const TypingArea = forwardRef<TypingAreaRef, TypingAreaProps>(({
     };
   }, []);
 
+  useEffect(() => {
+    setVisible(false);
+    const timer = setTimeout(() => setVisible(true), 50);
+    return () => clearTimeout(timer);
+  }, [sentence]);
+
   return (
-    <div className={styles.typingAreaWrapper}>
+    <div className={`${styles.typingAreaWrapper} ${visible ? styles.visible : styles.hidden}`}>
       <div className={styles.typingArea}>
         <input
           ref={inputRef}

@@ -83,6 +83,8 @@
   --main-box-hover-color: #e0e0e0;
   --main-box-hover-dark-color: #444444;
   --hover-color: #d62828;
+  --wrong-color: #d62828;
+  --wrong-color-dark: #ac1c1c;
   --correct-color: #09703c;
   --hover-color-rgb: 214, 40, 40;
   --correct-color-rgb: 9, 112, 60;
@@ -104,6 +106,7 @@ body {
   color: var(--main-text-color);
   background-color: var(--background-color);
   font-family: var(--font-family);
+  transition: background-color 0.5s ease, color 0.5s ease;
 }
 
 a {
@@ -142,4 +145,9 @@ body.modal-open {
   --main-sentence-color: var(--main-sentence-dark-color);
   --main-input-color: var(--main-input-dark-color);
   --gray-text-color: var(--gray-text-dark-color);
+  --wrong-color: var(--wrong-color-dark);
+}
+
+.transition {
+  transition: background-color 0.5s ease, color 0.5s ease;
 }

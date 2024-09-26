@@ -180,7 +180,7 @@
   height: 36px;
   fill: none;
   color: var(--main-text-color);
-  transition: stroke 0.3s ease;
+  transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
 .settingIconWrapper:hover .settingIcon {
