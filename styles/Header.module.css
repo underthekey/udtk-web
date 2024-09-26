@@ -77,7 +77,7 @@
 
 .darkModeToggle {
   position: absolute;
-  right: calc(2rem + 40px);
+  right: calc(2rem + 4rem);
   top: 50%;
   transform: translateY(-50%);
 }
@@ -262,7 +262,7 @@
   }
 
   .darkModeToggle {
-    right: calc(1rem + 30px); /* 모바일에서 메뉴 버튼 오른쪽 여백 + 메뉴 버튼 너비 */
+    left: calc(1rem + 0rem); /* 모바일에서 메뉴 버튼 오른쪽 여백 + 메뉴 버튼 너비 */
   }
 
   .menuDropdown {
