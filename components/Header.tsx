@@ -7,11 +7,13 @@ import Image from 'next/image';
 import styles from '@/styles/Header.module.css';
 import { useRouter } from 'next/navigation';
 import DarkModeToggle from './DarkModeToggle';
+import { useTheme } from 'next-themes';
 
 const Header = () => {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const router = useRouter();
+  const { theme } = useTheme();
 
   const toggleMenu = useCallback(() => {
     setIsMenuOpen(prev => !prev);
@@ -77,12 +79,21 @@ const Header = () => {
             <div className={styles.logoImageWrapper}>
               <Image
                 src="/images/image-logo/3d/logo-3d-512.png"
-                alt="underthekey logo | 언더더키"
+                alt="underthekey logo light"
                 width={256}
                 height={256}
                 sizes="(max-width: 768px) 100px, (max-width: 1200px) 150px, 200px"
                 style={{ objectFit: 'contain' }}
-                className={styles.logoImage}
+                className={`${styles.logoImage} ${styles.logoImageLight}`}
+              />
+              <Image
+                src="/images/image-logo/3d/logo-3d-dark-512.png"
+                alt="underthekey logo dark"
+                width={256}
+                height={256}
+                sizes="(max-width: 768px) 100px, (max-width: 1200px) 150px, 200px"
+                style={{ objectFit: 'contain' }}
+                className={`${styles.logoImage} ${styles.logoImageDark}`}
               />
             </div>
             <span className={styles.logoText}>underthekey</span>
