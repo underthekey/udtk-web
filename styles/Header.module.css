@@ -262,7 +262,7 @@
   }
 
   .darkModeToggle {
-    left: calc(1rem + 0rem); /* 모바일에서 메뉴 버튼 오른쪽 여백 + 메뉴 버튼 너비 */
+    left: calc(1rem + 0.25rem); /* 모바일에서 메뉴 버튼 오른쪽 여백 + 메뉴 버튼 너비 */
   }
 
   .menuDropdown {
