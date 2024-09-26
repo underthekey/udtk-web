@@ -39,6 +39,7 @@ const TypingArea = forwardRef<TypingAreaRef, TypingAreaProps>(({
   const lastUpdateTimeRef = useRef<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const arrowDownPressedRef = useRef(false);
 
   const isKoreanSyllable = (char: string) => {
     if (!char) return false; // 빈 문자열 체크
@@ -224,9 +225,13 @@ const TypingArea = forwardRef<TypingAreaRef, TypingAreaProps>(({
       e.preventDefault();
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
-      onSkip();
-      setFinalSpeed(0);
-      resetTypingSpeed();
+      if (!arrowDownPressedRef.current && !debounceTimerRef.current) {
+        arrowDownPressedRef.current = true;
+        onSkip();
+        debounceTimerRef.current = setTimeout(() => {
+          debounceTimerRef.current = null;
+        }, 200); // 디바운스 시간 설정
+      }
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       onPrevious();
@@ -239,6 +244,15 @@ const TypingArea = forwardRef<TypingAreaRef, TypingAreaProps>(({
       onKeyDown(e);
     }
   }, [input, sentence, isProcessing, onComplete, onSkip, onPrevious, onKeyDown, typingSpeed, resetTypingSpeed, resetTypingArea]);
+
+  const handleKeyUp = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'ArrowDown') {
+      arrowDownPressedRef.current = false;
+    }
+    if (typeof onKeyUp === 'function') {
+      onKeyUp(e);
+    }
+  }, [onKeyUp]);
 
   useEffect(() => {
     if (inputRef.current && !isProcessing) {
@@ -268,7 +282,7 @@ const TypingArea = forwardRef<TypingAreaRef, TypingAreaProps>(({
           placeholder={sentence}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          onKeyUp={onKeyUp}
+          onKeyUp={handleKeyUp}
           onCopy={(e) => e.preventDefault()}
           onPaste={(e) => e.preventDefault()}
           className={styles.input}
