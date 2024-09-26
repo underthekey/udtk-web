@@ -678,7 +678,11 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
           )}
         </div>
       </div>
-      <div className={styles.settingIconWrapper} onClick={toggleSettings}>
+      <div
+        className={styles.settingIconWrapper}
+        onClick={toggleSettings}
+        style={{ transform: `translateY(-${keyboardHeight}px)` }}
+      >
         <svg className={styles.settingIcon} viewBox="0 0 64 64">
           <use xlinkHref="/images/icon/setting.svg#icon" />
         </svg>

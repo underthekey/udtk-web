@@ -175,8 +175,15 @@
   right: 1.7rem;
   z-index: 999;
   cursor: pointer;
-  transition: bottom 0.3s ease;
+  transition: transform 0.3s ease;
   pointer-events: auto;
+}
+
+@media (max-width: 768px) {
+  .settingIconWrapper {
+    bottom: 1rem;
+    right: 1rem;
+  }
 }
 
 .settingIcon {
@@ -192,11 +199,6 @@
 }
 
 @media (max-width: 768px) {
-  .settingIconWrapper {
-    bottom: 1rem;
-    right: 1rem;
-  }
-
   .settingIcon {
     width: 36px;
     height: 36px;
