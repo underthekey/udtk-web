@@ -604,6 +604,11 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     const handleResize = () => {
       const keyboardHeight = getKeyboardHeight();
       debouncedSetKeyboardHeight(Math.max(keyboardHeight, 0));
+
+      const visualizer = document.querySelector(`.${styles.visualizerContainer}`);
+      if (visualizer) {
+        (visualizer as HTMLElement).style.bottom = `${Math.max(keyboardHeight, 0)}px`;
+      }
     };
 
     const handleFocus = (e: FocusEvent) => {
@@ -623,11 +628,13 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     };
 
     window.addEventListener('resize', handleResize);
+    window.visualViewport?.addEventListener('resize', handleResize);
     document.addEventListener('focus', handleFocus, true);
     document.addEventListener('blur', handleBlur, true);
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      window.visualViewport?.removeEventListener('resize', handleResize);
       document.removeEventListener('focus', handleFocus, true);
       document.removeEventListener('blur', handleBlur, true);
     };
@@ -671,7 +678,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
           )}
         </div>
       </div>
-      <div className={styles.settingIconWrapper} style={{ bottom: `${keyboardHeight + 16}px` }}>
+      <div className={styles.settingIconWrapper} onClick={toggleSettings}>
         <svg className={styles.settingIcon} viewBox="0 0 64 64">
           <use xlinkHref="/images/icon/setting.svg#icon" />
         </svg>

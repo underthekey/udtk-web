@@ -77,7 +77,8 @@
   position: fixed;
   bottom: 0;
   left: 0;
-  transition: bottom 0.3s ease;
+  transition: bottom 0.3s ease, transform 0.3s ease;
+  will-change: bottom, transform;
 }
 
 .visualizerContainer > * {
@@ -175,6 +176,7 @@
   z-index: 999;
   cursor: pointer;
   transition: bottom 0.3s ease;
+  pointer-events: auto;
 }
 
 .settingIcon {
