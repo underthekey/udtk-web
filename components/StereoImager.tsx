@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import styles from '@/styles/StereoImager.module.css';
+import { useTheme } from 'next-themes';  // next-themes에서 useTheme 훅 import
 
 interface StereoImagerProps {
     analyserNodeLeft: AnalyserNode | null;
@@ -11,6 +12,7 @@ const RISE_SPEED = 0.005; // 상향 attack
 const DECAY_SPEED = 0.007; // 하향 decay
 
 const StereoImager: React.FC<StereoImagerProps> = ({ analyserNodeLeft, analyserNodeRight, panValue }) => {
+    const { theme } = useTheme();  // 현재 테마 가져오기
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
     const previousDataRef = useRef<Float32Array | null>(null);
@@ -83,6 +85,9 @@ const StereoImager: React.FC<StereoImagerProps> = ({ analyserNodeLeft, analyserN
 
             const step = Math.ceil(bufferLength / 270); // 약 180개의 점만 그리도록 설정
 
+            // 테마에 따른 색상 설정
+            const color = theme === 'dark' ? 'rgba(253, 240, 213, 0.5)' : 'rgba(0, 48, 73, 0.5)';
+
             for (let i = 0; i < bufferLength; i += step) {
                 const leftValue = Math.max((dataArrayLeft.current![i] + 140) / 140, 0);
                 const rightValue = Math.max((dataArrayRight.current![i] + 140) / 140, 0);
@@ -114,6 +119,7 @@ const StereoImager: React.FC<StereoImagerProps> = ({ analyserNodeLeft, analyserN
                 // 중앙 강도 계산 추가
                 const centerIntensity = (leftIntensity + rightIntensity) / 2;
 
+                // 포인트 그리기 함수 수정
                 const drawPoint = (intensity: number, side: number) => {
                     const maxRadius = (height / 2) * 0.98;
                     const baseRadius = (height / 2) * (0.1 + intensity * 0.9);
@@ -144,18 +150,17 @@ const StereoImager: React.FC<StereoImagerProps> = ({ analyserNodeLeft, analyserN
                     const pointSize = calculatePointSize(intensity);
 
                     // 투명도 조정
-                    const alpha = 0.4 + intensity * 0.6; // 최소 투명도를 높이고, 강도에 따라 더 불투명하게
-
+                    const alpha = 0.4 + intensity * 0.6;
                     ctx.beginPath();
                     ctx.arc(x, y, pointSize, 0, 2 * Math.PI);
-                    ctx.fillStyle = `rgba(0, 48, 73, ${alpha})`;
+                    ctx.fillStyle = color.replace('0.5', alpha.toString());
                     ctx.fill();
                 };
 
                 drawPoint(leftIntensity, 1);  // 왼쪽
                 drawPoint(rightIntensity, -1);  // 오른쪽
 
-                // 중앙 포인트 그리기 수정
+                // 중앙 포인트 그리기 함수 수정
                 const drawCenterPoint = () => {
                     const maxRadius = (height / 2) * 0.98;
                     const baseRadius = (height / 2) * (0.1 + centerIntensity * 0.9);
@@ -183,11 +188,10 @@ const StereoImager: React.FC<StereoImagerProps> = ({ analyserNodeLeft, analyserN
 
                     const pointSize = calculatePointSize(centerIntensity) / 2; // 중앙 포인트 크기를 더 작게 조정 (1.5에서 2로 변경)
 
-                    const alpha = 0.3 + centerIntensity * 0.7; // 중앙 포인트 투명도 조정
-
+                    const alpha = 0.3 + centerIntensity * 0.7;
                     ctx.beginPath();
                     ctx.arc(x, y, pointSize, 0, 2 * Math.PI);
-                    ctx.fillStyle = `rgba(0, 48, 73, ${alpha})`;
+                    ctx.fillStyle = color.replace('0.5', alpha.toString());
                     ctx.fill();
                 };
 
@@ -206,7 +210,7 @@ const StereoImager: React.FC<StereoImagerProps> = ({ analyserNodeLeft, analyserN
                     ctx.beginPath();
                     ctx.moveTo(leftX, y);
                     ctx.lineTo(rightX, y);
-                    ctx.strokeStyle = `rgba(0, 48, 73, ${0.1 + (leftIntensity + rightIntensity) * 0.2})`;
+                    ctx.strokeStyle = color.replace('0.5', (0.1 + (leftIntensity + rightIntensity) * 0.2).toString());
                     ctx.lineWidth = 0.5;
                     ctx.stroke();
                 }
@@ -221,7 +225,7 @@ const StereoImager: React.FC<StereoImagerProps> = ({ analyserNodeLeft, analyserN
                 cancelAnimationFrame(animationIdRef.current);
             }
         };
-    }, [analyserNodeLeft, analyserNodeRight, panValue, canvasSize]);
+    }, [analyserNodeLeft, analyserNodeRight, panValue, canvasSize, theme]);  // theme 의존성 추가
 
     return (
         <div className={styles.stereoImagerWrapper}>

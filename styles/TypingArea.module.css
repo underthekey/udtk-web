@@ -21,7 +21,7 @@
   border-radius: 7px;
   box-shadow: none;
   outline: none;
-  color: #333;
+  color: var(--main-input-color);
   background-color: var(--main-background-color);
   box-sizing: border-box;
   transition: box-shadow 0.3s ease;

@@ -1,0 +1,82 @@
+.toggleContainer {
+  display: flex;
+  align-items: center;
+}
+
+.toggle {
+  width: 0;
+  height: 0;
+  visibility: hidden;
+}
+
+.label {
+  width: 60px;
+  height: 24px;
+  border-radius: 24px;
+  display: block;
+  background: #ebebeb;
+  position: relative;
+  cursor: pointer;
+  transition: 0.3s;
+  box-shadow: inset 0px 1px 3px rgba(0, 0, 0, 0.4), inset 0px -1px 3px rgba(255, 255, 255, 0.4);
+}
+
+.label:after {
+  content: "";
+  width: 22px;
+  height: 22px;
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  background: linear-gradient(180deg, #ffcc89, #d8860b);
+  border-radius: 22px;
+  transition: 0.3s;
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.toggle:checked + .label {
+  background: #242424;
+}
+
+.toggle:checked + .label:after {
+  left: calc(100% - 1px);
+  transform: translateX(-100%);
+  background: linear-gradient(180deg, #777, #3a3a3a);
+}
+
+.label:active:after {
+  width: 32px;
+}
+
+.sun,
+.moon {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  top: 5px;
+  z-index: 100;
+  transition: 0.3s;
+}
+
+.sun {
+  left: 5px;
+  fill: #fff;
+}
+
+.moon {
+  right: 5px;
+  fill: #7e7e7e;
+}
+
+.toggle:checked + .label .sun {
+  fill: #7e7e7e;
+}
+
+.toggle:checked + .label .moon {
+  fill: #fff;
+}
+
+/* 호버 효과 수정 */
+.label:hover:after {
+  width: 32px;
+}

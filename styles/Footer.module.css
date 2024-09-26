@@ -23,7 +23,7 @@
 }
 
 .githubIconWrapper:hover .githubIcon {
-  color: var(--primary-color);
+  color: var(--main-text-color);
 }
 
 @media (max-width: 768px) {

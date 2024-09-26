@@ -3,7 +3,7 @@
   justify-content: center;
   align-items: center;
   padding: 1.5rem 2rem;
-  background-color: var(--header-color);
+  /* background-color: var(--header-color); */
   position: fixed;
   top: 0;
   left: 0;
@@ -53,6 +53,13 @@
   font-size: 1.5rem;
   cursor: pointer;
   transition: opacity 0.3s ease, color 0.3s ease; /* color 트랜지션 추가 */
+}
+
+.darkModeToggle {
+  position: absolute;
+  right: calc(2rem + 40px);
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .menuButton svg {
@@ -155,7 +162,7 @@
   transform: translateY(-50%);
   width: 4px;
   height: 4px;
-  background-color: var(--primary-color);
+  background-color: var(--main-text-color);
   border-radius: 50%;
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -232,6 +239,10 @@
   .menuButton {
     right: 1rem;
     font-size: 1rem; /* 24px에 가까운 크기로 조정 */
+  }
+
+  .darkModeToggle {
+    right: calc(1rem + 30px); /* 모바일에서 메뉴 버튼 오른쪽 여백 + 메뉴 버튼 너비 */
   }
 
   .menuDropdown {
