@@ -80,6 +80,8 @@
   --main-text-dark-color: #bebebe;
   --gray-text-color: #9da3af;
   --gray-text-dark-color: #777777;
+  --main-box-hover-color: #e0e0e0;
+  --main-box-hover-dark-color: #444444;
   --hover-color: #d62828;
   --correct-color: #09703c;
   --hover-color-rgb: 214, 40, 40;
@@ -95,6 +97,7 @@
   --main-text-color: var(--secondary-color);
   --header-color: var(--background-dark-color);
   --dot-color: var(--secondary-color);
+  --main-box-hover-color: var(--main-box-hover-dark-color);
 }
 
 body {
