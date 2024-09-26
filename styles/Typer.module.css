@@ -75,8 +75,10 @@
   height: 100vh;
   padding-top: 4rem;
   position: fixed;
-  top: 0;
+  bottom: 0;
   left: 0;
+  transition: bottom 0.3s ease, transform 0.3s ease;
+  will-change: bottom, transform;
 }
 
 .visualizerContainer > * {
@@ -173,18 +175,8 @@
   right: 1.7rem;
   z-index: 999;
   cursor: pointer;
-}
-
-.settingIcon {
-  width: 36px;
-  height: 36px;
-  fill: none;
-  color: var(--main-text-color);
-  transition: stroke 0.3s ease;
-}
-
-.settingIconWrapper:hover .settingIcon {
-  stroke: var(--primary-color);
+  transition: transform 0.3s ease;
+  pointer-events: auto;
 }
 
 @media (max-width: 768px) {
@@ -192,7 +184,21 @@
     bottom: 1rem;
     right: 1rem;
   }
+}
 
+.settingIcon {
+  width: 36px;
+  height: 36px;
+  fill: none;
+  color: var(--main-text-color);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.settingIconWrapper:hover .settingIcon {
+  stroke: var(--primary-color);
+}
+
+@media (max-width: 768px) {
   .settingIcon {
     width: 36px;
     height: 36px;

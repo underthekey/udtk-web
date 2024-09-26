@@ -11,16 +11,12 @@ interface SentenceDisplayProps {
 }
 
 export default function SentenceDisplay({ sentence, nextSentence, currentInput, correctChars, lastCompletedCharIndex }: SentenceDisplayProps) {
-  const [visible, setVisible] = useState(false);
   const [nextVisible, setNextVisible] = useState(false);
 
   useEffect(() => {
-    setVisible(false);
     setNextVisible(false);
-    const timer = setTimeout(() => setVisible(true), 50);
     const nextTimer = setTimeout(() => setNextVisible(true), 100);
     return () => {
-      clearTimeout(timer);
       clearTimeout(nextTimer);
     };
   }, [sentence, nextSentence]);
@@ -42,7 +38,7 @@ export default function SentenceDisplay({ sentence, nextSentence, currentInput, 
           </p>
         )}
         <p
-          className={`${styles.content} ${visible ? styles.visible : ''} ${styles.noSelect}`}
+          className={`${styles.content} ${styles.noSelect}`}
           onCopy={(e) => e.preventDefault()}
           onCut={(e) => e.preventDefault()}
           onPaste={(e) => e.preventDefault()}

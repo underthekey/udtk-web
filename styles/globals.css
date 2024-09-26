@@ -83,6 +83,8 @@
   --main-box-hover-color: #e0e0e0;
   --main-box-hover-dark-color: #444444;
   --hover-color: #d62828;
+  --wrong-color: #d62828;
+  --wrong-color-dark: #ac1c1c;
   --correct-color: #09703c;
   --hover-color-rgb: 214, 40, 40;
   --correct-color-rgb: 9, 112, 60;
@@ -91,19 +93,30 @@
   --dot-color: var(--primary-color);
 }
 
-.dark {
-  --foreground-rgb: 255, 255, 255;
-  --background-color: var(--background-dark-color);
-  --main-text-color: var(--secondary-color);
-  --header-color: var(--background-dark-color);
-  --dot-color: var(--secondary-color);
-  --main-box-hover-color: var(--main-box-hover-dark-color);
+html,
+body {
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  overscroll-behavior-y: none;
+}
+
+html {
+  overscroll-behavior: none;
+  background-color: var(--background-color);
+  height: -webkit-fill-available;
 }
 
 body {
   color: var(--main-text-color);
   background-color: var(--background-color);
   font-family: var(--font-family);
+  transition: background-color 0.5s ease, color 0.5s ease;
+  -webkit-overflow-scrolling: touch;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
 }
 
 a {
@@ -136,10 +149,28 @@ body.modal-open {
 }
 
 .dark {
+  --foreground-rgb: 255, 255, 255;
+  --dot-color: var(--secondary-color);
+  --main-box-hover-color: var(--main-box-hover-dark-color);
   --background-color: var(--background-dark-color);
   --main-text-color: var(--main-text-dark-color);
   --header-color: var(--background-dark-color);
   --main-sentence-color: var(--main-sentence-dark-color);
   --main-input-color: var(--main-input-dark-color);
   --gray-text-color: var(--gray-text-dark-color);
+  --wrong-color: var(--wrong-color-dark);
+}
+
+html.dark {
+  background-color: var(--background-dark-color);
+}
+
+.transition {
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+#__next {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }

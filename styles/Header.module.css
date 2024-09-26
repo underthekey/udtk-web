@@ -32,6 +32,26 @@
 
 .logoImage {
   object-fit: contain;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: opacity 0.3s ease;
+}
+
+.logoImageLight {
+  opacity: 1;
+}
+
+.logoImageDark {
+  opacity: 0;
+}
+
+:global(.dark) .logoImageLight {
+  opacity: 0;
+}
+
+:global(.dark) .logoImageDark {
+  opacity: 1;
 }
 
 .logoText {
@@ -52,12 +72,12 @@
   color: var(--main-text-color);
   font-size: 1.5rem;
   cursor: pointer;
-  transition: opacity 0.3s ease, color 0.3s ease; /* color 트랜지션 추가 */
+  transition: fill 0.3s ease; /* color 트랜지션 추가 */
 }
 
 .darkModeToggle {
   position: absolute;
-  right: calc(2rem + 40px);
+  right: calc(2rem + 4rem);
   top: 50%;
   transform: translateY(-50%);
 }
@@ -66,7 +86,7 @@
   width: 24px;
   height: 24px;
   fill: var(--main-text-color); /* 기본 색상 설정 */
-  transition: fill 0.3s ease; /* fill 트랜지션 추가 */
+  transition: transform 0.3s ease, opacity 0.3s ease; /* fill 트랜지션 추가 */
 }
 
 /* switch.svg 아이콘에 대한 고정된 색상 설정 */
@@ -206,7 +226,7 @@
 .menuIcon::after {
   content: "";
   position: absolute;
-  right: -4px; /* 점의 치 조정 */
+  right: -4px; /* 점의 위치 조정 */
   top: 50%;
   transform: translateY(-50%);
   width: 6px;
@@ -214,7 +234,7 @@
   background-color: var(--primary-color);
   border-radius: 50%;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
 /* 현재 페이지 표시를 위한 클래스 */
@@ -242,7 +262,7 @@
   }
 
   .darkModeToggle {
-    right: calc(1rem + 30px); /* 모바일에서 메뉴 버튼 오른쪽 여백 + 메뉴 버튼 너비 */
+    left: calc(1rem + 0.25rem); /* 모바일에서 메뉴 버튼 오른쪽 여백 + 메뉴 버튼 너비 */
   }
 
   .menuDropdown {

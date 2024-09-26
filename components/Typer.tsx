@@ -10,6 +10,7 @@ import styles from '@/styles/Typer.module.css';
 import Image from 'next/image';
 import SettingsModal from './SettingsModal';
 import { TypingAreaRef } from './TypingArea';
+import { debounce } from 'lodash';
 
 const switchOptions = [
   'None',
@@ -196,7 +197,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
       'Digit0': '0'
     };
 
-    // key에서 실제 문자 추출
+    // key에서 실제 문 추출
     let actualKey = keyMap[key] || (key.length === 1 ? key : key.replace('Key', '')).toLowerCase();
 
     let frequency = 1000;
@@ -416,8 +417,17 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
   }, [currentIndex, sentences.length, isFetching, fetchMoreSentences]);
 
   const handleSentenceComplete = useCallback(() => {
-    moveToNextSentence();
-  }, [moveToNextSentence]);
+    setCurrentIndex((prevIndex) => {
+      const nextIndex = prevIndex + 1;
+      if (nextIndex < sentences.length) {
+        if (typingAreaRef.current) {
+          typingAreaRef.current.resetTypingArea();
+        }
+        return nextIndex;
+      }
+      return prevIndex;
+    });
+  }, [sentences.length]);
 
   const handleSkip = useCallback(async () => {
     if (currentIndex < sentences.length - 1) {
@@ -584,10 +594,64 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
     }
   }, [audioContext]);
 
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  const getKeyboardHeight = () => {
+    if (window.visualViewport) {
+      return window.innerHeight - window.visualViewport.height;
+    } else {
+      // 폴백: 화면 크기의 변화를 감지
+      return window.innerHeight - document.documentElement.clientHeight;
+    }
+  };
+
+  const debouncedSetKeyboardHeight = debounce((height: number) => {
+    setKeyboardHeight(height);
+  }, 100);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const keyboardHeight = getKeyboardHeight();
+      debouncedSetKeyboardHeight(Math.max(keyboardHeight, 0));
+
+      const visualizer = document.querySelector(`.${styles.visualizerContainer}`);
+      if (visualizer) {
+        (visualizer as HTMLElement).style.bottom = `${Math.max(keyboardHeight, 0)}px`;
+      }
+    };
+
+    const handleFocus = (e: FocusEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        // 입력 필드에 포커스가 갈 때 처리
+        setTimeout(() => {
+          const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+          const keyboardHeight = window.innerHeight - viewportHeight;
+          debouncedSetKeyboardHeight(Math.max(keyboardHeight, 0));
+        }, 100);  // 키보드가 완전히 열리기를 기다림
+      }
+    };
+
+    const handleBlur = () => {
+      // 포커스가 빠져나갈 때 키보드 높이 리셋
+      debouncedSetKeyboardHeight(0);
+    };
+
+    window.addEventListener('resize', handleResize);
+    window.visualViewport?.addEventListener('resize', handleResize);
+    document.addEventListener('focus', handleFocus, true);
+    document.addEventListener('blur', handleBlur, true);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.visualViewport?.removeEventListener('resize', handleResize);
+      document.removeEventListener('focus', handleFocus, true);
+      document.removeEventListener('blur', handleBlur, true);
+    };
+  }, []);
+
   return (
     <div className={styles.typer}>
-      <div className={styles.visualizerContainer}>
-        {/* <SimpleEqualizer analyserNode={analyserNodeLeft} /> */}
+      <div className={styles.visualizerContainer} style={{ bottom: `${keyboardHeight}px` }}>
         <StereoImager
           analyserNodeLeft={analyserNodeLeft}
           analyserNodeRight={analyserNodeRight}
@@ -623,7 +687,11 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
           )}
         </div>
       </div>
-      <div className={styles.settingIconWrapper} onClick={() => setIsSettingsOpen(true)}>
+      <div
+        className={styles.settingIconWrapper}
+        onClick={toggleSettings}
+        style={{ transform: `translateY(-${keyboardHeight}px)` }}
+      >
         <svg className={styles.settingIcon} viewBox="0 0 64 64">
           <use xlinkHref="/images/icon/setting.svg#icon" />
         </svg>

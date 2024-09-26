@@ -11,7 +11,11 @@ const DarkModeToggle: React.FC = () => {
     }, []);
 
     const toggleDarkMode = () => {
+        document.body.classList.add('transition');
         setTheme(theme === 'dark' ? 'light' : 'dark');
+        setTimeout(() => {
+            document.body.classList.remove('transition');
+        }, 500); // transition duration과 동일하게 설정
     };
 
     if (!mounted) {

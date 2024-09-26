@@ -39,6 +39,9 @@ const TypingArea = forwardRef<TypingAreaRef, TypingAreaProps>(({
   const lastUpdateTimeRef = useRef<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const arrowDownPressedRef = useRef(false);
+  const [visible, setVisible] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const isKoreanSyllable = (char: string) => {
     if (!char) return false; // 빈 문자열 체크
@@ -180,6 +183,11 @@ const TypingArea = forwardRef<TypingAreaRef, TypingAreaProps>(({
   }));
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (isTransitioning) {
+      e.preventDefault();
+      return;
+    }
+
     // Ctrl 또는 Command 키와 함께 사용되는 특정 단축키 방지
     if ((e.ctrlKey || e.metaKey) && ['a', 'c', 'v', 'x', 'z', 'y', 'r', 'f', 'p', 's'].includes(e.key.toLowerCase())) {
       e.preventDefault();
@@ -201,18 +209,26 @@ const TypingArea = forwardRef<TypingAreaRef, TypingAreaProps>(({
 
     if ((e.key === 'Enter' || (e.key === ' ' && input === sentence)) && !isProcessing) {
       if (input === sentence) {
+        e.preventDefault();
         setIsProcessing(true);
+        setIsTransitioning(true);
         setFinalSpeed(typingSpeed);
-        onComplete();
-        setInput('');
 
-        (async () => {
-          await new Promise(resolve => setTimeout(resolve, 300));
-          setIsProcessing(false);
+        // 입력을 즉시 비우고 처리 상태 해제
+        setInput('');
+        setIsProcessing(false);
+
+        // 약간의 지연 후에 onComplete 호출
+        setTimeout(() => {
+          onComplete();
           if (inputRef.current) {
             inputRef.current.focus();
           }
-        })();
+          // 추가 지연 후 전환 상태 해제
+          setTimeout(() => {
+            setIsTransitioning(false);
+          }, 100);
+        }, 10);
       } else {
         if (inputRef.current) {
           inputRef.current.classList.add(styles.incorrect);
@@ -221,12 +237,15 @@ const TypingArea = forwardRef<TypingAreaRef, TypingAreaProps>(({
           }, 200);
         }
       }
-      e.preventDefault();
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
-      onSkip();
-      setFinalSpeed(0);
-      resetTypingSpeed();
+      if (!arrowDownPressedRef.current && !debounceTimerRef.current) {
+        arrowDownPressedRef.current = true;
+        onSkip();
+        debounceTimerRef.current = setTimeout(() => {
+          debounceTimerRef.current = null;
+        }, 200); // 디바운스 시간 설정
+      }
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       onPrevious();
@@ -238,7 +257,16 @@ const TypingArea = forwardRef<TypingAreaRef, TypingAreaProps>(({
     if (typeof onKeyDown === 'function') {
       onKeyDown(e);
     }
-  }, [input, sentence, isProcessing, onComplete, onSkip, onPrevious, onKeyDown, typingSpeed, resetTypingSpeed, resetTypingArea]);
+  }, [input, sentence, isProcessing, isTransitioning, onComplete, onSkip, onPrevious, onKeyDown, typingSpeed, resetTypingSpeed, resetTypingArea]);
+
+  const handleKeyUp = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'ArrowDown') {
+      arrowDownPressedRef.current = false;
+    }
+    if (typeof onKeyUp === 'function') {
+      onKeyUp(e);
+    }
+  }, [onKeyUp]);
 
   useEffect(() => {
     if (inputRef.current && !isProcessing) {
@@ -258,8 +286,14 @@ const TypingArea = forwardRef<TypingAreaRef, TypingAreaProps>(({
     };
   }, []);
 
+  useEffect(() => {
+    setVisible(false);
+    const timer = setTimeout(() => setVisible(true), 50);
+    return () => clearTimeout(timer);
+  }, [sentence]);
+
   return (
-    <div className={styles.typingAreaWrapper}>
+    <div className={`${styles.typingAreaWrapper} ${visible ? styles.visible : styles.hidden}`}>
       <div className={styles.typingArea}>
         <input
           ref={inputRef}
@@ -268,7 +302,7 @@ const TypingArea = forwardRef<TypingAreaRef, TypingAreaProps>(({
           placeholder={sentence}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          onKeyUp={onKeyUp}
+          onKeyUp={handleKeyUp}
           onCopy={(e) => e.preventDefault()}
           onPaste={(e) => e.preventDefault()}
           className={styles.input}

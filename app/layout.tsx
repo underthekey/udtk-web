@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Script from 'next/script';
 import { ThemeProvider } from 'next-themes';
+import ThemeWrapper from '@/components/ThemeWrapper';
 
 export const metadata: Metadata = {
   title: "underthekey",
@@ -44,6 +45,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
+  userScalable: false
 };
 
 export default function RootLayout({
@@ -71,11 +73,13 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body>
+      <body className="flex flex-col min-h-screen">
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-          <Header />
-          {children}
-          <Footer />
+          <ThemeWrapper>
+            <Header />
+            {children}
+            <Footer />
+          </ThemeWrapper>
         </ThemeProvider>
       </body>
     </html>
