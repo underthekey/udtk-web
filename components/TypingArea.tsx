@@ -203,13 +203,14 @@ const TypingArea = forwardRef<TypingAreaRef, TypingAreaProps>(({
 
     if ((e.key === 'Enter' || (e.key === ' ' && input === sentence)) && !isProcessing) {
       if (input === sentence) {
+        e.preventDefault();
         setIsProcessing(true);
         setFinalSpeed(typingSpeed);
         onComplete();
-        setInput('');
 
         (async () => {
-          await new Promise(resolve => setTimeout(resolve, 300));
+          await new Promise(resolve => setTimeout(resolve, 100));
+          setInput('');
           setIsProcessing(false);
           if (inputRef.current) {
             inputRef.current.focus();
@@ -223,7 +224,6 @@ const TypingArea = forwardRef<TypingAreaRef, TypingAreaProps>(({
           }, 200);
         }
       }
-      e.preventDefault();
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
       if (!arrowDownPressedRef.current && !debounceTimerRef.current) {
