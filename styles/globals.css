@@ -99,11 +99,13 @@ body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+  overscroll-behavior-y: none;
 }
 
 html {
   overscroll-behavior: none;
   background-color: var(--background-color);
+  height: -webkit-fill-available;
 }
 
 body {
@@ -113,6 +115,8 @@ body {
   transition: background-color 0.5s ease, color 0.5s ease;
   -webkit-overflow-scrolling: touch;
   -webkit-tap-highlight-color: transparent;
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
 }
 
 a {
@@ -163,4 +167,10 @@ html.dark {
 
 .transition {
   transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+#__next {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
