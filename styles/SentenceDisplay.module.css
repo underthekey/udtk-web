@@ -15,7 +15,7 @@
   font-size: 1.5rem;
   line-height: 1.5;
   color: var(--main-sentence-color);
-  opacity: 0;
+  opacity: 1;
 }
 
 .content.visible {
