@@ -417,8 +417,17 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
   }, [currentIndex, sentences.length, isFetching, fetchMoreSentences]);
 
   const handleSentenceComplete = useCallback(() => {
-    moveToNextSentence();
-  }, [moveToNextSentence]);
+    setCurrentIndex((prevIndex) => {
+      const nextIndex = prevIndex + 1;
+      if (nextIndex < sentences.length) {
+        if (typingAreaRef.current) {
+          typingAreaRef.current.resetTypingArea();
+        }
+        return nextIndex;
+      }
+      return prevIndex;
+    });
+  }, [sentences.length]);
 
   const handleSkip = useCallback(async () => {
     if (currentIndex < sentences.length - 1) {

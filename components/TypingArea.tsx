@@ -208,14 +208,12 @@ const TypingArea = forwardRef<TypingAreaRef, TypingAreaProps>(({
         setFinalSpeed(typingSpeed);
         onComplete();
 
-        (async () => {
-          await new Promise(resolve => setTimeout(resolve, 100));
-          setInput('');
-          setIsProcessing(false);
-          if (inputRef.current) {
-            inputRef.current.focus();
-          }
-        })();
+        // 입력을 비우고 포커스 유지
+        setInput('');
+        setIsProcessing(false);
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
       } else {
         if (inputRef.current) {
           inputRef.current.classList.add(styles.incorrect);
