@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import styles from '@/styles/Header.module.css';
 import { useRouter } from 'next/navigation';
+import DarkModeToggle from './DarkModeToggle';
 
 const Header = () => {
   const pathname = usePathname();
@@ -87,6 +88,9 @@ const Header = () => {
             <span className={styles.logoText}>underthekey</span>
           </div>
         </Link>
+      </div>
+      <div className={styles.darkModeToggle}>
+        <DarkModeToggle />
       </div>
       <button
         className={styles.menuButton}

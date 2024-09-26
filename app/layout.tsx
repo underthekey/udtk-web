@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Script from 'next/script';
+import { ThemeProvider } from 'next-themes';
 
 export const metadata: Metadata = {
   title: "underthekey",
@@ -51,7 +52,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <Script
           strategy="afterInteractive"
@@ -71,9 +72,11 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <Header />  {/* Header 컴포넌트 추가 */}
-        {children}
-        <Footer />  {/* Footer 컴포넌트 추가 */}
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+          <Header />
+          {children}
+          <Footer />
+        </ThemeProvider>
       </body>
     </html>
   );

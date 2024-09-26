@@ -68,26 +68,33 @@
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-color: #f0f0f0;
+  --background-dark-color: #333333;
   --primary-color: #003049;
   --secondary-color: #fdf0d5;
-  --text-color: #ffffff;
   --header-color: #f0f0f0;
+  --main-sentence-color: #444444;
+  --main-sentence-dark-color: #acacac;
+  --main-input-color: #333333;
+  --main-input-dark-color: #9b9b9b;
   --main-text-color: #003049;
+  --main-text-dark-color: #bebebe;
   --gray-text-color: #9da3af;
+  --gray-text-dark-color: #777777;
   --hover-color: #d62828;
   --correct-color: #09703c;
   --hover-color-rgb: 214, 40, 40;
   --correct-color-rgb: 9, 112, 60;
   --font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
     "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  --dot-color: var(--primary-color);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+.dark {
+  --foreground-rgb: 255, 255, 255;
+  --background-color: var(--background-dark-color);
+  --main-text-color: var(--secondary-color);
+  --header-color: var(--background-dark-color);
+  --dot-color: var(--secondary-color);
 }
 
 body {
@@ -123,4 +130,13 @@ body.modal-open {
   overflow: hidden;
   position: fixed;
   width: 100%;
+}
+
+.dark {
+  --background-color: var(--background-dark-color);
+  --main-text-color: var(--main-text-dark-color);
+  --header-color: var(--background-dark-color);
+  --main-sentence-color: var(--main-sentence-dark-color);
+  --main-input-color: var(--main-input-dark-color);
+  --gray-text-color: var(--gray-text-dark-color);
 }

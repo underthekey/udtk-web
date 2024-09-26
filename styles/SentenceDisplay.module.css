@@ -15,7 +15,7 @@
   white-space: nowrap;
   font-size: 1.5rem;
   line-height: 1.5;
-  color: #444444;
+  color: var(--main-sentence-color);
   opacity: 0;
   transition: opacity 0.5s ease-in;
 }
