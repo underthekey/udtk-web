@@ -75,8 +75,9 @@
   height: 100vh;
   padding-top: 4rem;
   position: fixed;
-  top: 0;
+  bottom: 0;
   left: 0;
+  transition: bottom 0.3s ease;
 }
 
 .visualizerContainer > * {
@@ -173,6 +174,7 @@
   right: 1.7rem;
   z-index: 999;
   cursor: pointer;
+  transition: bottom 0.3s ease;
 }
 
 .settingIcon {
