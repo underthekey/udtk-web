@@ -49,10 +49,12 @@
 .title {
   font-size: 1.5rem;
   font-weight: bold;
+  color: var(--main-text-color);
 }
 
 .settingItem {
   margin-bottom: 1rem;
+  color: var(--main-text-color);
 }
 
 .settingLabel {
@@ -118,7 +120,7 @@
   appearance: none;
   width: 20px;
   height: 20px;
-  background: var(--primary-color);
+  background: var(--main-text-color);
   cursor: pointer;
   border-radius: 50%;
 }
@@ -145,28 +147,30 @@
 }
 
 .languageButton {
-  background-color: #f0f0f0;
   border: none;
   padding: 10px 20px;
   font-size: 16px;
   cursor: pointer;
   border-radius: 4px;
   margin-right: auto; /* 언어 변경 버튼을 왼쪽으로 밀어냅니다 */
+  color: var(--main-text-color);
 }
 
 .languageButton:hover {
-  background-color: #e0e0e0;
+  background-color: var(--main-box-hover-color);
+  color: var(--main-text-color);
 }
 
 .closeButton {
-  background-color: #f0f0f0;
   border: none;
   padding: 10px 20px;
   font-size: 16px;
   cursor: pointer;
   border-radius: 4px;
+  color: var(--main-text-color);
 }
 
 .closeButton:hover {
-  background-color: #e0e0e0;
+  background-color: var(--main-box-hover-color);
+  color: var(--main-text-color);
 }
