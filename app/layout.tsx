@@ -10,6 +10,21 @@ export const metadata: Metadata = {
   title: "underthekey",
   description: "언더더키 - 온라인 타건샵에서 타이핑 연습, 키보드 테스트, 스위치 및 커스텀 키보드 정보를 탐색하세요.",
   keywords: "언더더키, 커스텀 키보드, 타건샵, 키보드 ASMR, 타이핑 연습, 키보드 스위치 정보, 키보드 테스트, underthekey, custom keyboard, typing",
+  openGraph: {
+    title: 'underthekey',
+    description: '언더더키 - 온라인 타건샵에서 타이핑 연습, 키보드 테스트, 스위치 및 커스텀 키보드 정보를 탐색하세요.',
+    url: 'https://underthekey.com',
+    siteName: 'underthekey',
+    images: [
+      {
+        url: 'https://underthekey.com/images/image-logo/3d/logo-3d-background-512.png',
+        width: 512,
+        height: 512,
+      },
+    ],
+    locale: 'ko_KR',
+    type: 'website',
+  },
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },

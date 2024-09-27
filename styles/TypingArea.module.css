@@ -21,7 +21,7 @@
   border-radius: 7px;
   box-shadow: none;
   outline: none;
-  color: var(--main-input-color);
+  color: var(--main-sentence-color);
   background-color: var(--main-background-color);
   box-sizing: border-box;
   transition: box-shadow 0.3s ease;
@@ -81,9 +81,10 @@
   bottom: -30px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 0.8rem; /* 기본 크기 */
+  font-size: 0.8rem;
   color: var(--gray-text-color);
   transition: font-size 0.3s ease, bottom 0.3s ease;
+  white-space: nowrap;
 }
 
 @media (min-width: 768px) {

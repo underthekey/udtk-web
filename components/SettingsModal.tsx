@@ -46,13 +46,16 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     };
 
     const handleVolumeChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-        const newVolume = parseFloat(event.target.value);
-        setTempVolume(newVolume);
-        onVolumeChange(newVolume);
+        const newVolume = parseInt(event.target.value, 10);
+        const normalizedVolume = newVolume / 100; // 0에서 1 사이의 값으로 정규화
+        setTempVolume(normalizedVolume);
+        onVolumeChange(normalizedVolume);
+    }, [onVolumeChange]);
 
-        const adjustedVolume = newVolume * 1.5 * 10;
+    const handleVolumeChangeEnd = useCallback(() => {
+        const adjustedVolume = tempVolume * 1.5 * 10;
         playTestSound(adjustedVolume);
-    }, [onVolumeChange, playTestSound]);
+    }, [tempVolume, playTestSound]);
 
     const handleLanguageChange = useCallback(() => {
         setTempLanguage(prev => prev === 'kor' ? 'eng' : 'kor');
@@ -136,10 +139,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                         id="volumeSlider"
                         type="range"
                         min="0"
-                        max="1"
-                        step="0.1"
-                        value={tempVolume}
+                        max="100"
+                        step="1"
+                        value={Math.round(tempVolume * 100)}
                         onChange={handleVolumeChange}
+                        onMouseUp={handleVolumeChangeEnd}
+                        onTouchEnd={handleVolumeChangeEnd}
                         className={styles.volumeSlider}
                     />
                 </div>
