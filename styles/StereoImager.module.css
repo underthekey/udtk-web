@@ -3,7 +3,7 @@
   bottom: 0;
   left: 0;
   width: 100vw;
-  height: 50vh;
+  height: 40vh;
   display: flex;
   justify-content: center;
   align-items: flex-end;
@@ -11,10 +11,10 @@
 }
 
 .stereoImager {
-  width: 100%;
-  height: 56.25vw;
-  max-height: 100vh;
-  max-width: 177.78vh;
+  width: 80%;
+  height: 45vw;
+  max-height: 80vh;
+  max-width: 142.22vh;
   object-fit: cover;
   opacity: 20%;
   transform: translateY(10%);
@@ -22,7 +22,7 @@
 
 @media (max-aspect-ratio: 16/9) {
   .stereoImager {
-    width: 100%;
+    width: 80%;
     height: auto;
     transform: translateY(15%);
   }
