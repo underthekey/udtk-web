@@ -77,7 +77,8 @@ const TypingArea = forwardRef<TypingAreaRef, TypingAreaProps>(({
         const computedStyle = window.getComputedStyle(inputRef.current);
         context.font = computedStyle.font;
         const textWidth = context.measureText(sentence).width;
-        const totalWidth = textWidth + 10;
+        const padding = parseFloat(computedStyle.paddingLeft) + parseFloat(computedStyle.paddingRight);
+        const totalWidth = textWidth + padding + 3;
         inputRef.current.style.width = `${totalWidth}px`;
       }
     }
@@ -291,6 +292,20 @@ const TypingArea = forwardRef<TypingAreaRef, TypingAreaProps>(({
     const timer = setTimeout(() => setVisible(true), 50);
     return () => clearTimeout(timer);
   }, [sentence]);
+
+  useLayoutEffect(() => {
+    adjustInputWidth();
+  }, [sentence]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      adjustInputWidth();
+    };
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [adjustInputWidth]);
 
   return (
     <div className={`${styles.typingAreaWrapper} ${visible ? styles.visible : styles.hidden}`}>
