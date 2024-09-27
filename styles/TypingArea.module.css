@@ -81,9 +81,10 @@
   bottom: -30px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 0.8rem; /* 기본 크기 */
+  font-size: 0.8rem;
   color: var(--gray-text-color);
   transition: font-size 0.3s ease, bottom 0.3s ease;
+  white-space: nowrap;
 }
 
 @media (min-width: 768px) {
