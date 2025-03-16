@@ -126,11 +126,14 @@ pipeline {
                         if curl -s "${env.DEPLOY_URL}" > /dev/null
                         then
                             echo "Build Success!"
+                            curl -d '{"title":"udtk-web ${env.BRANCH_NAME} release:$BUILD_NUMBER","body":"Deployment Succeeded🚀"}' -H "Content-Type: application/json" -X POST ${PUSH_ALERT}
                             exit 0
                         fi
 
                         if [ \$retry_count -eq 20 ]
                         then
+                            echo "Build Failed!"
+                            curl -d '{"title":"udtk-web ${env.BRANCH_NAME} release:$BUILD_NUMBER","body":"Deployment Failed😢"}' -H "Content-Type: application/json" -X POST ${PUSH_ALERT}
                             exit 1
                         fi
 
