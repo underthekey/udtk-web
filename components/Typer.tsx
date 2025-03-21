@@ -117,7 +117,7 @@ export default function Typer({ initialSentences }: { initialSentences: Sentence
 
     setIsLoading(true);
     try {
-      const response = await fetch(`https://storage.underthekey.com/switches/sounds/${switchName}.mp3`);
+      const response = await fetch(`https://cdn.deepeet.com/underthekey/switches/sounds/${switchName}.mp3`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
