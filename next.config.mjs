@@ -10,7 +10,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "storage.underthekey.com",
+        hostname: "cdn.deepeet.com",
         port: "",
         pathname: "/**",
       },

@@ -70,11 +70,9 @@ pipeline {
 
         stage('previous docker rm') {
             steps {
-                sshagent(credentials: ['deepeet-ubuntu', 'udtk-ubuntu']) {
+                sshagent(credentials: ['udtk-ubuntu']) {
                     sh """
-                        ssh -o ProxyCommand="ssh -W %h:%p -p ${PROXMOX_SSH_PORT} ${PROXMOX_SERVER_ACCOUNT}@${PROXMOX_SERVER_URI}" \
-                        -o StrictHostKeyChecking=no ${UDTK_SERVER_ACCOUNT}@${UDTK_SERVER_IP} \
-                        '
+                        ssh -o StrictHostKeyChecking=no ${UDTK_SERVER_ACCOUNT}@${UDTK_SERVER_IP} '
                         docker ps -q --filter "ancestor=${DOCKER_REPOSITORY}:${env.IMAGE_NAME}-latest" | xargs -r docker stop
                         docker ps -aq --filter "ancestor=${DOCKER_REPOSITORY}:${env.IMAGE_NAME}-latest" | xargs -r docker rm -f
                         docker images ${DOCKER_REPOSITORY}:${env.IMAGE_NAME}-latest -q | xargs -r docker rmi
@@ -86,10 +84,9 @@ pipeline {
 
         stage('docker-hub pull') {
             steps {
-                sshagent(credentials: ['deepeet-ubuntu', 'udtk-ubuntu']) {
+                sshagent(credentials: ['udtk-ubuntu']) {
                     sh """
-                        ssh -o ProxyCommand="ssh -W %h:%p -p ${PROXMOX_SSH_PORT} ${PROXMOX_SERVER_ACCOUNT}@${PROXMOX_SERVER_URI}" \
-                        -o StrictHostKeyChecking=no ${UDTK_SERVER_ACCOUNT}@${UDTK_SERVER_IP} 'docker pull ${DOCKER_REPOSITORY}:${env.IMAGE_NAME}-latest'
+                        ssh -o StrictHostKeyChecking=no ${UDTK_SERVER_ACCOUNT}@${UDTK_SERVER_IP} 'docker pull ${DOCKER_REPOSITORY}:${env.IMAGE_NAME}-latest'
                     """
                 }
             }
@@ -98,26 +95,21 @@ pipeline {
         stage('service start') {
             steps {
                 withCredentials([file(credentialsId: 'udtk-web-credentials', variable: 'ENV_CREDENTIALS')]) {
-                    sshagent(credentials: ['deepeet-ubuntu', 'udtk-ubuntu']) {
+                    sshagent(credentials: ['udtk-ubuntu']) {
                         sh """
-                            scp -o ProxyCommand="ssh -W %h:%p -p ${PROXMOX_SSH_PORT} \
-                            ${PROXMOX_SERVER_ACCOUNT}@${PROXMOX_SERVER_URI}" \
-                            -o StrictHostKeyChecking=no $ENV_CREDENTIALS ${UDTK_SERVER_ACCOUNT}@${UDTK_SERVER_IP}:~/udtk-web-credentials
+                            scp -o StrictHostKeyChecking=no $ENV_CREDENTIALS ${UDTK_SERVER_ACCOUNT}@${UDTK_SERVER_IP}:~/udtk-web-credentials
                         """
 
                         sh """
-                            ssh -o ProxyCommand="ssh -W %h:%p -p ${PROXMOX_SSH_PORT} \
-                            ${PROXMOX_SERVER_ACCOUNT}@${PROXMOX_SERVER_URI}" \
-                            -o StrictHostKeyChecking=no ${UDTK_SERVER_ACCOUNT}@${UDTK_SERVER_IP} \
-                        '
-                        docker run -i -e TZ=Asia/Seoul --env-file ~/udtk-web-credentials \\
-                        --name ${env.IMAGE_NAME} --network ${params.DOCKER_NETWORK} \\
-                        -p ${env.SERVER_PORT}:${env.SERVER_PORT} \\
-                        --restart unless-stopped \\
-                        -d ${DOCKER_REPOSITORY}:${env.IMAGE_NAME}-latest
+                            ssh -o StrictHostKeyChecking=no ${UDTK_SERVER_ACCOUNT}@${UDTK_SERVER_IP} '
+                            docker run -i -e TZ=Asia/Seoul --env-file ~/udtk-web-credentials \\
+                            --name ${env.IMAGE_NAME} --network ${params.DOCKER_NETWORK} \\
+                            -p ${env.SERVER_PORT}:${env.SERVER_PORT} \\
+                            --restart unless-stopped \\
+                            -d ${DOCKER_REPOSITORY}:${env.IMAGE_NAME}-latest
 
-                        rm -f ~/udtk-web-credentials
-                        '
+                            rm -f ~/udtk-web-credentials
+                            '
                         """
                     }
                 }
@@ -134,11 +126,14 @@ pipeline {
                         if curl -s "${env.DEPLOY_URL}" > /dev/null
                         then
                             echo "Build Success!"
+                            curl -d '{"title":"udtk-web ${env.BRANCH_NAME} release:$BUILD_NUMBER","body":"Deployment Succeeded🚀"}' -H "Content-Type: application/json" -X POST ${PUSH_ALERT}
                             exit 0
                         fi
 
                         if [ \$retry_count -eq 20 ]
                         then
+                            echo "Build Failed!"
+                            curl -d '{"title":"udtk-web ${env.BRANCH_NAME} release:$BUILD_NUMBER","body":"Deployment Failed😢"}' -H "Content-Type: application/json" -X POST ${PUSH_ALERT}
                             exit 1
                         fi
 
